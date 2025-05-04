@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useAuth } from "../components/hooks";
+import { NavBar } from "../components/NavBar";
 
 export function Home() {
   const { user, authenticated } = useAuth();
@@ -8,15 +9,18 @@ export function Home() {
 
   useEffect(() => {
     if(!authenticated) {
-      toast.error('No tienes acceso a esta página. Por favor inicia sesión.');
       navigate('/login');
     }
   })
 
   return (
-    <div className="home">
-      <h1>Home</h1>
-      <p>Welcome to the home page!</p>
-    </div>
+    <>
+      <NavBar></NavBar>
+      <div className="home">
+        <h1>Home</h1>
+        <p>Welcome to the home page!</p>
+        <p>User: { user?.nombre } {user?.apellido}</p>
+      </div>
+    </>
   );
 }

@@ -6,17 +6,13 @@ import { useAuth } from "../components/hooks.js";
 
 export function Login(){
   const navigate = useNavigate()
-  const {login, authenticated} = useAuth()
+  const { login } = useAuth()
 
   const handleLoginSuccess = async (credentialResponse) => {
 
     const { credential } = credentialResponse
     try{
       await login(credential)
-      if(!authenticated) {
-        throw new Error('No se pudo autenticar el usuario')
-      }
-
       toast.success("Inicio de sesión exitoso")
 
       navigate('/home')
@@ -28,6 +24,8 @@ export function Login(){
 
 
   return (
+    <>
+
     <div className="login w-full flex flex-col justify-center items-center h-screen">
       <div className="border-2 border-gray-300 rounded-lg p-4 flex flex-col">
         <div className="">
@@ -40,5 +38,6 @@ export function Login(){
         </div>
       </div>
     </div>
+    </>
   );
 }

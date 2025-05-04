@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credential) =>{
     try{
       const user = await apiLogin(credential)
-      setUser(user.data)
+      setUser(user.data.user)
       setAuthenticated(true)
     }catch(err){
       toast.error('No es posible iniciar sesión')

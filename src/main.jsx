@@ -9,7 +9,7 @@ import { GOOGLE_CLIENT_ID } from './config/config.js';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ToastContainer position='top-right' autoClose={3000}/>
+    <ToastContainer position='top-right' autoClose={2500} limit={4} closeButton={false} pauseOnHover={false} draggable={false}/>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <App />
     </GoogleOAuthProvider>
