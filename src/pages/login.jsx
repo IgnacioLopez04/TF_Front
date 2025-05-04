@@ -1,19 +1,22 @@
 import { GoogleLogin } from "@react-oauth/google";
-import { apiLogin } from "../apis/login.js";
+// import { apiLogin } from "../apis/login.js";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../components/hooks.js";
 
 export function Login(){
   const navigate = useNavigate()
+  const {login, authenticated} = useAuth()
 
   const handleLoginSuccess = async (credentialResponse) => {
 
     const { credential } = credentialResponse
     try{
-      const user = await apiLogin(credential)
+      await login(credential)
+      if(!authenticated) {
+        throw new Error('No se pudo autenticar el usuario')
+      }
 
-      const {access_token} = user.data
-      localStorage.setItem('access_token', access_token)
       toast.success("Inicio de sesión exitoso")
 
       navigate('/home')
