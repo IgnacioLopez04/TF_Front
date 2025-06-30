@@ -14,7 +14,6 @@ export function Login() {
     try {
       // await login(credential);
       toast.success('Inicio de sesión exitoso');
-
       navigate('/home');
     } catch (err) {
       toast.error('No es posible iniciar sesión');
