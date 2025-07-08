@@ -9,7 +9,7 @@ export function Layout() {
         <Outlet />
       </main>
       <footer className="bg-gray-800 text-white p-4 text-center">
-        © 2025 My Application
+        © 2025 Sistema de Historias Clínicas. Todos los derechos reservados.
       </footer>
     </div>
   );

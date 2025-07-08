@@ -4,6 +4,7 @@ import { AuthProvider } from './context/authContext'
 import PrivateRoute from './context/PrivateRoute'
 import { Home } from './pages/home'
 import { Login } from './pages/login'
+import { Paciente } from './pages/paciente'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
             </PrivateRoute>
           }>
             <Route path='/home' element={<Home/>}/> 
+            <Route path='/paciente/:dni' element={<Paciente/>}/> 
           </Route>
         </Routes>
       </BrowserRouter>

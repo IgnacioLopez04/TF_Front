@@ -1,0 +1,18 @@
+.selector-button {
+  background-color: white;
+  color: #a678d6;
+  border-radius: 8px;
+  border-color: #a678d6;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.selector-button:hover{
+  background-color: #a678d6;
+  color: white;
+}
+
+.selector-button.active {
+  background-color: #a678d6; /* Color violeta de selección */
+  color: white;
+}

@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 *{
-  font-family: 'Roboto', sans-serif
+  font-family: 'Roboto', sans-serif;
 }
 /* Colores principales */
 .bg-causana-light {
@@ -41,4 +41,9 @@
 }
 .border-causana-dark {
   border-color: #7E57C2;
+}
+
+.button-custom {
+  padding: 0.50rem 1rem;
+  cursor: pointer;
 }
