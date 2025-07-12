@@ -77,28 +77,42 @@ export function Paciente() {
           </div>
         )}
         {tab === 'historia' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div className="border rounded-lg p-2 sm:p-4 bg-[#f5f2fa]">
-              <div className="font-semibold mb-2">Historia Fisiátrica</div>
-              <div className="text-xs sm:text-base">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna .</div>
-              <ul className="list-disc ml-6 text-xs sm:text-base">
-                <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
-                <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
-              </ul>
+          <div>
+            {/* Botón para crear nueva historia */}
+            <div className="flex justify-end mb-4">
+              <button 
+                onClick={() => window.location.href = `/nueva-historia/${dni}`}
+                className="bg-[#6d4bc1] hover:bg-[#5e35b1] text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
+              >
+                <span className="text-lg">+</span>
+                Crear Nueva Historia Fisiátrica
+              </button>
             </div>
-            <div className="border rounded-lg p-2 sm:p-4 bg-[#f5f2fa]">
-              <div className="font-semibold mb-2">Examen Físico</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            
+            {/* Contenido de la historia */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div className="border rounded-lg p-2 sm:p-4 bg-[#f5f2fa]">
+                <div className="font-semibold mb-2">Historia Fisiátrica</div>
+                <div className="text-xs sm:text-base">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna .</div>
                 <ul className="list-disc ml-6 text-xs sm:text-base">
                   <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
                   <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
-                  <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
                 </ul>
-                <ul className="list-disc ml-6 text-xs sm:text-base">
-                  <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
-                  <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
-                  <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
-                </ul>
+              </div>
+              <div className="border rounded-lg p-2 sm:p-4 bg-[#f5f2fa]">
+                <div className="font-semibold mb-2">Examen Físico</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <ul className="list-disc ml-6 text-xs sm:text-base">
+                    <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
+                    <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
+                    <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
+                  </ul>
+                  <ul className="list-disc ml-6 text-xs sm:text-base">
+                    <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
+                    <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
+                    <li>Onsectetur adipiscing elit, ut labore et dolore magna .</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

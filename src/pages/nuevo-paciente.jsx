@@ -61,8 +61,11 @@ export function NuevoPaciente() {
     };
     
     console.log('Datos del nuevo paciente:', datosCompletos);
-    // Por ahora solo redirigimos a home
-    window.location.href = '/home';
+    
+    // Aquí se implementaría la lógica para guardar el paciente en el backend
+    // Por ahora simulamos que se guardó exitosamente y redirigimos a la pantalla del paciente
+    // Usamos el DNI del paciente para la URL
+    window.location.href = `/paciente/${data.dni}`;
   };
 
   const handleCancel = () => {
