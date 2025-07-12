@@ -5,6 +5,7 @@ import PrivateRoute from './context/PrivateRoute'
 import { Home } from './pages/home'
 import { Login } from './pages/login'
 import { Paciente } from './pages/paciente'
+import { NuevoPaciente } from './pages/nuevo-paciente'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           }>
             <Route path='/home' element={<Home/>}/> 
             <Route path='/paciente/:dni' element={<Paciente/>}/> 
+            <Route path='/nuevo-paciente' element={<NuevoPaciente/>}/> 
           </Route>
         </Routes>
       </BrowserRouter>

@@ -19,6 +19,7 @@
     "primereact": "^10.9.6",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.60.0",
     "react-router-dom": "6.26.2",
     "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.5"

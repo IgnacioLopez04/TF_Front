@@ -25,6 +25,15 @@ export function NavBar() {
           </li>
         </ul>
       </div>
+      {/* Botón Agregar Paciente */}
+      <div className="flex items-center gap-2">
+        <Button
+          icon="pi pi-plus"
+          label="Agregar Paciente"
+          className="px-4 py-2 rounded cursor-pointer bg-[#6d4bc1] text-white hover:bg-[#5e35b1] transition-colors"
+          onClick={() => window.location.href = '/nuevo-paciente'}
+        />
+      </div>
       {/* Avatar y logout */}
       <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
         <Avatar label='JC'  style={{backgroundColor: '#EDE7F6', borderRadius: '15%', marginRight: '10px', color:"#6d4bc1"}}></Avatar>
