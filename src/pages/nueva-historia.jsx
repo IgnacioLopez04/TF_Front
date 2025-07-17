@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
+import { Button } from '../components/Button';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Calendar } from 'primereact/calendar';
 import { Divider } from 'primereact/divider';
 import { pacientes } from '../apis/pacientes';
+import { TabView, TabPanel } from 'primereact/tabview';
 
 export function NuevaHistoria() {
   const { dni } = useParams();
@@ -363,176 +363,214 @@ export function NuevaHistoria() {
             {pasoActual === 4 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-[#6d4bc1] mb-4">Examen Físico</h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Actitud</label>
-                    <InputText {...register('actitud')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Comunicación, códigos</label>
-                    <InputText {...register('comunicacionCodigos')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Piel y faneras</label>
-                    <InputText {...register('pielFaneras')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Cabeza</label>
-                    <InputText {...register('cabeza')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ojos</label>
-                    <InputText {...register('ojos')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Movimientos anormales</label>
-                    <InputTextarea {...register('movimientosAnormales')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Estrabismo</label>
-                    <InputText {...register('estrabismo')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Orejas</label>
-                    <InputText {...register('orejas')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Audición</label>
-                    <InputText {...register('audicion')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <h3 className="font-semibold text-gray-700 mb-2">Complejo orofacial</h3>
-                    <div className="grid grid-cols-1 gap-2">
+                <TabView 
+                  className="custom-tabs"
+                  style={{
+                    '--primary-color': '#6d4bc1',
+                    '--primary-hover': '#5e35b1'
+                  }}
+                >
+                  {/* General */}
+                  <TabPanel header="General">
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Boca</label>
-                        <InputText {...register('boca')} className="w-full" />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Actitud</label>
+                        <InputTextarea {...register('actitud')} className="w-full" rows={2} />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Labios</label>
-                        <InputText {...register('labios')} className="w-full" />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Comunicación y códigos</label>
+                        <InputTextarea {...register('comunicacionCodigos')} className="w-full" rows={2} />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Lengua</label>
-                        <InputText {...register('lengua')} className="w-full" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Dentición</label>
-                        <InputText {...register('denticion')} className="w-full" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Mordida</label>
-                        <InputText {...register('mordida')} className="w-full" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Paladar, velo</label>
-                        <InputText {...register('paladarVelo')} className="w-full" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Maxilares</label>
-                        <InputText {...register('maxilares')} className="w-full" />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Piel y faneras</label>
+                        <InputTextarea {...register('pielFaneras')} className="w-full" rows={2} />
                       </div>
                     </div>
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tórax</label>
-                    <InputText {...register('torax')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Abdomen</label>
-                    <InputText {...register('abdomen')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Columna vertebral</label>
-                    <InputText {...register('columnaVertebral')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Pelvis</label>
-                    <InputText {...register('pelvis')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Caderas</label>
-                    <InputText {...register('caderas')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">M.M.I.I.</label>
-                    <InputText {...register('mmii')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Pies</label>
-                    <InputText {...register('pies')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">M.M.S.S.</label>
-                    <InputText {...register('mmss')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Manos</label>
-                    <InputText {...register('manos')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Lateralidad</label>
-                    <InputText {...register('lateralidad')} className="w-full" />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ap. Respiratorio</label>
-                    <InputTextarea {...register('apRespiratorio')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ap. Cardiovascular</label>
-                    <InputTextarea {...register('apCardiovascular')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ap. Digestivo</label>
-                    <InputTextarea {...register('apDigestivo')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Actividad refleja</label>
-                    <InputTextarea {...register('actividadRefleja')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Actividad sensoperceptual</label>
-                    <InputTextarea {...register('actividadSensoperceptual')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Reacciones posturales</label>
-                    <InputTextarea {...register('reaccionesPosturales')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Desplazamiento-marcha</label>
-                    <InputTextarea {...register('desplazamientoMarcha')} className="w-full" rows={2} />
-                  </div>
-                  <Divider />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Etapa del desarrollo</label>
-                    <InputTextarea {...register('etapaDesarrollo')} className="w-full" rows={2} />
-                  </div>
-                </div>
+                  </TabPanel>
+
+                  {/* Cabeza y sentidos */}
+                  <TabPanel header="Cabeza y sentidos">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Cabeza</label>
+                          <InputTextarea {...register('cabeza')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Ojos</label>
+                          <InputTextarea {...register('ojos')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Movimientos anormales</label>
+                          <InputTextarea {...register('movimientosAnormales')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Estrabismo</label>
+                          <InputTextarea {...register('estrabismo')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Orejas</label>
+                          <InputTextarea {...register('orejas')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Audición</label>
+                          <InputTextarea {...register('audicion')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      {/* Sub-tab para Complejo orofacial */}
+                      <TabView>
+                        <TabPanel header="Complejo orofacial">
+                          <div className="grid grid-cols-1 gap-2">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Boca</label>
+                                <InputTextarea {...register('boca')} className="w-full" rows={2} />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Labios</label>
+                                <InputTextarea {...register('labios')} className="w-full" rows={2} />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Lengua</label>
+                                <InputTextarea {...register('lengua')} className="w-full" rows={2} />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Dentición</label>
+                                <InputTextarea {...register('denticion')} className="w-full" rows={2} />
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Mordida</label>
+                                <InputTextarea {...register('mordida')} className="w-full" rows={2} />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Paladar y velo</label>
+                                <InputTextarea {...register('paladarVelo')} className="w-full" rows={2} />
+                              </div>  
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-2">Maxilares</label>
+                              <InputTextarea {...register('maxilares')} className="w-full" rows={2} />
+                            </div>
+                          </div>
+                        </TabPanel>
+                      </TabView>
+                    </div>
+                  </TabPanel>
+
+                  {/* Tronco y extremidades */}
+                  <TabPanel header="Tronco y extremidades">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Tórax</label>
+                          <InputTextarea {...register('torax')} className="w-full" rows={2} />
+                      </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Abdomen</label>
+                          <InputTextarea {...register('abdomen')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Columna vertebral</label>
+                            <InputTextarea {...register('columnaVertebral')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Pelvis</label>
+                          <InputTextarea {...register('pelvis')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Caderas</label>
+                          <InputTextarea {...register('caderas')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">M.M.I.I.</label>
+                          <InputTextarea {...register('mmii')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Pies</label>
+                          <InputTextarea {...register('pies')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">M.M.S.S.</label>
+                          <InputTextarea {...register('mmss')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Manos</label>
+                          <InputTextarea {...register('manos')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Lateralidad</label>
+                          <InputTextarea {...register('lateralidad')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                    </div>
+                  </TabPanel>
+
+                  {/* Sistema y actividades */}
+                  <TabPanel header="Sistema y actividades">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Ap. Respiratorio</label>
+                          <InputTextarea {...register('apRespiratorio')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Ap. Cardiovascular</label>
+                          <InputTextarea {...register('apCardiovascular')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                                             <div className="grid grid-cols-2 gap-2">
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Ap. Digestivo</label>
+                           <InputTextarea {...register('apDigestivo')} className="w-full" rows={2} />
+                         </div>
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Actividad refleja</label>
+                           <InputTextarea {...register('actividadRefleja')} className="w-full" rows={2} />
+                         </div>
+                       </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Actividad sensoperceptual</label>
+                          <InputTextarea {...register('actividadSensoperceptual')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Reacciones posturales</label>
+                          <InputTextarea {...register('reaccionesPosturales')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Reacciones posturales</label>
+                          <InputTextarea {...register('reaccionesPosturales')} className="w-full" rows={2} />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Desplazamiento-marcha</label>
+                          <InputTextarea {...register('desplazamientoMarcha')} className="w-full" rows={2} />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Etapa del desarrollo</label>
+                        <InputTextarea {...register('etapaDesarrollo')} className="w-full" rows={2} />
+                      </div>
+                    </div>
+                  </TabPanel>
+                </TabView>
               </div>
             )}
 
@@ -581,7 +619,7 @@ export function NuevaHistoria() {
                 type="button"
                 label="Cancelar"
                 icon="pi pi-times"
-                severity="secondary"
+                variant="secondary"
                 onClick={handleCancel}
                 className="flex-1"
               />
@@ -590,7 +628,7 @@ export function NuevaHistoria() {
                   type="button"
                   label="Anterior"
                   icon="pi pi-chevron-left"
-                  severity="primary"
+                  variant="secondary"
                   onClick={pasoAnterior}
                   className="flex-1"
                 />
@@ -602,15 +640,17 @@ export function NuevaHistoria() {
                   label="Siguiente"
                   icon="pi pi-chevron-right"
                   iconPos="right"
+                  variant="primary"
                   onClick={siguientePaso}
-                  className="flex-1 bg-[#6d4bc1] hover:bg-[#5e35b1]"
+                  className="flex-1"
                 />
               ) : (
                 <Button
                   type="submit"
                   label="Guardar Historia Fisiátrica"
                   icon="pi pi-check"
-                  className="flex-1 bg-[#6d4bc1] hover:bg-[#5e35b1]"
+                  variant="primary"
+                  className="flex-1"
                 />
               )}
               
