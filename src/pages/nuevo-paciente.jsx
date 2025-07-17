@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from 'primereact/button';
+import { Button } from '../components/Button';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
 import { Calendar } from 'primereact/calendar';
@@ -314,7 +314,7 @@ export function NuevoPaciente() {
                       type="button"
                       icon="pi pi-plus"
                       label="Agregar Tutor"
-                      className="bg-[#6d4bc1] hover:bg-[#5e35b1] text-white"
+                      variant="primary"
                       onClick={agregarTutor}
                     />
                   </div>
@@ -332,8 +332,7 @@ export function NuevoPaciente() {
                         <Button
                           type="button"
                           icon="pi pi-trash"
-                          severity="danger"
-                          text
+                          variant="danger"
                           onClick={() => eliminarTutor(tutor.id)}
                           className="text-red-500 hover:text-red-700"
                         />
@@ -413,17 +412,18 @@ export function NuevoPaciente() {
             {/* Botones */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <Button
-                type="submit"
-                label="Guardar Paciente"
-                icon="pi pi-check"
-                className="flex-1 bg-[#6d4bc1] hover:bg-[#5e35b1]"
-              />
-              <Button
                 type="button"
                 label="Cancelar"
                 icon="pi pi-times"
-                severity="secondary"
+                variant="secondary"
                 onClick={handleCancel}
+                className="flex-1"
+              />
+              <Button
+                type="submit"
+                label="Guardar Paciente"
+                icon="pi pi-check"
+                variant="primary"
                 className="flex-1"
               />
             </div>

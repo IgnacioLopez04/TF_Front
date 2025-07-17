@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { pacientes } from '../apis/pacientes';
+import { Button } from '../components/Button';
 
 export function Paciente() {
   const { dni } = useParams();
@@ -58,8 +59,8 @@ export function Paciente() {
               </div>
               <textarea className="w-full bg-white border rounded p-2 mb-2 text-xs sm:text-base" rows={4} value="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." readOnly />
               <div className="flex flex-col sm:flex-row gap-2 justify-end">
-                <button className="bg-[#b39ddb] text-white px-4 py-1 rounded">Ver</button>
-                <button className="bg-[#ede7f6] text-[#6d4bc1] px-4 py-1 rounded border">Agregar comentario</button>
+                <Button variant="action" label="Ver" size="sm" />
+                <Button variant="secondary" label="Agregar comentario" size="sm" />
               </div>
             </div>
             {/* Otro informe de ejemplo */}
@@ -70,8 +71,8 @@ export function Paciente() {
               </div>
               <textarea className="w-full bg-white border rounded p-2 mb-2 text-xs sm:text-base" rows={2} value="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." readOnly />
               <div className="flex flex-col sm:flex-row gap-2 justify-end">
-                <button className="bg-[#b39ddb] text-white px-4 py-1 rounded">Ver</button>
-                <button className="bg-[#ede7f6] text-[#6d4bc1] px-4 py-1 rounded border">Agregar comentario</button>
+                <Button variant="action" label="Ver" size="sm" />
+                <Button variant="secondary" label="Agregar comentario" size="sm" />
               </div>
             </div>
           </div>
@@ -80,13 +81,12 @@ export function Paciente() {
           <div>
             {/* Botón para crear nueva historia */}
             <div className="flex justify-end mb-4">
-              <button 
+              <Button 
                 onClick={() => window.location.href = `/nueva-historia/${dni}`}
-                className="bg-[#6d4bc1] hover:bg-[#5e35b1] text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-colors"
-              >
-                <span className="text-lg">+</span>
-                Crear Nueva Historia Fisiátrica
-              </button>
+                variant="primary"
+                icon="pi pi-plus"
+                label="Crear Nueva Historia Fisiátrica"
+              />
             </div>
             
             {/* Contenido de la historia */}

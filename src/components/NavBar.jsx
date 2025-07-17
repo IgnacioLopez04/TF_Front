@@ -1,4 +1,4 @@
-import { Button } from 'primereact/button';
+import { Button } from './Button';
 import { Avatar } from 'primereact/avatar';
 import { useAuth } from './hooks';
 
@@ -30,7 +30,7 @@ export function NavBar() {
         <Button
           icon="pi pi-plus"
           label="Agregar Paciente"
-          className="px-4 py-2 rounded cursor-pointer bg-[#6d4bc1] text-white hover:bg-[#5e35b1] transition-colors"
+          variant="primary"
           onClick={() => window.location.href = '/nuevo-paciente'}
         />
       </div>
@@ -39,11 +39,9 @@ export function NavBar() {
         <Avatar label='JC'  style={{backgroundColor: '#EDE7F6', borderRadius: '15%', marginRight: '10px', color:"#6d4bc1"}}></Avatar>
         <Button
           icon="pi pi-sign-out"
-          className="px-4 py-2 rounded cursor-pointer hover:bg-gray-200"
+          variant="ghost"
           onClick={() => logout()}
-          severity='secondary'
-          text
-        ></Button>
+        />
       </div>
     </nav>
   );

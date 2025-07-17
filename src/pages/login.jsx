@@ -3,7 +3,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../components/hooks.js';
-import { Button } from 'primereact/button';
+import { Button } from '../components/Button';
 
 export function Login() {
   const navigate = useNavigate();
@@ -30,10 +30,11 @@ export function Login() {
           </div>
           <div className="mt-2">
             <Button
-              className="w-full border-gray-300 rounded-lg"
+              variant="primary"
+              className="w-full"
               label="Iniciar Sesión"
               onClick={() => navigate('/home')}
-            ></Button>
+            />
             {/* <GoogleLogin onSuccess={handleLoginSuccess}></GoogleLogin> */}
             <small className="text-sm">
               Inicia sesión con tu cuenta de Google para ingresar a la

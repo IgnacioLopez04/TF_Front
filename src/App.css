@@ -16,3 +16,53 @@
   background-color: #a678d6; /* Color violeta de selección */
   color: white;
 }
+
+/* Estilos personalizados para los tabs */
+.custom-tabs .p-tabview-nav {
+  border-bottom: 2px solid #e5e7eb;
+  background: transparent;
+}
+
+.custom-tabs .p-tabview-nav .p-tabview-nav-link {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.custom-tabs .p-tabview-nav .p-tabview-nav-link:hover {
+  background: #f3f4f6;
+  color: #6d4bc1;
+}
+
+.custom-tabs .p-tabview-nav .p-highlight .p-tabview-nav-link {
+  background: #6d4bc1;
+  color: white;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.custom-tabs .p-tabview-panels {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  padding: 1.5rem;
+}
+
+.custom-tabs .p-tabview-nav .p-tabview-nav-link:focus {
+  box-shadow: 0 0 0 2px rgba(109, 75, 193, 0.2);
+}
+
+/* Estilos para el sub-tab dentro de Cabeza y sentidos */
+.custom-tabs .p-tabview .p-tabview .p-tabview-nav {
+  border-bottom: 1px solid #e5e7eb;
+  margin-top: 1rem;
+}
+
+.custom-tabs .p-tabview .p-tabview .p-tabview-nav .p-tabview-nav-link {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+}

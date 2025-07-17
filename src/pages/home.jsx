@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { pacientes } from '../apis/pacientes';
+import { Button } from '../components/Button';
 
 export function Home() {
   const prestaciones = ['Todos', 'Hogar', 'Centro de Día', 'Centro de Rehabilitación'];
@@ -58,7 +59,7 @@ export function Home() {
             </div>
             {/* Botón Ver */}
             <div className="flex flex-col gap-2 w-full sm:w-auto">
-              <button className="selector-button button-custom border-2 mt-2 bg-[#b39ddb] text-white px-4 py-1 rounded" onClick={() => window.location.href = `/paciente/${paciente.dni}`}>Ver</button>
+              <Button variant="action" label="Ver" size="sm" onClick={() => window.location.href = `/paciente/${paciente.dni}`} />
             </div>
           </div>
         ))}
