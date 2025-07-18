@@ -32,15 +32,6 @@ export function NavBar() {
           </li> */}
         </ul>
       </div>
-      {/* Botón Agregar Paciente */}
-      <div className="flex items-center gap-2">
-        <Button
-          icon="pi pi-plus"
-          label="Agregar Paciente"
-          variant="primary"
-          onClick={() => (window.location.href = '/nuevo-paciente')}
-        />
-      </div>
       {/* Avatar y logout */}
       <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
         <Avatar
