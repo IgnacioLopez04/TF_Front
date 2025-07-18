@@ -4,6 +4,7 @@ import { pacientes } from '../apis/pacientes';
 import { Button } from '../components/Button';
 import { Dialog } from 'primereact/dialog';
 import { InputTextarea } from 'primereact/inputtextarea';
+import { HistoriaFisiatica } from '../components/HistoriaFisiatica';
 
 // Mockup de informes con comentarios
 const informesMock = [
@@ -182,67 +183,7 @@ export function Paciente() {
             ))}
           </div>
         )}
-        {tab === 'historia' && (
-          <div>
-            {/* Botón para crear nueva historia */}
-            <div className="flex justify-end mb-4">
-              <Button
-                onClick={() =>
-                  (window.location.href = `/nueva-historia/${dni}`)
-                }
-                variant="primary"
-                icon="pi pi-plus"
-                label="Crear Nueva Historia Fisiátrica"
-              />
-            </div>
-
-            {/* Contenido de la historia */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <div className="border rounded-lg p-2 sm:p-4 bg-[#f5f2fa]">
-                <div className="font-semibold mb-2">Historia Fisiátrica</div>
-                <div className="text-xs sm:text-base">
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                  do eiusmod tempor incididunt ut labore et dolore magna .
-                </div>
-                <ul className="list-disc ml-6 text-xs sm:text-base">
-                  <li>
-                    Onsectetur adipiscing elit, ut labore et dolore magna .
-                  </li>
-                  <li>
-                    Onsectetur adipiscing elit, ut labore et dolore magna .
-                  </li>
-                </ul>
-              </div>
-              <div className="border rounded-lg p-2 sm:p-4 bg-[#f5f2fa]">
-                <div className="font-semibold mb-2">Examen Físico</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <ul className="list-disc ml-6 text-xs sm:text-base">
-                    <li>
-                      Onsectetur adipiscing elit, ut labore et dolore magna .
-                    </li>
-                    <li>
-                      Onsectetur adipiscing elit, ut labore et dolore magna .
-                    </li>
-                    <li>
-                      Onsectetur adipiscing elit, ut labore et dolore magna .
-                    </li>
-                  </ul>
-                  <ul className="list-disc ml-6 text-xs sm:text-base">
-                    <li>
-                      Onsectetur adipiscing elit, ut labore et dolore magna .
-                    </li>
-                    <li>
-                      Onsectetur adipiscing elit, ut labore et dolore magna .
-                    </li>
-                    <li>
-                      Onsectetur adipiscing elit, ut labore et dolore magna .
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {tab === 'historia' && <HistoriaFisiatica dni={dni} />}
         {tab === 'multimedia' && (
           <div>
             <div className="text-center text-gray-400 text-sm sm:text-base">
