@@ -5,6 +5,7 @@ import { Button } from '../components/Button';
 import { Dialog } from 'primereact/dialog';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { HistoriaFisiatica } from '../components/HistoriaFisiatica';
+import { MultimediaPaciente } from '../components/MultimediaPaciente';
 
 // Mockup de informes con comentarios
 const informesMock = [
@@ -184,13 +185,7 @@ export function Paciente() {
           </div>
         )}
         {tab === 'historia' && <HistoriaFisiatica dni={dni} />}
-        {tab === 'multimedia' && (
-          <div>
-            <div className="text-center text-gray-400 text-sm sm:text-base">
-              Sin archivos multimedia.
-            </div>
-          </div>
-        )}
+        {tab === 'multimedia' && <MultimediaPaciente />}
       </div>
       <Dialog
         header={informeSeleccionado ? informeSeleccionado.titulo : 'Informe'}
