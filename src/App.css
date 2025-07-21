@@ -1,42 +1,68 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.selector-button {
+  background-color: white;
+  color: #a678d6;
+  border-radius: 8px;
+  border-color: #a678d6;
+  font-weight: bold;
+  transition: background-color 0.2s;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.selector-button:hover{
+  background-color: #a678d6;
+  color: white;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.selector-button.active {
+  background-color: #a678d6; /* Color violeta de selección */
+  color: white;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Estilos personalizados para los tabs */
+.custom-tabs .p-tabview-nav {
+  border-bottom: 2px solid #e5e7eb;
+  background: transparent;
 }
 
-.card {
-  padding: 2em;
+.custom-tabs .p-tabview-nav .p-tabview-nav-link {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s;
+  border-radius: 0.5rem 0.5rem 0 0;
 }
 
-.read-the-docs {
-  color: #888;
+.custom-tabs .p-tabview-nav .p-tabview-nav-link:hover {
+  background: #f3f4f6;
+  color: #6d4bc1;
+}
+
+.custom-tabs .p-tabview-nav .p-highlight .p-tabview-nav-link {
+  background: #6d4bc1;
+  color: white;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.custom-tabs .p-tabview-panels {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  padding: 1.5rem;
+}
+
+.custom-tabs .p-tabview-nav .p-tabview-nav-link:focus {
+  box-shadow: 0 0 0 2px rgba(109, 75, 193, 0.2);
+}
+
+/* Estilos para el sub-tab dentro de Cabeza y sentidos */
+.custom-tabs .p-tabview .p-tabview .p-tabview-nav {
+  border-bottom: 1px solid #e5e7eb;
+  margin-top: 1rem;
+}
+
+.custom-tabs .p-tabview .p-tabview .p-tabview-nav .p-tabview-nav-link {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
 }
