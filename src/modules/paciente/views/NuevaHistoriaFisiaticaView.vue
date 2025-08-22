@@ -978,9 +978,6 @@ const pasoAnterior = () => {
 };
 
 const pasoSiguiente = () => {
-  console.log(esFormularioValido.value);
-  console.log(pasoActivo.value);
-  console.log(pasos.value.length);
   if (esFormularioValido.value && pasoActivo.value < pasos.value.length - 1) {
     pasoActivo.value++;
   } else if (!esFormularioValido.value) {
