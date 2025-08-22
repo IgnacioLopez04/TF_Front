@@ -110,7 +110,7 @@
         <div class="grid">
           <div class="col-12 md:col-6 mb-3">
             <label for="calle" class="block text-sm font-medium text-gray-700 mb-2">
-              Calle <span class="text-red-500">*</span>
+              Calle y Número <span class="text-red-500">*</span>
             </label>
             <InputText
               id="calle"
@@ -121,23 +121,6 @@
             />
             <small v-if="errors.calle" class="text-red-500 text-sm">{{ errors.calle }}</small>
           </div>
-
-          <div class="col-12 md:col-6 mb-3">
-            <label for="numero" class="block text-sm font-medium text-gray-700 mb-2">
-              Número <span class="text-red-500">*</span>
-            </label>
-            <InputText
-              id="numero"
-              v-model="formData.numero"
-              placeholder="Ej: 123"
-              :class="{ 'p-invalid': errors.numero }"
-              class="w-full"
-            />
-            <small v-if="errors.numero" class="text-red-500 text-sm">{{ errors.numero }}</small>
-          </div>
-        </div>
-
-        <div class="grid">
           <div class="col-12 md:col-6 mb-3">
             <label for="pisoDepto" class="block text-sm font-medium text-gray-700 mb-2">Piso / Departamento</label>
             <InputText
@@ -147,19 +130,20 @@
               class="w-full"
             />
           </div>
-
-          <div class="col-12 md:col-6 mb-3">
-            <label for="barrio" class="block text-sm font-medium text-gray-700 mb-2">Barrio</label>
-            <InputText
-              id="barrio"
-              v-model="formData.barrio"
-              placeholder="Ej: Alta Córdoba"
-              class="w-full"
-            />
-          </div>
         </div>
 
         <div class="grid">
+
+          <div class="col-12 md:col-6 mb-3">
+            <label for="provincia" class="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
+            <Select
+              id="provincia"
+              v-model="formData.provincia"
+              :options="provincias"
+              optionLabel="nombre"
+              optionValue="id"
+            />
+          </div>
           <div class="col-12 md:col-6 mb-3">
             <label for="localidad" class="block text-sm font-medium text-gray-700 mb-2">
               Localidad <span class="text-red-500">*</span>
@@ -173,19 +157,18 @@
             />
             <small v-if="errors.localidad" class="text-red-500 text-sm">{{ errors.localidad }}</small>
           </div>
-
+        </div>
+        
+        <div class="grid">
           <div class="col-12 md:col-6 mb-3">
-            <label for="provincia" class="block text-sm font-medium text-gray-700 mb-2">Provincia</label>
+            <label for="barrio" class="block text-sm font-medium text-gray-700 mb-2">Barrio</label>
             <InputText
-              id="provincia"
-              v-model="formData.provincia"
-              placeholder="Ej: Córdoba"
+              id="barrio"
+              v-model="formData.barrio"
+              placeholder="Ej: Alta Córdoba"
               class="w-full"
             />
           </div>
-        </div>
-
-        <div class="grid">
           <div class="col-12 md:col-6 mb-3">
             <label for="conQuienVive" class="block text-sm font-medium text-gray-700 mb-2">Con quien vive</label>
             <InputText
@@ -356,9 +339,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { showSuccess, showError } from '@/composables/useToast';
+import { provincias as cargarProvincias, ciudades as cargarCiudades } from '../store/actions';
+
+const provincias = ref([]);
+const ciudades = ref([]);
 
 const router = useRouter();
 const isSubmitting = ref(false);
@@ -391,6 +378,16 @@ const errors = reactive({
   calle: '',
   numero: '',
   localidad: ''
+});
+
+onMounted(async () => {
+  try{
+    provincias.value = await cargarProvincias();
+    console.log(provincias.value);
+  }catch(error){ 
+    console.error('Error al cargar las provincias:', error);
+    showError('Hubo problemas al cargar las provincias');
+  }
 });
 
 // Computed para determinar si es menor de edad (menos de 18 años)
