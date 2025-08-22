@@ -1,5 +1,13 @@
 <template>
   <div class="google-login-container">
+    <!-- Loading indicator -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="loading-content">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+        <p>Iniciando sesión...</p>
+      </div>
+    </div>
+    
     <!-- Botón de Google que se renderiza automáticamente -->
     <div 
       id="g_id_onload"
@@ -36,6 +44,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { GOOGLE_CLIENT_ID } from '@/utils';
+import { login } from '@/modules/auth/store/actions';
 
 const props = defineProps({
   onSuccess: {
@@ -47,13 +56,42 @@ const props = defineProps({
     required: true
   }
 });
+
+const emit = defineEmits(['login-success']);
+
 const clientId = GOOGLE_CLIENT_ID;
 const googleLoaded = ref(false);
 const fallbackLoading = ref(false);
+const isLoading = ref(false);
 
 // Función global que será llamada por Google
-window.handleCredentialResponse = (response) => {
-  props?.onSuccess?.(response);
+window.handleCredentialResponse = async (response) => {
+  try {
+    isLoading.value = true;
+    
+    // Extraer el credential del response de Google
+    const credential = response.credential;
+    
+    if (!credential) {
+      throw new Error('No se recibió el credential de Google');
+    }
+    
+    // Llamar al API de login con el credential
+    const loginResponse = await login(credential);
+    
+    // Si el login es exitoso, llamar al callback de éxito
+    if (loginResponse && loginResponse.access_token) {
+      props.onSuccess(loginResponse);
+    } else {
+      throw new Error('Respuesta inválida del servidor');
+    }
+    
+  } catch (error) {
+    const errorMessage = error.response?.data?.error || error.message || 'Error al iniciar sesión';
+    props.onError(errorMessage);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 // Función fallback si Google no se carga
@@ -100,10 +138,35 @@ onUnmounted(() => {
 <style scoped>
 .google-login-container {
   width: 100%;
+  position: relative;
 }
 
 .google-fallback {
   opacity: 0.8;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 8px;
+}
+
+.loading-content {
+  text-align: center;
+  color: #666;
+}
+
+.loading-content p {
+  margin-top: 1rem;
+  font-size: 0.9rem;
 }
 
 /* Asegurar que el botón de Google tenga el ancho completo */

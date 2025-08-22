@@ -8,7 +8,6 @@ export function useAuthState() {
     email: '',
     picture: '',
     nivel: null,
-    id_sucursal: null,
   });
 
   const accessToken = ref(null);

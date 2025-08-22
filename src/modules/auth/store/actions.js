@@ -1,4 +1,17 @@
 import { showError } from '@/composables/useToast';
+import { urlAuth } from '@/utils';
+import { useAxios } from '@/composables/useAxios';
+
+export const login = async (credential) => {
+  try {
+    const response = await useAxios.postUnauthenticated(`${urlAuth}/login`, {
+      credential,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export function useLogin(usuario, accessToken) {
   return (userData, token) => {
@@ -19,8 +32,6 @@ export function useLogin(usuario, accessToken) {
 
       // Actualizar el token
       accessToken.value = token;
-
-      console.log('Login exitoso:', usuario.value);
     } catch (error) {
       console.error('Error en login:', error);
       showError('Error al iniciar sesión');
@@ -48,10 +59,7 @@ export function useLogout(usuario, accessToken) {
 
       // Resetear el token
       accessToken.value = null;
-
-      console.log('Logout exitoso');
     } catch (error) {
-      console.error('Error en logout:', error);
       showError('Error al cerrar sesión');
     }
   };
