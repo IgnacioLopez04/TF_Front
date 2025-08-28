@@ -1,14 +1,7 @@
 import axios from 'axios';
 
 const getAuthHeaders = () => {
-  const token = sessionStorage.getItem('token');
-
-  if (process.env.NODE_ENV === 'development') {
-    return {
-      ok: true,
-      config: {},
-    };
-  }
+  const token = sessionStorage.getItem('accessToken');
 
   if (!token) {
     return { ok: false, message: 'No se encontró el token de acceso.' };

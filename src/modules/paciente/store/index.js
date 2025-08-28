@@ -1,18 +1,8 @@
 import { defineStore } from 'pinia';
-import {
-  fetchPacientes,
-  createPaciente,
-  updatePaciente,
-  deletePaciente,
-} from './actions';
+import state from './state';
 
 export const usePacienteStore = defineStore('paciente', {
-  state: () => ({
-    pacientes: [],
-    pacienteActual: null,
-    loading: false,
-    error: null,
-  }),
+  state,
 
   getters: {
     getPacienteById: (state) => (id) => {
@@ -37,19 +27,6 @@ export const usePacienteStore = defineStore('paciente', {
       }
     },
 
-    async createPaciente(pacienteData) {
-      this.loading = true;
-      try {
-        const nuevoPaciente = await createPaciente(pacienteData);
-        this.pacientes.push(nuevoPaciente);
-        this.error = null;
-      } catch (error) {
-        this.error = error.message;
-      } finally {
-        this.loading = false;
-      }
-    },
-
     async updatePaciente(id, pacienteData) {
       this.loading = true;
       try {
@@ -59,8 +36,10 @@ export const usePacienteStore = defineStore('paciente', {
           this.pacientes[index] = pacienteActualizado;
         }
         this.error = null;
+        return pacienteActualizado;
       } catch (error) {
         this.error = error.message;
+        throw error;
       } finally {
         this.loading = false;
       }
@@ -74,17 +53,99 @@ export const usePacienteStore = defineStore('paciente', {
         this.error = null;
       } catch (error) {
         this.error = error.message;
+        throw error;
       } finally {
         this.loading = false;
       }
     },
 
-    setPacienteActual(paciente) {
-      this.pacienteActual = paciente;
+    setPaciente(paciente) {
+      this.paciente = paciente;
     },
 
+    // Agregar un tutor al paciente actual
+    agregarTutor() {
+      if (!this.paciente.tutores) {
+        this.paciente.tutores = [];
+      }
+      const nuevoTutor = {
+        nombre: '',
+        dni: '',
+        fechaNacimiento: null,
+        ocupacion: '',
+        lugarNacimiento: '',
+      };
+      this.paciente.tutores.push(nuevoTutor);
+      return nuevoTutor;
+    },
+
+    // Eliminar un tutor del paciente actual
+    eliminarTutor(index) {
+      if (this.paciente.tutores && this.paciente.tutores[index]) {
+        this.paciente.tutores.splice(index, 1);
+      }
+    },
+
+    // Limpiar el paciente actual
+    limpiarPaciente() {
+      this.paciente = {
+        nombre: '',
+        dni: '',
+        prestacion: null,
+        fechaNacimiento: null,
+        ocupacionActual: '',
+        ocupacionAnterior: '',
+        calle: '',
+        numero: '',
+        pisoDepto: '',
+        barrio: '',
+        localidad: '',
+        provincia: '',
+        conQuienVive: '',
+        mutual: null,
+        numeroAfiliado: '',
+        tutores: [],
+        activo: true,
+        fechaCreacion: null,
+        fechaModificacion: null,
+      };
+    },
+
+    // Limpiar errores
     clearError() {
       this.error = null;
+    },
+
+    // Validar si un paciente es menor de edad
+    esMenorDeEdad(fechaNacimiento) {
+      if (!fechaNacimiento) return false;
+
+      const fechaNac = new Date(fechaNacimiento);
+      const hoy = new Date();
+      const edad = hoy.getFullYear() - fechaNac.getFullYear();
+      const mes = hoy.getMonth() - fechaNac.getMonth();
+
+      if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+        return edad - 1 < 18;
+      }
+
+      return edad < 18;
+    },
+
+    // Obtener edad del paciente
+    obtenerEdad(fechaNacimiento) {
+      if (!fechaNacimiento) return null;
+
+      const fechaNac = new Date(fechaNacimiento);
+      const hoy = new Date();
+      const edad = hoy.getFullYear() - fechaNac.getFullYear();
+      const mes = hoy.getMonth() - fechaNac.getMonth();
+
+      if (mes < 0 || (mes === 0 && hoy.getDate() < fechaNac.getDate())) {
+        return edad - 1;
+      }
+
+      return edad;
     },
   },
 });

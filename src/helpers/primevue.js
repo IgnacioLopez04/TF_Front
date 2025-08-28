@@ -2,6 +2,7 @@
 import InputText from 'primevue/inputtext';
 import Textarea from 'primevue/textarea';
 import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
 
@@ -30,6 +31,7 @@ export default {
     app.component('InputText', InputText);
     app.component('Textarea', Textarea);
     app.component('Dropdown', Dropdown);
+    app.component('Select', Select);
     app.component('Calendar', Calendar);
     app.component('Button', Button);
     app.component('Card', Card);
