@@ -1,4 +1,29 @@
 import axios from 'axios';
+import { useAuthStore } from '@/modules/auth/store';
+import router from '@/router';
+
+// Configurar interceptor de respuesta para manejar tokens expirados
+const setupResponseInterceptor = () => {
+  axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        // Token expirado o inválido
+        const authStore = useAuthStore();
+        authStore.logout();
+
+        // Redirigir al login si no estamos ya ahí
+        if (router.currentRoute.value.name !== 'login') {
+          router.push({ name: 'login' });
+        }
+      }
+      return Promise.reject(error);
+    },
+  );
+};
+
+// Inicializar el interceptor
+setupResponseInterceptor();
 
 const getAuthHeaders = () => {
   const token = sessionStorage.getItem('accessToken');
