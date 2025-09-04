@@ -141,6 +141,116 @@ export const useValidations = () => {
     return true;
   };
 
+  // Validar DNI del tutor (mínimo 7 dígitos, solo números)
+  const validateTutorDNI = (value, tutorIndex) => {
+    const fieldName = `tutor${tutorIndex}DNI`;
+
+    if (!value || value.toString().trim() === '') {
+      errors.value[fieldName] = 'El DNI del tutor es obligatorio';
+      isValid.value[fieldName] = false;
+      return false;
+    }
+
+    const dniString = value.toString().trim();
+    const dniRegex = /^\d+$/;
+
+    if (!dniRegex.test(dniString)) {
+      errors.value[fieldName] = 'El DNI del tutor solo puede contener números';
+      isValid.value[fieldName] = false;
+      return false;
+    }
+
+    if (dniString.length < 7) {
+      errors.value[fieldName] =
+        'El DNI del tutor debe tener al menos 7 dígitos';
+      isValid.value[fieldName] = false;
+      return false;
+    }
+
+    clearError(fieldName);
+    return true;
+  };
+
+  // Validar fecha de nacimiento del tutor (debe ser mayor de edad)
+  const validateTutorBirthDate = (value, tutorIndex) => {
+    const fieldName = `tutor${tutorIndex}BirthDate`;
+
+    if (!value) {
+      errors.value[fieldName] =
+        'La fecha de nacimiento del tutor es obligatoria';
+      isValid.value[fieldName] = false;
+      return false;
+    }
+
+    const hoy = new Date();
+    const nacimiento = new Date(value);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const m = hoy.getMonth() - nacimiento.getMonth();
+
+    if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+      edad--;
+    }
+
+    if (edad < 18) {
+      errors.value[fieldName] =
+        'El tutor debe ser mayor de edad (mínimo 18 años)';
+      isValid.value[fieldName] = false;
+      return false;
+    }
+
+    clearError(fieldName);
+    return true;
+  };
+
+  // Validar nombre del tutor
+  const validateTutorName = (value, tutorIndex) => {
+    const fieldName = `tutor${tutorIndex}Name`;
+    return validateName(value, fieldName);
+  };
+
+  // Validar ocupación del tutor
+  const validateTutorOccupation = (value, tutorIndex) => {
+    const fieldName = `tutor${tutorIndex}Occupation`;
+    return validateOccupation(value, fieldName);
+  };
+
+  // Validar lugar de nacimiento del tutor
+  const validateTutorBirthPlace = (value, tutorIndex) => {
+    const fieldName = `tutor${tutorIndex}BirthPlace`;
+
+    if (!value || value.trim() === '') {
+      errors.value[fieldName] =
+        'El lugar de nacimiento del tutor es obligatorio';
+      isValid.value[fieldName] = false;
+      return false;
+    }
+
+    clearError(fieldName);
+    return true;
+  };
+
+  // Validar todos los tutores
+  const validateTutors = (tutores) => {
+    if (!tutores || tutores.length === 0) {
+      return true; // No hay tutores para validar
+    }
+
+    let isValidTutors = true;
+
+    tutores.forEach((tutor, index) => {
+      if (!validateTutorName(tutor.nombre, index)) isValidTutors = false;
+      if (!validateTutorDNI(tutor.dni, index)) isValidTutors = false;
+      if (!validateTutorBirthDate(tutor.fechaNacimiento, index))
+        isValidTutors = false;
+      if (!validateTutorOccupation(tutor.ocupacion, index))
+        isValidTutors = false;
+      if (!validateTutorBirthPlace(tutor.lugarNacimiento, index))
+        isValidTutors = false;
+    });
+
+    return isValidTutors;
+  };
+
   // Validar todo el formulario
   const validatePatientForm = (paciente) => {
     let isValidForm = true;
@@ -199,6 +309,11 @@ export const useValidations = () => {
       isValidForm = false;
     if (!validateAffiliateNumber(paciente.numeroAfiliado)) isValidForm = false;
 
+    // Validar tutores si es menor de edad
+    if (paciente.tutores && paciente.tutores.length > 0) {
+      if (!validateTutors(paciente.tutores)) isValidForm = false;
+    }
+
     return isValidForm;
   };
 
@@ -217,5 +332,11 @@ export const useValidations = () => {
     validateStreetNumber,
     validateRequiredSelection,
     validateAffiliateNumber,
+    validateTutorDNI,
+    validateTutorBirthDate,
+    validateTutorName,
+    validateTutorOccupation,
+    validateTutorBirthPlace,
+    validateTutors,
   };
 };

@@ -31,19 +31,9 @@ export default () => ({
   ciudades: [],
 
   // Opciones para dropdowns
-  opcionesPrestacion: [
-    { label: 'Hogar', value: 'hogar' },
-    { label: 'Centro de Día', value: 'centro-dia' },
-    { label: 'Centro de Rehabilitación', value: 'centro-rehabilitacion' },
-  ],
+  opcionesPrestacion: [],
 
-  opcionesMutual: [
-    { label: 'OSDE', value: 'osde' },
-    { label: 'Swiss Medical', value: 'swiss-medical' },
-    { label: 'Medicus', value: 'medicus' },
-    { label: 'Galeno', value: 'galeno' },
-    { label: 'Otro', value: 'otro' },
-  ],
+  opcionesMutual: [],
 
   // Estructura por defecto para un tutor
   tutor: {
@@ -52,6 +42,8 @@ export default () => ({
     fechaNacimiento: null,
     ocupacion: '',
     lugarNacimiento: '',
+    convive: true,
+    relacion: '',
   },
 
   tutores: [],

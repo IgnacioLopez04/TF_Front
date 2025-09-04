@@ -5,6 +5,7 @@ import Dropdown from 'primevue/dropdown';
 import Select from 'primevue/select';
 import Calendar from 'primevue/calendar';
 import Button from 'primevue/button';
+import InputNumber from 'primevue/inputnumber';
 
 // Componentes de presentación
 import Card from 'primevue/card';
@@ -31,6 +32,7 @@ export default {
     app.component('InputText', InputText);
     app.component('Textarea', Textarea);
     app.component('Dropdown', Dropdown);
+    app.component('InputNumber', InputNumber);
     app.component('Select', Select);
     app.component('Calendar', Calendar);
     app.component('Button', Button);

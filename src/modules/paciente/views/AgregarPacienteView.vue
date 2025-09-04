@@ -284,8 +284,7 @@
             icon="pi pi-plus"
           />
         </div>
-
-        <div v-for="(tutor, index) in pacienteStore.paciente.tutores" :key="index" class="surface-ground p-4 border-round my-4">
+        <div v-for="(tutor, index) in pacienteStore.tutores" :key="index" class="surface-ground p-4 border-round my-4">
           <div class="flex align-items-center justify-content-between mb-3">
             <h4 class="text-lg font-medium text-purple-600 m-0">Tutor {{ index + 1 }}</h4>
             <Button
@@ -297,7 +296,6 @@
               text
             />
           </div>
-
           <div class="grid">
             <div class="col-12 md:col-6 mb-3">
               <label :for="`nombreTutor${index}`" class="block text-sm font-medium text-gray-700 mb-2">
@@ -308,9 +306,11 @@
                 v-model="tutor.nombre"
                 placeholder="Ej: Juan Pérez"
                 class="w-full"
+                :class="{ 'p-invalid': !isValid[`tutor${index}Name`] && errors[`tutor${index}Name`] }"
+                @blur="validateTutorField(index, 'nombre', 'Name')"
               />
+              <small v-if="errors[`tutor${index}Name`]" class="p-error">{{ errors[`tutor${index}Name`] }}</small>
             </div>
-
             <div class="col-12 md:col-6 mb-3">
               <label :for="`dniTutor${index}`" class="block text-sm font-medium text-gray-700 mb-2">
                 DNI del tutor
@@ -320,7 +320,10 @@
                 v-model="tutor.dni"
                 placeholder="Ej: 1234567890"
                 class="w-full"
+                :class="{ 'p-invalid': !isValid[`tutor${index}DNI`] && errors[`tutor${index}DNI`] }"
+                @blur="validateTutorField(index, 'dni', 'DNI')"
               />
+              <small v-if="errors[`tutor${index}DNI`]" class="p-error">{{ errors[`tutor${index}DNI`] }}</small>
             </div>
           </div>
 
@@ -336,7 +339,10 @@
                 dateFormat="dd/mm/yy"
                 :showIcon="true"
                 class="w-full"
+                :class="{ 'p-invalid': !isValid[`tutor${index}BirthDate`] && errors[`tutor${index}BirthDate`] }"
+                @blur="validateTutorField(index, 'fechaNacimiento', 'BirthDate')"
             />
+              <small v-if="errors[`tutor${index}BirthDate`]" class="p-error">{{ errors[`tutor${index}BirthDate`] }}</small>
             </div>
 
             <div class="col-12 md:col-6 mb-3">
@@ -348,7 +354,10 @@
                 v-model="tutor.ocupacion"
                 placeholder="Ej: Profesor"
                 class="w-full"
+                :class="{ 'p-invalid': !isValid[`tutor${index}Occupation`] && errors[`tutor${index}Occupation`] }"
+                @blur="validateTutorField(index, 'ocupacion', 'Occupation')"
               />
+              <small v-if="errors[`tutor${index}Occupation`]" class="p-error">{{ errors[`tutor${index}Occupation`] }}</small>
             </div>
           </div>
 
@@ -361,6 +370,34 @@
                 :id="`lugarNacimientoTutor${index}`"
                 v-model="tutor.lugarNacimiento"
                 placeholder="Ej: Córdoba Capital"
+                class="w-full"
+                :class="{ 'p-invalid': !isValid[`tutor${index}BirthPlace`] && errors[`tutor${index}BirthPlace`] }"
+                @blur="validateTutorField(index, 'lugarNacimiento', 'BirthPlace')"
+              />
+              <small v-if="errors[`tutor${index}BirthPlace`]" class="p-error">{{ errors[`tutor${index}BirthPlace`] }}</small>
+            </div>
+            <div class="col-12 md:col-6 mb-3">
+              <label :for="`relacionTutor${index}`" class="block text-sm font-medium text-gray-700 mb-2">
+                Relación
+              </label>
+              <InputText
+                :id="`relacionTutor${index}`"
+                v-model="tutor.relacion"
+                placeholder="Ej: Especifique la relación"
+                class="w-full"
+              />
+            </div>
+            <div class="col-12 md:col-6 mb-3">
+              <label :for="`conviveTutor${index}`" class="block text-sm font-medium text-gray-700 mb-2">
+                Convive
+              </label>
+              <Select
+                :id="`conviveTutor${index}`"
+                v-model="tutor.convive"
+                :options="[{ label: 'Si', value: true }, { label: 'No', value: false }]"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Seleccione si convive"
                 class="w-full"
               />
             </div>
@@ -396,7 +433,6 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { showSuccess, showError } from '@/composables/useToast';
 import { usePacienteStore } from '../store';
-import { obtenerPrestaciones, obtenerMutuales, obtenerProvincias, obtenerCiudades, crearPaciente } from '../store/actions';
 import { useValidations } from '@/composables/useValidations';
 
 const router = useRouter();
@@ -418,27 +454,43 @@ const isLoading = ref({
 });
 
 const esMenorDeEdad = computed(() => {
-  if (!pacienteStore.paciente || !pacienteStore.paciente.fechaNacimiento) return false;
-  return pacienteStore.esMenorDeEdad(pacienteStore.paciente.fechaNacimiento);
+  const fechaNacimiento = pacienteStore.paciente.fechaNacimiento;
+  if (!fechaNacimiento) return false;
+
+  const hoy = new Date();
+  const nacimiento = new Date(fechaNacimiento);
+  let edad = hoy.getFullYear() - nacimiento.getFullYear();
+  const m = hoy.getMonth() - nacimiento.getMonth();
+
+  if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+    edad--;
+  }
+
+  if (edad < 18) return true;
+  return false;
 });
+
 
 const { 
   errors, 
   isValid, 
   validatePatientForm, 
-  clearErrors 
+  clearErrors,
+  validateTutorName,
+  validateTutorDNI,
+  validateTutorBirthDate,
+  validateTutorOccupation,
+  validateTutorBirthPlace
 } = useValidations();
 
 onMounted(async () => {
   try {
-    // Cargar datos en paralelo para mejor rendimiento
     await Promise.all([
-      provincias.value = await obtenerProvincias(),
-      prestaciones.value = await obtenerPrestaciones(),
-      mutuales.value = await obtenerMutuales()
+      provincias.value = await pacienteStore.obtenerProvincias(),
+      prestaciones.value = await pacienteStore.obtenerPrestaciones(),
+      mutuales.value = await pacienteStore.obtenerMutuales()
     ]);
   } catch (error) {
-    console.error('Error al cargar las opciones:', error);
     showError('Hubo problemas al cargar las opciones');
   }
 });
@@ -451,14 +503,50 @@ watch(esMenorDeEdad, (nuevoValor) => {
 
 const agregarTutor = () => {
   if (pacienteStore.paciente) {
-    pacienteStore.agregarTutor();
+    pacienteStore.tutores.push({
+      nombre: '',
+      dni: '',
+      fechaNacimiento: null,
+      ocupacion: '',
+      lugarNacimiento: '',
+      convive: true,
+      relacion: '',
+    });
   }
 };
 
 const eliminarTutor = (index) => {
-  if (pacienteStore.paciente) {
-    pacienteStore.eliminarTutor(index);
+  if (pacienteStore.tutores) {
+    pacienteStore.tutores = pacienteStore.tutores.filter((_, i) => i !== index);
   }
+};
+
+// Función para validar campos del tutor en tiempo real
+const validateTutorField = (tutorIndex, fieldName, validationType) => {
+  const tutor = pacienteStore.tutores[tutorIndex];
+  if (!tutor) return;
+
+  let isValid = false;
+  
+  switch (validationType) {
+    case 'Name':
+      isValid = validateTutorName(tutor[fieldName], tutorIndex);
+      break;
+    case 'DNI':
+      isValid = validateTutorDNI(tutor[fieldName], tutorIndex);
+      break;
+    case 'BirthDate':
+      isValid = validateTutorBirthDate(tutor[fieldName], tutorIndex);
+      break;
+    case 'Occupation':
+      isValid = validateTutorOccupation(tutor[fieldName], tutorIndex);
+      break;
+    case 'BirthPlace':
+      isValid = validateTutorBirthPlace(tutor[fieldName], tutorIndex);
+      break;
+  }
+  
+  return isValid;
 };
 
 
@@ -476,10 +564,12 @@ const guardarPaciente = async () => {
 
   isSubmitting.value = true;
   try {
-    await crearPaciente(pacienteStore.paciente);
+    console.log({paciente: { ...pacienteStore.paciente, tutores: pacienteStore.tutores}});
+    await pacienteStore.crearPaciente({ ...pacienteStore.paciente, tutores: pacienteStore.tutores });
     showSuccess('Paciente guardado exitosamente');
-    pacienteStore.limpiarPaciente();
 
+    pacienteStore.limpiarPaciente();
+    pacienteStore.limpiarTutores();
     router.push('/pacientes');
   } catch (error) {
     showError('Error al guardar el paciente. Intente nuevamente.');
@@ -504,7 +594,7 @@ const cargarCiudadesHandler = async (idProvincia) => {
     }
     
     if (idProvincia) {
-      ciudades.value = await obtenerCiudades(idProvincia);
+      ciudades.value = await pacienteStore.obtenerCiudades(idProvincia);
     }
   } catch (error) {
     console.error('Error al cargar ciudades:', error);
@@ -512,6 +602,8 @@ const cargarCiudadesHandler = async (idProvincia) => {
     ciudades.value = [];
   }
 };
+
+
 </script>
 
 <style scoped>
