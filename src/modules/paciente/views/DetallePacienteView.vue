@@ -6,7 +6,7 @@
       <div class="flex md:flex-row align-items-start gap-4">
         <div class="flex-shrink-0">
           <Avatar 
-            :label="paciente.iniciales"
+            :label="pacienteStore.paciente.iniciales"
             size="xlarge"
             shape="square"
             class="bg-primary text-white text-4xl font-bold"
@@ -14,11 +14,11 @@
           />
         </div>
         <div class="flex-1">
-          <h1 class="text-3xl font-bold text-color-primary mb-3">{{ paciente.nombre }}</h1>
+          <h1 class="text-3xl font-bold text-color-primary mb-3">{{ pacienteStore.paciente.nombre + ' ' + pacienteStore.paciente.apellido }}</h1>
           <div class="flex flex-column sm:flex-row gap-4 text-gray-600">
-            <p class="mb-0"><strong>DNI:</strong> {{ paciente.dni }}</p>
-            <p class="mb-0"><strong>Prestación:</strong> {{ paciente.prestacion }}</p>
-            <p class="mb-0"><strong>Últ. Modificación:</strong> {{ formatearFecha(paciente.ultimaModificacion) }}</p>
+            <p class="mb-0"><strong>DNI:</strong> {{ pacienteStore.paciente.dni }}</p>
+            <p class="mb-0"><strong>Prestación:</strong> {{ pacienteStore.paciente.prestacion }}</p>
+            <p class="mb-0"><strong>Últ. Modificación:</strong> {{ formatearFecha(pacienteStore.paciente.ultimaModificacion) }}</p>
           </div>
         </div>
       </div>
@@ -46,6 +46,17 @@
       <div class="p-4">
         <!-- Tab Informes -->
         <div v-if="tabActivo === 'Informes'">
+          <!-- Header con botón de crear nuevo informe -->
+          <div class="flex justify-content-between align-items-center mb-4">
+            <h3 class="text-xl font-bold text-color-primary">Informes</h3>
+            <Button 
+              label="Crear Nuevo Informe" 
+              icon="pi pi-plus"
+              @click="crearNuevoInforme"
+              class="button-primary-custom"
+            />
+          </div>
+          
           <div class="informe-bg border-round-xl p-3 shadow-md my-3">
             <div class="flex flex-column sm:flex-row justify-content-between align-items-start mb-3">
               <h3 class="text-xl font-bold mt-1 sm:mb-0" style="color: #7c3aed;">Avance en la terapia</h3>
@@ -889,22 +900,83 @@
         />
       </template>
     </Dialog>
+
+    <!-- Modal para Crear Nuevo Informe -->
+    <Dialog 
+      v-model:visible="modalNuevoInformeVisible" 
+      header="Crear Nuevo Informe"
+      :style="{ width: '60vw' }" 
+      class="p-fluid"
+    >
+      <div class="flex flex-column w-full gap-3">
+        <div class="flex flex-column justify-content-between sm:flex-row gap-4 w-full">
+          <div class="w-full">
+            <label for="tituloInforme" class="block text-900 font-medium mb-2 text-color-primary">Título del Informe</label>
+            <InputText 
+              id="tituloInforme"
+              v-model="nuevoInforme.titulo" 
+              placeholder="Ingrese el título del informe"
+              class="w-full"
+            />
+          </div>
+          <div class="">
+            <label for="fechaInforme" class="block text-900 font-medium mb-2 text-color-primary">Fecha del Informe</label>
+            <DatePicker 
+              id="fechaInforme"
+              v-model="nuevoInforme.fecha" 
+              :showIcon="true"
+              dateFormat="dd/mm/yy"
+              class="w-full"
+            />
+          </div>
+        </div>
+        <div class="">
+          <label for="contenidoInforme" class="block text-900 font-medium mb-2 text-color-primary">Contenido del Informe</label>
+          <Textarea 
+            id="contenidoInforme"
+            v-model="nuevoInforme.contenido" 
+            :rows="7" 
+            placeholder="Escriba el contenido del informe aquí..."
+            class="w-full"
+          />
+        </div>
+      </div>
+      
+      <template #footer>
+        <Button 
+          label="Cancelar" 
+          @click="cancelarNuevoInforme"
+          class="back-button"
+        />
+        <Button 
+          label="Crear Informe" 
+          @click="guardarNuevoInforme"
+          class="button-primary-custom"
+          :disabled="!esInformeValido"
+        />
+      </template>
+    </Dialog>
   </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { showSuccess } from '@/composables/useToast';
+import { showError, showSuccess } from '@/composables/useToast';
+import { usePacienteStore } from '../store';
+import { useAuthStore } from '@/modules/auth/store';
 
+const pacienteStore = usePacienteStore();
 const route = useRoute();
 const router = useRouter();
 const tabActivo = ref('Informes');
 const rows = ref(5);
+const authStore = useAuthStore();
 
 // Estados de los modales
 const modalVerVisible = ref(false);
 const modalComentarioVisible = ref(false);
 const modalMultimediaVisible = ref(false);
+const modalNuevoInformeVisible = ref(false);
 const informeSeleccionado = ref(null);
 const nuevoComentario = ref('');
 const tipoMultimedia = ref('imagen');
@@ -915,6 +987,13 @@ const vistaPrevia = ref(null);
 const nuevoMultimedia = ref({
   titulo: '',
   descripcion: '',
+  fecha: new Date()
+});
+
+// Formulario de nuevo informe
+const nuevoInforme = ref({
+  titulo: '',
+  contenido: '',
   fecha: new Date()
 });
 
@@ -1053,17 +1132,6 @@ const videos = ref([
   }
 ]);
 
-
-
-// Datos del paciente (aquí conectarías con tu API)
-const paciente = ref({
-  id: 1,
-  nombre: 'Ana Martínez',
-  dni: '45678901',
-  iniciales: 'AM',
-  prestacion: 'Hogar',
-  ultimaModificacion: '2025-07-25'
-});
 
 // Contenido de los informes
 const informeAvance = ref(`Paciente muestra una mejoría significativa en la movilidad del miembro superior derecho. Se recomienda continuar con el programa de ejercicios establecido y realizar seguimiento semanal para evaluar progresos. La terapia ocupacional ha sido efectiva en la recuperación de la funcionalidad.`);
@@ -1271,11 +1339,63 @@ const crearNuevaHistoria = () => {
   router.push(`/pacientes/${route.params.id}/nueva-historia`);
 };
 
+// Funciones para nuevo informe
+const crearNuevoInforme = () => {
+  limpiarFormularioInforme();
+  modalNuevoInformeVisible.value = true;
+};
+
+const limpiarFormularioInforme = () => {
+  nuevoInforme.value = {
+    titulo: '',
+    contenido: '',
+    fecha: new Date()
+  };
+};
+
+const cancelarNuevoInforme = () => {
+  modalNuevoInformeVisible.value = false;
+  limpiarFormularioInforme();
+};
+
+const guardarNuevoInforme = async () => {
+
+  const user = authStore.usuario;
+
+  if (esInformeValido.value) {
+
+    const informe = {
+      idUsuario: user.id_usuario,
+      titulo: nuevoInforme.value.titulo,
+      contenido: nuevoInforme.value.contenido,
+      fecha: formatearFecha(nuevoInforme.value.fecha),
+      dniPaciente: pacienteStore.paciente.dni,
+    };
+
+    try {
+      await pacienteStore.crearInforme(informe);
+
+      showSuccess('Informe creado correctamente');
+      modalNuevoInformeVisible.value = false;
+      limpiarFormularioInforme();
+    } catch (error) {
+      console.log(error);
+      showError('No es posible crear el informe');
+    }
+  }
+};
+
 // Computed properties
 const esFormularioValido = computed(() => {
   return nuevoMultimedia.value.titulo.trim() && 
          archivoSeleccionado.value && 
          nuevoMultimedia.value.fecha;
+});
+
+const esInformeValido = computed(() => {
+  return nuevoInforme.value.titulo.trim() && 
+         nuevoInforme.value.contenido.trim() && 
+         nuevoInforme.value.fecha;
 });
 
 const formatearFecha = (fecha) => {
@@ -1287,13 +1407,12 @@ const formatearFecha = (fecha) => {
   });
 };
 
-onMounted(() => {
-  // Aquí cargarías los datos del paciente desde tu API usando route.params.id
-  const pacienteId = route.params.id;
-  console.log('Cargando paciente con ID:', pacienteId);
-  
-  // Ejemplo de carga de datos
-  // cargarPaciente(pacienteId);
+onMounted(async () => {
+  try{
+    pacienteStore.paciente = await pacienteStore.obtenerPaciente(route.params.id);
+  }catch(error){
+    showError('No es posible obtener el paciente');
+  }
 });
 </script>
 

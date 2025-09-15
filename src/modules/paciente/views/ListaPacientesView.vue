@@ -50,7 +50,7 @@
             </div>
             <Button 
               label="Ver" 
-              @click="verPaciente(paciente.id)"
+              @click="verPaciente(paciente.hash_id)"
               class="view-button border-round"
             />
           </div>
