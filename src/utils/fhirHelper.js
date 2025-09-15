@@ -307,6 +307,64 @@ export const getResponseStats = (data) => {
   return stats;
 };
 
+/**
+ * Obtiene el valor de una extensión FHIR por su URL
+ * @param {Array} extensions - Array de extensiones FHIR
+ * @param {string} url - URL de la extensión a buscar
+ * @returns {string|null} - Valor de la extensión o null si no se encuentra
+ */
+export const getExtensionValue = (extensions, url) => {
+  if (!extensions || !Array.isArray(extensions)) {
+    return null;
+  }
+
+  const extension = extensions.find((ext) => ext.url === url);
+  return extension ? extension.valueString : null;
+};
+
+/**
+ * Obtiene múltiples valores de extensiones por sus URLs
+ * @param {Array} extensions - Array de extensiones FHIR
+ * @param {Object} urlMap - Objeto con URLs como claves y nombres de propiedades como valores
+ * @returns {Object} - Objeto con los valores de las extensiones
+ *
+ * @example
+ * const extensions = resource.extension;
+ * const values = getExtensionValues(extensions, {
+ *   'http://mi-servidor/fhir/StructureDefinition/hash-id': 'hash_id',
+ *   'http://mi-servidor/fhir/StructureDefinition/prestacion': 'prestacion'
+ * });
+ * // Resultado: { hash_id: 'abc123', prestacion: 'Hogar' }
+ */
+export const getExtensionValues = (extensions, urlMap) => {
+  const result = {};
+
+  if (!extensions || !Array.isArray(extensions) || !urlMap) {
+    return result;
+  }
+
+  Object.entries(urlMap).forEach(([url, propertyName]) => {
+    result[propertyName] = getExtensionValue(extensions, url);
+  });
+
+  return result;
+};
+
+/**
+ * Obtiene el valor de un identificador FHIR por su sistema
+ * @param {Array} identifiers - Array de identificadores FHIR
+ * @param {string} system - Sistema del identificador a buscar
+ * @returns {string|null} - Valor del identificador o null si no se encuentra
+ */
+export const getIdentifierValue = (identifiers, system) => {
+  if (!identifiers || !Array.isArray(identifiers)) {
+    return null;
+  }
+
+  const identifier = identifiers.find((id) => id.system === system);
+  return identifier ? identifier.value : null;
+};
+
 export default {
   extractFhirResources,
   extractResourcesByType,
@@ -320,4 +378,7 @@ export default {
   findResourceById,
   findResourcesByName,
   getResponseStats,
+  getExtensionValue,
+  getExtensionValues,
+  getIdentifierValue,
 };
