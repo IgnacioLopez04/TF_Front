@@ -982,6 +982,7 @@ const nuevoComentario = ref('');
 const tipoMultimedia = ref('imagen');
 const archivoSeleccionado = ref(null);
 const vistaPrevia = ref(null);
+const informes = ref([]);
 
 // Formulario de nuevo multimedia
 const nuevoMultimedia = ref({
@@ -1410,6 +1411,7 @@ const formatearFecha = (fecha) => {
 onMounted(async () => {
   try{
     pacienteStore.paciente = await pacienteStore.obtenerPaciente(route.params.id);
+    informes.value = await pacienteStore.obtenerInformes(route.params.id);
   }catch(error){
     showError('No es posible obtener el paciente');
   }

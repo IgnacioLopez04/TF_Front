@@ -295,4 +295,14 @@ export default {
       throw error;
     }
   },
+
+  async obtenerInformes(hashId) {
+    try {
+      const response = await useAxios.get(`${urlFhirReport}/${hashId}`);
+      const resources = extractFhirResources(response.data);
+      return resources;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
