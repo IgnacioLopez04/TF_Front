@@ -1,15 +1,17 @@
 import { useAxios } from '@/composables/useAxios';
 import {
-  urlAbm,
   urlFhirLocation,
   urlFhirOrganization,
   urlFhirPatient,
   urlFhirReport,
+  urlFhirAnnex,
 } from '@/utils';
 import {
   extractFhirResources,
   getExtensionValues,
   getIdentifierValue,
+  transformarDiagnosticReport,
+  transformarComentario, // Nueva importación
 } from '@/utils/fhirHelper';
 
 export default {
@@ -298,9 +300,73 @@ export default {
 
   async obtenerInformes(hashId) {
     try {
-      const response = await useAxios.get(`${urlFhirReport}/${hashId}`);
+      const response = await useAxios.get(`${urlFhirReport}?patient=${hashId}`);
       const resources = extractFhirResources(response.data);
-      return resources;
+
+      // Transformar los DiagnosticReports a formato legible
+      const informesLegibles = resources.map((reporte) =>
+        transformarDiagnosticReport(reporte),
+      );
+
+      this.informes = informesLegibles;
+
+      return informesLegibles;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async crearComentario(comentarioData, reportHashId) {
+    try {
+      if (!reportHashId) {
+        throw new Error(
+          'El hashId del informe es requerido para crear un comentario',
+        );
+      }
+
+      // Crear el recurso DiagnosticReport FHIR para el anexo
+      const diagnosticReport = {
+        resourceType: 'DiagnosticReport',
+        status: 'final',
+        code: {
+          text: 'Comentario',
+        },
+        conclusion: comentarioData.texto || '',
+        subject: {
+          reference: `DiagnosticReport/${reportHashId}`,
+        },
+        extension: [
+          {
+            url: 'http://example.org/fhir/StructureDefinition/is-annex',
+            valueBoolean: true,
+          },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/user-id',
+            valueString: comentarioData.idUsuario || '',
+          },
+        ],
+      };
+
+      // Enviar al servidor FHIR usando la URL estándar de DiagnosticReport
+      const response = await useAxios.post(urlFhirReport, diagnosticReport);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async obtenerComentarios(hashIdInforme) {
+    try {
+      const response = await useAxios.get(
+        `${urlFhirReport}?annex=${hashIdInforme}`,
+      );
+      const resources = extractFhirResources(response.data);
+
+      const comentariosLegibles = resources.map((anexo) =>
+        transformarComentario(anexo),
+      );
+
+      return comentariosLegibles;
     } catch (error) {
       throw error;
     }

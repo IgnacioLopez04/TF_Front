@@ -21,3 +21,4 @@ export const urlFhirLocation = `${urlFhir}/Location`;
 export const urlFhirOrganization = `${urlFhir}/Organization`;
 export const urlFhirPatient = `${urlFhir}/Patient`;
 export const urlFhirReport = `${urlFhir}/DiagnosticReport`;
+export const urlFhirAnnex = `${urlFhir}/Annex`;

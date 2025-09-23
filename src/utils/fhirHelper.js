@@ -365,6 +365,204 @@ export const getIdentifierValue = (identifiers, system) => {
   return identifier ? identifier.value : null;
 };
 
+/**
+ * Transforma un DiagnosticReport FHIR a un formato más legible para el frontend
+ * @param {Object} diagnosticReport - El recurso DiagnosticReport de FHIR
+ * @returns {Object} Objeto con la información del informe en formato legible
+ * Nota: Los anexos (presentedForm) se interpretan como comentarios del informe
+ */
+export function transformarDiagnosticReport(diagnosticReport) {
+  // Extraer información básica
+  const informe = {
+    id: diagnosticReport.id || 'N/A',
+    hashId: 'N/A', // Nuevo campo para el hashId del reporte
+    titulo: diagnosticReport.code?.text || 'Sin título',
+    contenido: diagnosticReport.conclusion || 'Sin contenido',
+    fechaCreacion: diagnosticReport.effectiveDateTime || 'Fecha no disponible',
+    estado: diagnosticReport.status || 'unknown',
+    pacienteId:
+      diagnosticReport.subject?.reference?.replace('Patient/', '') || 'N/A',
+
+    // Información del profesional (desde extensiones)
+    profesional: {
+      nombre: 'No disponible',
+      apellido: 'No disponible',
+      dni: 'No disponible',
+    },
+
+    // Información del tipo de informe
+    tipoInforme: {
+      nombre: 'No disponible',
+      id: 'N/A',
+    },
+
+    // Anexos (comentarios del informe)
+    anexos: [],
+  };
+
+  // Extraer información de las extensiones
+  if (diagnosticReport.extension && Array.isArray(diagnosticReport.extension)) {
+    diagnosticReport.extension.forEach((extension) => {
+      const url = extension.url;
+      const value = extension.valueString || extension.value?.toString() || '';
+
+      switch (url) {
+        case 'http://example.org/fhir/StructureDefinition/report-hash-id':
+          informe.hashId = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-name':
+          informe.profesional.nombre = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-lastname':
+          informe.profesional.apellido = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-dni':
+          informe.profesional.dni = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/report-type-name':
+          informe.tipoInforme.nombre = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/report-type-id':
+          informe.tipoInforme.id = value;
+          break;
+      }
+    });
+  }
+
+  // Extraer anexos (comentarios) de presentedForm
+  if (
+    diagnosticReport.presentedForm &&
+    Array.isArray(diagnosticReport.presentedForm)
+  ) {
+    informe.anexos = diagnosticReport.presentedForm.map((anexo, index) => ({
+      id: index + 1,
+      titulo: anexo.title || `Comentario ${index + 1}`,
+      contenido: anexo.data
+        ? new TextDecoder().decode(anexo.data)
+        : 'Sin contenido',
+      tipoContenido: anexo.contentType || 'text/plain',
+      fechaCreacion: anexo.creation || 'Fecha no disponible',
+    }));
+  }
+
+  // Formatear fecha si es posible
+  if (
+    informe.fechaCreacion &&
+    informe.fechaCreacion !== 'Fecha no disponible'
+  ) {
+    try {
+      const fecha = new Date(informe.fechaCreacion);
+      informe.fechaCreacion = fecha.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.warn('Error al formatear fecha:', error);
+    }
+  }
+
+  // Crear nombre completo del profesional
+  informe.profesional.nombreCompleto =
+    `${informe.profesional.nombre} ${informe.profesional.apellido}`.trim();
+
+  return informe;
+}
+
+/**
+ * Transforma un DiagnosticReport FHIR de anexo/comentario a un formato más legible para el frontend
+ * @param {Object} diagnosticReport - El recurso DiagnosticReport de FHIR (anexo)
+ * @returns {Object} Objeto con la información del comentario en formato legible
+ */
+export function transformarComentario(diagnosticReport) {
+  // Extraer información básica del comentario
+  const comentario = {
+    id: diagnosticReport.id || 'N/A',
+    hashId: 'N/A',
+    titulo: diagnosticReport.code?.text || 'Comentario',
+    contenido: diagnosticReport.conclusion || 'Sin contenido',
+    fechaCreacion: diagnosticReport.effectiveDateTime || 'Fecha no disponible',
+    estado: diagnosticReport.status || 'unknown',
+    esComentario: true, // Marcar que es un comentario
+    
+    // Referencia al informe padre
+    informePadre: diagnosticReport.subject?.reference?.replace('DiagnosticReport/', '') || 'N/A',
+
+    // Información del profesional (desde extensiones)
+    profesional: {
+      nombre: 'No disponible',
+      apellido: 'No disponible',
+      dni: 'No disponible',
+    },
+
+    // Campos específicos del anexo
+    idAnexo: 'N/A',
+    idInforme: 'N/A',
+    idUsuario: 'N/A',
+  };
+
+  // Extraer información de las extensiones
+  if (diagnosticReport.extension && Array.isArray(diagnosticReport.extension)) {
+    diagnosticReport.extension.forEach((extension) => {
+      const url = extension.url;
+      const value = extension.valueString || extension.value?.toString() || '';
+
+      switch (url) {
+        case 'http://example.org/fhir/StructureDefinition/report-hash-id':
+          comentario.hashId = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-name':
+          comentario.profesional.nombre = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-lastname':
+          comentario.profesional.apellido = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-dni':
+          comentario.profesional.dni = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/is-annex':
+          // Confirmar que es un anexo
+          comentario.esComentario = value === true || value === 'true';
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-id':
+          comentario.idUsuario = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/report-type-id':
+          comentario.idInforme = value;
+          break;
+      }
+    });
+  }
+
+  // Formatear fecha si es posible
+  if (
+    comentario.fechaCreacion &&
+    comentario.fechaCreacion !== 'Fecha no disponible'
+  ) {
+    try {
+      const fecha = new Date(comentario.fechaCreacion);
+      comentario.fechaCreacion = fecha.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.warn('Error al formatear fecha del comentario:', error);
+    }
+  }
+
+  // Crear nombre completo del profesional
+  comentario.profesional.nombreCompleto =
+    `${comentario.profesional.nombre} ${comentario.profesional.apellido}`.trim();
+
+  return comentario;
+}
+
+
 export default {
   extractFhirResources,
   extractResourcesByType,
@@ -381,4 +579,6 @@ export default {
   getExtensionValue,
   getExtensionValues,
   getIdentifierValue,
+  transformarDiagnosticReport,
+  transformarComentario,
 };

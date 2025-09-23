@@ -57,67 +57,69 @@
             />
           </div>
           
-          <div class="informe-bg border-round-xl p-3 shadow-md my-3">
-            <div class="flex flex-column sm:flex-row justify-content-between align-items-start mb-3">
-              <h3 class="text-xl font-bold mt-1 sm:mb-0" style="color: #7c3aed;">Avance en la terapia</h3>
-              <div class="text-right text-gray-500 text-sm">
-                <p class="mb-2 font-bold" style="color: #7c3aed;">Dr. Juan Manuel Belgrano</p>
-                <p class="mb-0">Fecha: 26/06/2025</p>
+          <!-- Lista de informes dinámicos -->
+          <div v-if="informes.length === 0" class="text-center p-6">
+            <i class="pi pi-file-text text-6xl text-gray-400 mb-4"></i>
+            <h4 class="text-lg text-gray-600 mb-2">No hay informes disponibles</h4>
+            <p class="text-gray-500">Crea el primer informe para este paciente</p>
+          </div>
+          
+          <div v-else>
+            <div 
+              v-for="informe in informes" 
+              :key="informe.id"
+              class="informe-bg border-round-xl p-3 shadow-md my-3"
+            >
+              <div class="flex flex-column sm:flex-row justify-content-between align-items-start mb-3">
+                <h3 class="text-xl font-bold mt-1 sm:mb-0" style="color: #7c3aed;">{{ informe.titulo }}</h3>
+                <div class="text-right text-gray-500 text-sm">
+                  <p class="mb-2 font-bold" style="color: #7c3aed;">{{ informe.profesional.nombreCompleto }}</p>
+                  <p class="mb-0">Fecha: {{ informe.fechaCreacion }}</p>
+                  <p class="mb-0 text-xs" v-if="informe.tipoInforme.nombre">Tipo: {{ informe.tipoInforme.nombre }}</p>
+                </div>
               </div>
-            </div>
-            <div class="mb-4">
-              <Textarea 
-                v-model="informeAvance" 
-                :autoResize="true" 
-                :rows="rows" 
-                readonly
-                class="w-full border-gray-300"
-                style="min-height: 120px;"
-              />
-            </div>
-            <div class="flex flex-column sm:flex-row gap-3 justify-content-end">
-              <Button 
-                label="Agregar comentario" 
-                @click="agregarComentario('avance')"
-                class="p-button-outlined p-button-primary"
-              />
-              <Button 
-                label="Ver" 
-                @click="verInforme('avance')"
-                class="p-button-primary"
-              />
-            </div>
-          </div>   
-          <!-- Informe de Evaluación -->
-          <div class="informe-bg border-round-xl p-3 shadow-md my-3">
-            <div class="flex flex-column sm:flex-row justify-content-between align-items-start mb-4">
-              <h3 class="text-xl font-bold mt-1 sm:mb-0" style="color: #7c3aed;">Evaluación inicial</h3>
-              <div class="text-right text-gray-500 text-sm">
-                <p class="mb-1">Lic. Ana Pérez</p>
-                <p class="mb-0">Fecha: 15/06/2025</p>
+              
+              <div class="mb-4">
+                <Textarea 
+                  :value="informe.contenido" 
+                  :autoResize="true" 
+                  :rows="rows" 
+                  readonly
+                  class="w-full border-gray-300"
+                  style="min-height: 120px;"
+                />
               </div>
-            </div>
-            <div class="mb-4">
-              <Textarea 
-                v-model="informeEvaluacion" 
-                :autoResize="true" 
-                :rows="rows" 
-                readonly
-                class="w-full border-gray-300"
-                style="min-height: 120px;"
-              />
-            </div>
-            <div class="flex flex-column sm:flex-row gap-3 justify-content-end">
-              <Button 
-                label="Agregar comentario" 
-                @click="agregarComentario('evaluacion')"
-                class="p-button-outlined p-button-primary"
-              />
-              <Button 
-                label="Ver" 
-                @click="verInforme('avance')"
-                class="p-button-primary"
-              />
+              
+              <!-- Comentarios (anexos) si existen -->
+              <div v-if="informe.anexos && informe.anexos.length > 0" class="mb-4">
+                <h5 class="text-sm font-semibold text-gray-600 mb-2">Comentarios:</h5>
+                <div class="space-y-2">
+                  <div 
+                    v-for="anexo in informe.anexos" 
+                    :key="anexo.id"
+                    class="bg-gray-50 border-round p-3 border border-gray-200"
+                  >
+                    <div class="flex justify-content-between align-items-start mb-2">
+                      <span class="text-sm font-semibold text-color-primary">{{ anexo.titulo }}</span>
+                      <span class="text-xs text-gray-500">{{ anexo.fechaCreacion }}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 m-0">{{ anexo.contenido }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex flex-column sm:flex-row gap-3 justify-content-end">
+                <Button 
+                  label="Agregar comentario" 
+                  @click="agregarComentario(informe)"
+                  class="p-button-outlined p-button-primary"
+                />
+                <Button 
+                  label="Ver" 
+                  @click="verInforme(informe)"
+                  class="p-button-primary"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -714,27 +716,51 @@
               class="w-full"
             />
           </div>
+          
+          <!-- Comentarios (anexos) del informe -->
+          <div v-if="informeSeleccionado.anexos && informeSeleccionado.anexos.length > 0" class="mb-4">
+            <h4 class="text-lg font-semibold mb-3 text-color-primary">Comentarios del Informe</h4>
+            <div class="space-y-3">
+              <div 
+                v-for="anexo in informeSeleccionado.anexos" 
+                :key="anexo.id"
+                class="border-round border border-gray-200 p-4 bg-gray-50"
+              >
+                <div class="flex justify-content-between align-items-start mb-3">
+                  <div class="flex align-items-center">
+                    <i class="pi pi-comment text-color-primary mr-2"></i>
+                    <span class="font-semibold text-color-primary">{{ anexo.titulo }}</span>
+                  </div>
+                  <span class="text-sm text-gray-500">{{ anexo.fechaCreacion }}</span>
+                </div>
+                <p class="text-gray-700 m-0">{{ anexo.contenido }}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Comentarios del informe -->
         <div class="mb-4">
           <h4 class="text-lg font-semibold mb-3 text-color-primary">Comentarios</h4>
-          <div v-if="informeSeleccionado.comentarios && informeSeleccionado.comentarios.length > 0">
+          <div v-if="comentarioLoading" class="text-center p-4 text-gray-500">
+            <ProgressSpinner/>
+          </div>
+          <div v-else-if="comentarios && comentarios.length > 0">
             <Divider/>
             <div 
-              v-for="(comentario, index) in informeSeleccionado.comentarios" 
+              v-for="(comentario, index) in comentarios" 
               :key="index"
               class=" bg-white border-round border border-gray-200"
             >
               <div class="flex justify-content-between align-items-start mb-2">
-                <span class="font-semibold text-color-primary">{{ comentario.autor }}</span>
-                <span class="text-sm text-gray-500">{{ comentario.fecha }}</span>
+                <span class="font-semibold text-color-primary">{{ comentario.profesional.nombre }} {{ comentario.profesional.apellido }}</span>
+                <span class="text-sm text-gray-500">{{ comentario.fechaCreacion }}</span>
               </div>
-              <p class="text-gray-700 m-0">{{ comentario.texto }}</p>
+              <p class="text-gray-700 m-0">{{ comentario.contenido }}</p>
               <Divider/>
             </div>
           </div>
-          <div v-else class="text-center p-4 text-gray-500">
+          <div v-else class="text-center p-4 text-gray-500"> 
             <i class="pi pi-comment text-2xl mb-2"></i>
             <p>No hay comentarios para este informe</p>
           </div>
@@ -759,12 +785,12 @@
     >
       <div>
         <div class="mb-4">
-          <div class="p-2 informe-bg border-round">
-            <h4 class="text-lg font-semibold m-0 mb-2 text-color-primart">{{ informeSeleccionado?.titulo }}</h4>
-            <p class="text-gray-600 m-0">{{ informeSeleccionado?.profesional }} - {{ informeSeleccionado?.fecha }}</p>
+          <h4 class=" m-0 mb-2 text-color-primary">Informe</h4>
+          <div class="py-2 px-3 informe-bg border-round-xl">
+            <h4 class="text-lg font-semibold m-0">{{ informeSeleccionado?.titulo }}</h4>
+            <p class="text-gray-600 m-0 text-right">{{ informeSeleccionado?.profesional }} - {{ informeSeleccionado?.fecha }}</p>
           </div>
         </div>
-        
         <div class="mb-4">
           <label for="nuevoComentario" class="block text-900 font-medium mb-2 text-color-primart">Comentario</label>
           <Textarea 
@@ -777,7 +803,6 @@
           />
         </div>
       </div>
-      
       <template #footer>
         <Button 
           label="Cancelar" 
@@ -983,6 +1008,8 @@ const tipoMultimedia = ref('imagen');
 const archivoSeleccionado = ref(null);
 const vistaPrevia = ref(null);
 const informes = ref([]);
+const comentarios = ref([]);
+const comentarioLoading = ref(false);
 
 // Formulario de nuevo multimedia
 const nuevoMultimedia = ref({
@@ -1133,12 +1160,6 @@ const videos = ref([
   }
 ]);
 
-
-// Contenido de los informes
-const informeAvance = ref(`Paciente muestra una mejoría significativa en la movilidad del miembro superior derecho. Se recomienda continuar con el programa de ejercicios establecido y realizar seguimiento semanal para evaluar progresos. La terapia ocupacional ha sido efectiva en la recuperación de la funcionalidad.`);
-
-const informeEvaluacion = ref(`Se realiza evaluación inicial. Paciente refiere dolor moderado en la zona lumbar. Se inicia tratamiento fisiátrico con sesiones de fisioterapia tres veces por semana. Se recomienda reposo relativo y evitar movimientos bruscos.`);
-
 // Configuración de tabs
 const tabs = ref([
   { label: 'Informes', icon: 'pi pi-file-text' },
@@ -1147,86 +1168,66 @@ const tabs = ref([
 ]);
 
 // Métodos
-const verInforme = (tipo) => {
-  // Configurar el informe seleccionado según el tipo
-  if (tipo === 'avance') {
-    informeSeleccionado.value = {
-      titulo: 'Avance en la terapia',
-      profesional: 'Dr. Juan Manuel Belgrano',
-      fecha: '26/06/2025',
-      contenido: informeAvance.value,
-      comentarios: [
-        {
-          autor: 'Dr. Carlos López',
-          fecha: '27/06/2025',
-          texto: 'Excelente progreso del paciente. Recomiendo continuar con la terapia actual.'
-        },
-        {
-          autor: 'Lic. María González',
-          fecha: '28/06/2025',
-          texto: 'Paciente muestra mejoría en la coordinación motora.'
-        }
-      ]
-    };
-  } else if (tipo === 'evaluacion') {
-    informeSeleccionado.value = {
-      titulo: 'Evaluación inicial',
-      profesional: 'Lic. Ana Pérez',
-      fecha: '15/06/2025',
-      contenido: informeEvaluacion.value,
-      comentarios: [
-        {
-          autor: 'Dr. Roberto Silva',
-          fecha: '16/06/2025',
-          texto: 'Evaluación completa y detallada. Tratamiento bien planificado.'
-        }
-      ]
-    };
+const verInforme = async (informe) => {
+  comentarioLoading.value = true;
+  try{
+    comentarios.value = await pacienteStore.obtenerComentarios(informe.hashId);
+
+  }catch(error){
+    showError('No es posible obtener los comentarios');
+  }finally{
+    comentarioLoading.value = false;
   }
+  
+  // Configurar el informe seleccionado con los datos reales
+  informeSeleccionado.value = {
+    id: informe.id,
+    titulo: informe.titulo,
+    profesional: informe.profesional.nombreCompleto,
+    fecha: informe.fechaCreacion,
+    contenido: informe.contenido,
+    tipoInforme: informe.tipoInforme.nombre,
+    anexos: informe.anexos || [],
+    comentarios: informe.comentarios || []
+  };
   
   modalVerVisible.value = true;
 };
 
-const agregarComentario = (tipo) => {
-  // Configurar el informe seleccionado según el tipo
-  if (tipo === 'avance') {
-    informeSeleccionado.value = {
-      titulo: 'Avance en la terapia',
-      profesional: 'Dr. Juan Manuel Belgrano',
-      fecha: '26/06/2025',
-      contenido: informeAvance.value
-    };
-  } else if (tipo === 'evaluacion') {
-    informeSeleccionado.value = {
-      titulo: 'Evaluación inicial',
-      profesional: 'Lic. Ana Pérez',
-      fecha: '15/06/2025',
-      contenido: informeEvaluacion.value
-    };
-  }
-  
-  nuevoComentario.value = '';
+const agregarComentario = async (informe) => {
+  // Configurar el informe seleccionado con los datos reales
+  informeSeleccionado.value = {
+    id: informe.id,
+    titulo: informe.titulo,
+    profesional: informe.profesional.nombreCompleto,
+    fecha: informe.fechaCreacion,
+    contenido: informe.contenido,
+    tipoInforme: informe.tipoInforme.nombre,
+    comentarios: informe.comentarios || [],
+    hashId: informe.hashId
+  };
+
   modalComentarioVisible.value = true;
 };
 
-const guardarComentario = () => {
+const guardarComentario = async () => {
   if (nuevoComentario.value.trim()) {
-    // Aquí implementarías la lógica para guardar el comentario en tu API
     const comentario = {
-      autor: 'Usuario Actual', // Esto vendría de tu sistema de autenticación
+      idUsuario: authStore.usuario.id_usuario,
       fecha: new Date().toLocaleDateString('es-ES'),
       texto: nuevoComentario.value.trim()
     };
-    
-    // Agregar el comentario al informe seleccionado
-    if (!informeSeleccionado.value.comentarios) {
-      informeSeleccionado.value.comentarios = [];
+
+    try{
+      await pacienteStore.crearComentario(comentario, informeSeleccionado.value.hashId);
+      
+      comentarios.value = await pacienteStore.obtenerComentarios(informeSeleccionado.value.hashId);
+      showSuccess('Comentario agregado correctamente');
+      nuevoComentario.value = '';
+      modalComentarioVisible.value = false;
+    }catch(error){
+      showError('No es posible agregar el comentario');
     }
-    informeSeleccionado.value.comentarios.push(comentario);
-    
-    showSuccess('Comentario agregado correctamente');
-    modalComentarioVisible.value = false;
-    nuevoComentario.value = '';
   }
 };
 
@@ -1379,8 +1380,10 @@ const guardarNuevoInforme = async () => {
       showSuccess('Informe creado correctamente');
       modalNuevoInformeVisible.value = false;
       limpiarFormularioInforme();
+      
+      // Refrescar la lista de informes
+      informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
     } catch (error) {
-      console.log(error);
       showError('No es posible crear el informe');
     }
   }
@@ -1411,7 +1414,7 @@ const formatearFecha = (fecha) => {
 onMounted(async () => {
   try{
     pacienteStore.paciente = await pacienteStore.obtenerPaciente(route.params.id);
-    informes.value = await pacienteStore.obtenerInformes(route.params.id);
+    informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
   }catch(error){
     showError('No es posible obtener el paciente');
   }

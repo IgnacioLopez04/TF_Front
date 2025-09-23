@@ -47,4 +47,6 @@ export default () => ({
   },
 
   tutores: [],
+
+  informes: [],
 });
