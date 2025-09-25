@@ -189,6 +189,8 @@ export default {
       const extensionValues = getExtensionValues(resource[0].extension, {
         'http://mi-servidor/fhir/StructureDefinition/hash-id': 'hash_id',
         'http://mi-servidor/fhir/StructureDefinition/prestacion': 'prestacion',
+        'http://mi-servidor/fhir/StructureDefinition/hash-id-ehr':
+          'hash_id_EHR',
       });
 
       const data = {
@@ -199,6 +201,7 @@ export default {
         prestacion: extensionValues.prestacion,
         iniciales:
           resource[0].name[0].given[0][0] + resource[0].name[0].family[0],
+        hashIdEHR: extensionValues.hash_id_EHR,
       };
       return data;
     } catch (error) {
@@ -228,6 +231,8 @@ export default {
       activo: true,
       fechaCreacion: null,
       fechaModificacion: null,
+      hashId: '',
+      hashIdEHR: '',
     };
   },
 
@@ -239,6 +244,84 @@ export default {
       fechaNacimiento: null,
       ocupacion: '',
       lugarNacimiento: '',
+    };
+  },
+
+  inicializarHistoriaFisiatrica() {
+    this.historiaFisiatrica = {
+      // Evaluación y Consulta
+      fechaEvaluacion: null,
+      derivadosPor: '',
+      antecedentesCuadro: '',
+      medicacionActual: '',
+      estudiosRealizados: '',
+
+      // Antecedentes
+      antecedentesHereditarios: '',
+      antecedentesPatologicos: '',
+      antecedentesQuirurgicos: '',
+      antecedentesMetabolicos: '',
+      antecedentesInmunologicos: '',
+
+      // Fisiológicos
+      fisiologicosDormir: '',
+      fisiologicosAlimentacion: '',
+      fisiologicosCatarsis: '',
+      fisiologicosDiuresis: '',
+      fisiologicosPeriodoMenstrual: '',
+      fisiologicosSexualidad: '',
+
+      // Anamnesis sistémica
+      anamnesisComunicacion: '',
+      anamnesisMotricidad: '',
+      anamnesisVidaDiaria: '',
+
+      // Examen físico - General
+      examenActitud: '',
+      examenComunicacionCodigos: '',
+      examenPielFaneras: '',
+
+      // Examen físico - Cabeza y sentidos
+      examenCabeza: '',
+      examenOjos: '',
+      examenMovimientosAnormales: '',
+      examenEstrabismo: '',
+      examenOrejas: '',
+      examenAudicion: '',
+      examenLabios: '',
+      examenDenticion: '',
+      examenPaladarVelo: '',
+      examenMordida: '',
+      examenMaxilares: '',
+      examenBoca: '',
+      examenLengua: '',
+
+      // Examen físico - Tronco y extremidades
+      examenTorax: '',
+      examenAbdomen: '',
+      examenColumnaVertebral: '',
+      examenPelvis: '',
+      examenCaderas: '',
+      examenMMII: '',
+      examenPies: '',
+      examenMMSS: '',
+      examenManos: '',
+      examenLateralidad: '',
+
+      // Examen físico - Sistema y actividades
+      examenApRespiratorio: '',
+      examenApCardiovascular: '',
+      examenApDigestivo: '',
+      examenActividadRefleja: '',
+      examenActividadSensoperceptual: '',
+      examenReaccionesPosturales: '',
+      examenDesplazamientoMarcha: '',
+      examenEtapaDesarrollo: '',
+
+      // Diagnóstico funcional
+      diagnosticoFuncional: '',
+      conductaSeguirObjetivos: '',
+      objetivosFamilia: '',
     };
   },
 
@@ -275,10 +358,10 @@ export default {
         });
       }
 
-      if (informeData.idHistoriaClinica) {
+      if (informeData.hashIdEHR) {
         diagnosticReport.extension.push({
-          url: 'http://mi-servidor/fhir/StructureDefinition/ehr-id',
-          valueString: informeData.idHistoriaClinica,
+          url: 'http://example.org/fhir/StructureDefinition/ehr-id',
+          valueString: informeData.hashIdEHR,
         });
       }
 

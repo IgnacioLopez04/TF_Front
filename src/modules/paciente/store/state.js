@@ -23,6 +23,8 @@ export default () => ({
     activo: true,
     fechaCreacion: null,
     fechaModificacion: null,
+    hashId: '',
+    hashIdEHR: '',
   },
 
   loading: false,
@@ -47,6 +49,7 @@ export default () => ({
   },
 
   tutores: [],
-
   informes: [],
+
+  historiaFisiatrica: null,
 });
