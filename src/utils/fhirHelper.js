@@ -486,9 +486,11 @@ export function transformarComentario(diagnosticReport) {
     fechaCreacion: diagnosticReport.effectiveDateTime || 'Fecha no disponible',
     estado: diagnosticReport.status || 'unknown',
     esComentario: true, // Marcar que es un comentario
-    
+
     // Referencia al informe padre
-    informePadre: diagnosticReport.subject?.reference?.replace('DiagnosticReport/', '') || 'N/A',
+    informePadre:
+      diagnosticReport.subject?.reference?.replace('DiagnosticReport/', '') ||
+      'N/A',
 
     // Información del profesional (desde extensiones)
     profesional: {
@@ -562,6 +564,262 @@ export function transformarComentario(diagnosticReport) {
   return comentario;
 }
 
+/**
+ * Transforma un DiagnosticReport FHIR de Historia Fisiatrica a un formato más legible para el frontend
+ * @param {Object} diagnosticReport - El recurso DiagnosticReport de FHIR (Historia Fisiatrica)
+ * @returns {Object} Objeto con la información de la historia fisiatrica en formato legible
+ */
+export function transformarHistoriaFisiatrica(diagnosticReport) {
+  console.log('diagnosticReport', diagnosticReport);
+  // Extraer información básica de la historia fisiatrica
+  const historiaFisiatrica = {
+    id: diagnosticReport.id || 'N/A',
+    hashId: 'N/A',
+    tipo: 'fisiatrica',
+    titulo: diagnosticReport.code?.text || 'Historia Clínica Fisiátrica',
+    contenido: diagnosticReport.conclusion || 'Sin contenido',
+    fechaCreacion: diagnosticReport.effectiveDateTime || 'Fecha no disponible',
+    estado: diagnosticReport.status || 'unknown',
+
+    // Referencia al paciente
+    pacienteId:
+      diagnosticReport.subject?.reference?.replace('Patient/', '') || 'N/A',
+
+    // Información del EHR
+    ehrId: 'N/A',
+
+    // Campos específicos de la historia fisiatrica
+    antecedentes: '',
+    medicacionActual: '',
+    estudiosRealizados: '',
+    fisiologico: {},
+    anamnesisSistemica: {},
+    examenFisico: {},
+    diagnosticoFuncional: '',
+    conductaSeguirObjetivos: '',
+    objetivosFamilia: '',
+
+    // Información del profesional (desde extensiones)
+    profesional: {
+      nombre: 'No disponible',
+      apellido: 'No disponible',
+      dni: 'No disponible',
+    },
+  };
+
+  // Extraer información de las extensiones
+  if (diagnosticReport.extension && Array.isArray(diagnosticReport.extension)) {
+    diagnosticReport.extension.forEach((extension) => {
+      const url = extension.url;
+      const value = extension.valueString || extension.value?.toString() || '';
+
+      switch (url) {
+        case 'http://example.org/fhir/StructureDefinition/report-hash-id':
+          historiaFisiatrica.hashId = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/ehr-id':
+          historiaFisiatrica.ehrId = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/historia-tipo':
+          historiaFisiatrica.tipo = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-name':
+          historiaFisiatrica.profesional.nombre = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-lastname':
+          historiaFisiatrica.profesional.apellido = value;
+          break;
+        case 'http://example.org/fhir/StructureDefinition/user-dni':
+          historiaFisiatrica.profesional.dni = value;
+          break;
+
+        // Mapear extensiones de evaluación y consulta
+        case 'http://mi-servidor.com/fhir/StructureDefinition/derivados-por':
+          historiaFisiatrica.derivadosPor = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/medicacion-actual':
+          historiaFisiatrica.medicacionActual = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/antecedentes-cuadro':
+          historiaFisiatrica.antecedentesCuadro = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/estudios-realizados':
+          historiaFisiatrica.estudiosRealizados = value;
+          break;
+
+        // Mapear extensiones de antecedentes
+        case 'http://mi-servidor.com/fhir/StructureDefinition/antecedentes-hereditarios':
+          historiaFisiatrica.antecedentesHereditarios = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/antecedentes-patologicos':
+          historiaFisiatrica.antecedentesPatologicos = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/antecedentes-quirurgicos':
+          historiaFisiatrica.antecedentesQuirurgicos = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/antecedentes-metabolicos':
+          historiaFisiatrica.antecedentesMetabolicos = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/antecedentes-inmunologicos':
+          historiaFisiatrica.antecedentesInmunologicos = value;
+          break;
+
+        // Mapear extensiones de fisiológicos
+        case 'http://mi-servidor.com/fhir/StructureDefinition/fisiologicos-dormir':
+          historiaFisiatrica.fisiologicosDormir = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/fisiologicos-alimentacion':
+          historiaFisiatrica.fisiologicosAlimentacion = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/fisiologicos-catarsis':
+          historiaFisiatrica.fisiologicosCatarsis = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/fisiologicos-diuresis':
+          historiaFisiatrica.fisiologicosDiuresis = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/fisiologicos-periodo-menstrual':
+          historiaFisiatrica.fisiologicosPeriodoMenstrual = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/fisiologicos-sexualidad':
+          historiaFisiatrica.fisiologicosSexualidad = value;
+          break;
+
+        // Mapear extensiones de diagnóstico funcional
+        case 'http://mi-servidor.com/fhir/StructureDefinition/diagnostico-funcional':
+          historiaFisiatrica.diagnosticoFuncional = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/conducta-objetivos':
+          historiaFisiatrica.conductaSeguirObjetivos = value;
+          break;
+        case 'http://mi-servidor.com/fhir/StructureDefinition/objetivos-familia':
+          historiaFisiatrica.objetivosFamilia = value;
+          break;
+      }
+    });
+  }
+
+  // Parsear el contenido de la conclusión para extraer los campos específicos
+  if (
+    historiaFisiatrica.contenido &&
+    historiaFisiatrica.contenido !== 'Sin contenido'
+  ) {
+    parsearContenidoHistoria(historiaFisiatrica, diagnosticReport.conclusion);
+  }
+
+  // Formatear fecha si es posible
+  if (
+    historiaFisiatrica.fechaCreacion &&
+    historiaFisiatrica.fechaCreacion !== 'Fecha no disponible'
+  ) {
+    try {
+      const fecha = new Date(historiaFisiatrica.fechaCreacion);
+      historiaFisiatrica.fechaCreacion = fecha.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch (error) {
+      console.warn(
+        'Error al formatear fecha de la historia fisiatrica:',
+        error,
+      );
+    }
+  }
+
+  // Crear nombre completo del profesional
+  historiaFisiatrica.profesional.nombreCompleto =
+    `${historiaFisiatrica.profesional.nombre} ${historiaFisiatrica.profesional.apellido}`.trim();
+
+  return historiaFisiatrica;
+}
+
+/**
+ * Parsea el contenido de la conclusión para extraer los campos específicos de la historia fisiatrica
+ * @param {Object} historiaFisiatrica - Objeto de la historia fisiatrica a actualizar
+ * @param {string} conclusion - Contenido de la conclusión del DiagnosticReport
+ */
+function parsearContenidoHistoria(historiaFisiatrica, conclusion) {
+  if (!conclusion) return;
+
+  const secciones = {
+    'ANTECEDENTES:': 'antecedentes',
+    'MEDICACIÓN ACTUAL:': 'medicacionActual',
+    'ESTUDIOS REALIZADOS:': 'estudiosRealizados',
+    'DATOS FISIOLÓGICOS:': 'fisiologico',
+    'ANAMNESIS SISTÉMICA:': 'anamnesisSistemica',
+    'EXAMEN FÍSICO:': 'examenFisico',
+    'DIAGNÓSTICO FUNCIONAL:': 'diagnosticoFuncional',
+    'CONDUCTA A SEGUIR:': 'conductaSeguir',
+  };
+
+  const lineas = conclusion.split('\n');
+  let seccionActual = null;
+  let contenidoSeccion = [];
+
+  for (const linea of lineas) {
+    const lineaTrim = linea.trim();
+
+    // Verificar si es el inicio de una nueva sección
+    if (secciones[lineaTrim]) {
+      // Guardar la sección anterior si existe
+      if (seccionActual && contenidoSeccion.length > 0) {
+        guardarSeccion(historiaFisiatrica, seccionActual, contenidoSeccion);
+      }
+
+      // Iniciar nueva sección
+      seccionActual = secciones[lineaTrim];
+      contenidoSeccion = [];
+    } else if (seccionActual && lineaTrim) {
+      // Agregar línea al contenido de la sección actual
+      contenidoSeccion.push(lineaTrim);
+    }
+  }
+
+  // Guardar la última sección
+  if (seccionActual && contenidoSeccion.length > 0) {
+    guardarSeccion(historiaFisiatrica, seccionActual, contenidoSeccion);
+  }
+}
+
+/**
+ * Guarda el contenido de una sección en el objeto de historia fisiatrica
+ * @param {Object} historiaFisiatrica - Objeto de la historia fisiatrica
+ * @param {string} seccion - Nombre de la sección
+ * @param {Array} contenido - Array de líneas de contenido
+ */
+function guardarSeccion(historiaFisiatrica, seccion, contenido) {
+  const contenidoTexto = contenido.join('\n').trim();
+
+  if (['fisiologico', 'anamnesisSistemica', 'examenFisico'].includes(seccion)) {
+    // Para campos JSON, intentar parsear el contenido
+    try {
+      // Buscar patrones de clave-valor en el contenido
+      const jsonData = {};
+      contenido.forEach((linea) => {
+        if (linea.startsWith('- ')) {
+          const partes = linea.substring(2).split(': ');
+          if (partes.length === 2) {
+            const clave = partes[0].toLowerCase().replace(/\s+/g, '_');
+            const valor = partes[1].trim();
+            if (valor && valor !== '') {
+              jsonData[clave] = valor;
+            }
+          }
+        }
+      });
+      historiaFisiatrica[seccion] =
+        Object.keys(jsonData).length > 0 ? jsonData : {};
+    } catch (error) {
+      console.warn(`Error al parsear JSON para ${seccion}:`, error);
+      historiaFisiatrica[seccion] = {};
+    }
+  } else {
+    // Para campos de texto simple
+    historiaFisiatrica[seccion] = contenidoTexto;
+  }
+}
 
 export default {
   extractFhirResources,
@@ -581,4 +839,5 @@ export default {
   getIdentifierValue,
   transformarDiagnosticReport,
   transformarComentario,
+  transformarHistoriaFisiatrica,
 };

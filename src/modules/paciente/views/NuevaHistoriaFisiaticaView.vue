@@ -5,7 +5,7 @@
       <div class="flex justify-content-between align-items-center ">
         <div>
           <h1 class="text-2xl font-bold text-color-primary mb-2">Nueva Historia Fisiátrica</h1>
-          <p class="text-gray-600 text-lg">Paciente: {{ paciente.nombre }} (DNI: {{ paciente.dni }})</p>
+          <p class="text-gray-600 text-lg">Paciente: {{ `${pacienteStore.paciente.nombre} ${pacienteStore.paciente.apellido}` }} (DNI: {{ pacienteStore.paciente.dni }})</p>
         </div>
       </div>
     </div>
@@ -46,7 +46,8 @@
                 Fecha de Evaluación <span class="text-red-500">*</span>
               </label>
               <Calendar 
-                v-model="pacienteStore.historiaFisiatrica.fechaEvaluacion" 
+                v-model="pacienteStore.historiaFisiatrica.fechaEvaluacion"
+                @onChange="onChangeFechaEvaluacion"
                 :showIcon="true"
                 dateFormat="dd/mm/yy"
               />
@@ -824,7 +825,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { showSuccess, showError } from '@/composables/useToast';
 import { usePacienteStore } from '../store';
 
@@ -837,7 +838,6 @@ const props = defineProps({
 });
 // Router
 const router = useRouter();
-const route = useRoute();
 
 // Estado del formulario
 const pacienteStore = usePacienteStore();
@@ -867,14 +867,6 @@ const subTabsExamenFisico = ref([
   { id: 4, label: 'Sistema y actividades' }
 ]);
 
-// Datos del paciente (simulado)
-const paciente = ref({
-  id: props.pacienteId,
-  nombre: 'Ana Martinez',
-  dni: '45678901'
-});
-
-
 // Computed properties
 const esFormularioValido = computed(() => {
   if (pasoActivo.value === 0) {
@@ -882,6 +874,26 @@ const esFormularioValido = computed(() => {
            pacienteStore.historiaFisiatrica.derivadosPor.trim().length > 0;
   }
   return true;
+});
+
+// Formatear fecha de evaluación a formato legible DD/MM/YYYY
+const fechaEvaluacionFormateada = computed(() => {
+  if (
+    !pacienteStore.historiaFisiatrica.fechaEvaluacion ||
+    pacienteStore.historiaFisiatrica.fechaEvaluacion === 'Sin información'
+  )
+    return 'Sin información';
+
+  // Ajustar a UTC-3 (Argentina, por ejemplo)
+  const fechaOriginal = new Date(pacienteStore.historiaFisiatrica.fechaEvaluacion);
+  // Obtener la hora UTC y restar 3 horas para UTC-3
+  const fechaUTC3 = new Date(fechaOriginal.getTime() - 3 * 60 * 60 * 1000);
+
+  const dia = fechaUTC3.getDate().toString().padStart(2, '0');
+  const mes = (fechaUTC3.getMonth() + 1).toString().padStart(2, '0');
+  const año = fechaUTC3.getFullYear();
+
+  return `${dia}/${mes}/${año}`;
 });
 
 // Métodos  
@@ -912,10 +924,18 @@ const cancelar = () => {
   }
 };
 
+const onChangeFechaEvaluacion = () => {
+  // La fecha ya se actualiza automáticamente en el v-model
+  // El computed fechaEvaluacionFormateada se recalculará automáticamente
+  console.log('Fecha de evaluación actualizada:', fechaEvaluacionFormateada.value);
+};
+
 const finalizarHistoria = () => {
   if (esFormularioValido.value) {
+    console.log(pacienteStore.historiaFisiatrica);
+    pacienteStore.crearHistoriaFisiatrica(pacienteStore.historiaFisiatrica);
     showSuccess('Historia fisiátrica creada exitosamente');
-    volver();
+    router.push(`/pacientes/${pacienteStore.paciente.hashId}`);
   } else {
     showError('Por favor complete todos los campos obligatorios');
   }

@@ -597,7 +597,7 @@ const tabs = ref([
 ]);
 
 const crearHistoriaFisiatrica = computed(() => {
-  return pacienteStore.historiaFisiatrica === null;
+  return pacienteStore.historiaFisiatrica.fechaEvaluacion === `Sin información`;
 });
 
 // Métodos
@@ -849,7 +849,7 @@ onMounted(async () => {
   try{
     pacienteStore.paciente = await pacienteStore.obtenerPaciente(route.params.id);
     informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
-    // pacienteStore.historiaFisiatrica = await pacienteStore.obtenerHistoriaFisiatrica(pacienteStore.paciente.hashId);
+    pacienteStore.historiaFisiatrica = await pacienteStore.obtenerHistoriaFisiatrica(pacienteStore.paciente.hashId);
   }catch(error){
     showError('No es posible obtener el paciente');
   }

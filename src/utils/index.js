@@ -14,6 +14,7 @@ export const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0';
 export const urlAuth = `${AUTH_URL}/auth`;
 export const urlAbm = `${BACKEND_URL}/abm`;
 export const urlPaciente = `${BACKEND_URL}/paciente`;
+export const urlEhr = `${BACKEND_URL}/ehr`;
 
 // URLs para FHIR
 export const urlFhir = `${FHIR_URL}/fhir`;

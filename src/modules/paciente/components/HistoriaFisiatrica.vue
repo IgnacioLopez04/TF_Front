@@ -12,7 +12,7 @@
     </div>
 
     <!-- Tabs de navegación de la historia -->
-    <div v-if="historiaFisiatica" class="bg-white border-round-xl shadow-sm border border-gray-100 mb-6">
+    <div v-if="!crearHistoriaFisiatrica" class="bg-white border-round-xl shadow-sm border border-gray-100 mb-6">
       <div class="flex border-bottom-1 border-gray-200">
         <button 
           v-for="(tabHistoria, index) in tabsHistoria" 
@@ -37,7 +37,7 @@
               <h4 class="text-lg font-semibold mb-4 text-color-primary">Evaluación y Consulta</h4> 
               <div class="mb-4 flex gap-2">
                 <label class="block text-900 font-medium mb-2 text-color-primary">Fecha de Evaluación: </label>
-                <p class="mb-2"> {{ historiaFisiatica.fechaEvaluacion }}</p>
+                <p class="mb-2"> {{ formatearFecha(historiaFisiatica.fechaEvaluacion) }}</p>
               </div>
             </div>
             <div class="mb-4 md:col-span-2">
@@ -508,6 +508,18 @@ const subTabsExamenFisico = ref([
 ]);
 
 const historiaFisiatica = ref(pacienteStore.historiaFisiatrica);
+
+// Formatear fecha de evaluación a formato legible DD/MM/YYYY
+const formatearFecha = (fecha) => {
+  if (!fecha || fecha === 'Sin información') return 'Sin información';
+  
+  const fechaObj = new Date(fecha);
+  const dia = fechaObj.getDate().toString().padStart(2, '0');
+  const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+  const año = fechaObj.getFullYear();
+  
+  return `${dia}/${mes}/${año}`;
+};
 
 const crearNuevaHistoria = () => {
   router.push(`/pacientes/${route.params.id}/nueva-historia`);

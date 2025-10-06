@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useAuthState } from './state';
 import { useLogin, useLogout, useCheckAuth } from './actions';
 import router from '@/router';
@@ -81,6 +81,18 @@ export const useAuthStore = defineStore('auth', () => {
   // Inicializar al crear el store
   initializeAuth();
   setupStorageListener();
+
+  // Redirigir al login si el estado de auth se limpia
+  watch(
+    () => ({ token: accessToken.value, userId: usuario.value?.id_usuario }),
+    ({ token, userId }) => {
+      const isLoggedOut = !token || userId === null || userId === '';
+      if (isLoggedOut && router.currentRoute.value.name !== 'login') {
+        router.push({ name: 'login' });
+      }
+    },
+    { deep: false, immediate: true },
+  );
 
   return {
     usuario,
