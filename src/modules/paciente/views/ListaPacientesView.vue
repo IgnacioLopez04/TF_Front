@@ -20,11 +20,14 @@
       />
     </div>
 
+    <div v-if="isLoadingPacientes" class="flex justify-content-center align-items-center" style="height: 60vh;">
+      <ProgressSpinner />
+    </div>
     <!-- Lista de pacientes -->
-    <div class="flex flex-column gap-3 px-3">
+    <div v-else class="flex flex-column gap-3 px-3">
       <Card 
         v-for="paciente in pacientesFiltrados" 
-        :key="paciente.id"
+        :key="paciente.dni"
         class="patient-card"
       >
         <template #content>
@@ -37,17 +40,17 @@
                 class="patient-avatar"
               />
               <div class="flex flex-column gap-1">
-                <h3 class="patient-name m-0">{{ paciente.nombre }}</h3>
+                <h3 class="patient-name m-0">{{ paciente.nombre }} {{ paciente.apellido }}</h3>
                 <div class="flex gap-4">
                   <p class="patient-info m-0">DNI: {{ paciente.dni }}</p>
-                  <p class="patient-info m-0">Últ. Modificación: {{ formatearFecha(paciente.ultimaModificacion) }}</p>
+                  <p class="patient-info m-0">Últ. Modificación: {{ paciente.ultimaModificacion ? formatearFecha(paciente.ultimaModificacion) : 'N/A' }}</p>
                 </div>
-                <p class="patient-location m-0">{{ paciente.ubicacion }}</p>
+                <p class="patient-location m-0">{{ paciente.prestacion }}</p>
               </div>
             </div>
             <Button 
               label="Ver" 
-              @click="verPaciente(paciente.id)"
+              @click="verPaciente(paciente.hash_id)"
               class="view-button border-round"
             />
           </div>
@@ -64,48 +67,19 @@
 </template>
 
 <script setup>
+import { showError } from '@/composables/useToast';
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { showSuccess } from '@/composables/useToast';
+import { usePacienteStore } from '../store';
+
+
+const pacienteStore = usePacienteStore();
 
 const router = useRouter();
 const filtroActivo = ref('todos');
-
-// Lista de filtros disponibles
-const filtros = [
-  { id: 'todos', label: 'Todos' },
-  { id: 'hogar', label: 'Hogar' },
-  { id: 'centro-dia', label: 'Centro de Día' },
-  { id: 'centro-rehabilitacion', label: 'Centro de Rehabilitación' }
-];
-
-// Datos de ejemplo - aquí conectarías con tu API
-const pacientes = ref([
-  {
-    id: 1,
-    nombre: 'Ana Martínez',
-    dni: '45678901',
-    iniciales: 'AM',
-    ultimaModificacion: '2025-07-25',
-    ubicacion: 'Hogar'
-  },
-  {
-    id: 2,
-    nombre: 'Carlos Rodríguez',
-    dni: '34567890',
-    iniciales: 'CR',
-    ultimaModificacion: '2025-07-20',
-    ubicacion: 'Centro de Rehabilitación'
-  },
-  {
-    id: 3,
-    nombre: 'Carmen López',
-    dni: '67890123',
-    iniciales: 'CL',
-    ultimaModificacion: '2025-08-05',
-    ubicacion: 'Centro de Rehabilitación'
-  }
-]);
+const isLoadingPacientes = ref(false);
+const pacientes = ref([]);
+const filtros = ref([{ id: 'todos', label: 'Todos' }]);
 
 // Computed para filtrar pacientes
 const pacientesFiltrados = computed(() => {
@@ -113,14 +87,11 @@ const pacientesFiltrados = computed(() => {
     return pacientes.value;
   }
   
-  const filtros = {
-    'hogar': 'Hogar',
-    'centro-dia': 'Centro de Día',
-    'centro-rehabilitacion': 'Centro de Rehabilitación'
-  };
+  const filtroSeleccionado = filtros.value.find(filtro => filtro.id === filtroActivo.value);
+  if (!filtroSeleccionado) return pacientes.value;
   
   return pacientes.value.filter(paciente => 
-    paciente.ubicacion === filtros[filtroActivo.value]
+    paciente.prestacion === filtroSeleccionado.label
   );
 });
 
@@ -147,9 +118,23 @@ const formatearFecha = (fecha) => {
   });
 };
 
-onMounted(() => {
-  // Aquí cargarías los datos desde tu API
-  console.log('Vista de pacientes cargada');
+onMounted(async () => {
+  isLoadingPacientes.value = true;
+  try{
+    await pacienteStore.obtenerPrestaciones();
+    filtros.value.push(...pacienteStore.opcionesPrestacion.map((prestacion) => {
+      return {
+        id: prestacion.id,
+        label: prestacion.name
+      }
+    }));
+    await pacienteStore.obtenerPacientes();
+    pacientes.value = pacienteStore.pacientes;
+  }catch(error){
+    showError('No es posible obtener los pacientes');
+  }finally{
+    isLoadingPacientes.value = false;
+  }
 });
 </script>
 

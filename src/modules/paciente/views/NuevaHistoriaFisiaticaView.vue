@@ -1,19 +1,11 @@
 <template>
-  <!-- <div class="flex justify-content-between align-items-center mb-4">
-    <Button 
-      label="Volver" 
-      icon="pi pi-arrow-left"
-      @click="volver"
-      class="back-button border-round"
-    />
-  </div> -->
   <div class="page-container p-4 border-round">
     <!-- Header principal -->
     <div class="bg-white border-round-xl shadow-sm border border-gray-100 p-5 mb-4">
       <div class="flex justify-content-between align-items-center ">
         <div>
           <h1 class="text-2xl font-bold text-color-primary mb-2">Nueva Historia Fisiátrica</h1>
-          <p class="text-gray-600 text-lg">Paciente: {{ paciente.nombre }} (DNI: {{ paciente.dni }})</p>
+          <p class="text-gray-600 text-lg">Paciente: {{ `${pacienteStore.paciente.nombre} ${pacienteStore.paciente.apellido}` }} (DNI: {{ pacienteStore.paciente.dni }})</p>
         </div>
       </div>
     </div>
@@ -54,10 +46,10 @@
                 Fecha de Evaluación <span class="text-red-500">*</span>
               </label>
               <Calendar 
-                v-model="historiaNueva.fechaEvaluacion" 
+                v-model="pacienteStore.historiaFisiatrica.fechaEvaluacion"
+                @onChange="onChangeFechaEvaluacion"
                 :showIcon="true"
                 dateFormat="dd/mm/yy"
-                class=""
               />
             </div>
           </div>
@@ -72,7 +64,7 @@
                 Derivados por <span class="text-red-500">*</span>
               </label>
               <Textarea 
-                v-model="historiaNueva.derivadosPor" 
+                v-model="pacienteStore.historiaFisiatrica.derivadosPor" 
                 :autoResize="true" 
                 :rows="4" 
                 placeholder="Describa el motivo principal de la consulta..."
@@ -86,7 +78,7 @@
               Antecedentes del cuadro actual
             </label>
             <Textarea 
-              v-model="historiaNueva.antecedentesCuadro" 
+              v-model="pacienteStore.historiaFisiatrica.antecedentesCuadro" 
               :autoResize="true" 
               :rows="4" 
               placeholder="Describa los antecedentes relevantes..."
@@ -100,7 +92,7 @@
               Medicación actual
             </label>
             <Textarea 
-              v-model="historiaNueva.medicacionActual" 
+              v-model="pacienteStore.historiaFisiatrica.medicacionActual" 
               :autoResize="true" 
               :rows="4" 
               placeholder="Describa la medicación que toma actualmente..."
@@ -114,7 +106,7 @@
               Estudios realizados
             </label>
             <Textarea 
-              v-model="historiaNueva.estudiosRealizados" 
+              v-model="pacienteStore.historiaFisiatrica.estudiosRealizados" 
               :autoResize="true" 
               :rows="4" 
               placeholder="Liste los estudios realizados..."
@@ -133,7 +125,7 @@
            <div>
              <label class="block text-900 font-medium mb-2 text-color-primary">Hereditarios</label>
              <Textarea 
-               v-model="historiaNueva.antecedentesHereditarios" 
+               v-model="pacienteStore.historiaFisiatrica.antecedentesHereditarios" 
                :autoResize="true" 
                :rows="3" 
                placeholder="Describa los antecedentes hereditarios relevantes..."
@@ -145,7 +137,7 @@
            <div>
              <label class="block text-900 font-medium mb-2 text-color-primary">Patológico</label>
              <Textarea 
-               v-model="historiaNueva.antecedentesPatologicos" 
+               v-model="pacienteStore.historiaFisiatrica.antecedentesPatologicos" 
                :autoResize="true" 
                :rows="3" 
                placeholder="Describa los antecedentes patológicos relevantes..."
@@ -157,7 +149,7 @@
            <div>
              <label class="block text-900 font-medium mb-2 text-color-primary">Quirúrgicos</label>
              <Textarea 
-               v-model="historiaNueva.antecedentesQuirurgicos" 
+               v-model="pacienteStore.historiaFisiatrica.antecedentesQuirurgicos" 
                :autoResize="true" 
                :rows="3" 
                placeholder="Describa los antecedentes quirúrgicos relevantes..."
@@ -169,7 +161,7 @@
            <div>
              <label class="block text-900 font-medium mb-2 text-color-primary">Metabólicos</label>
              <Textarea 
-               v-model="historiaNueva.antecedentesMetabolicos" 
+               v-model="pacienteStore.historiaFisiatrica.antecedentesMetabolicos" 
                :autoResize="true" 
                :rows="3" 
                placeholder="Describa los antecedentes metabólicos relevantes..."
@@ -181,7 +173,7 @@
            <div>
              <label class="block text-900 font-medium mb-2 text-color-primary">Inmunológicos</label>
              <Textarea 
-               v-model="historiaNueva.antecedentesInmunologicos" 
+               v-model="pacienteStore.historiaFisiatrica.antecedentesInmunologicos" 
                :autoResize="true" 
                :rows="3" 
                placeholder="Describa los antecedentes inmunológicos relevantes..."
@@ -201,7 +193,7 @@
                <div>
                  <label class="block text-md font-medium text-700 mb-2">Dormir</label>
                  <Textarea 
-                   v-model="historiaNueva.fisiologicosDormir" 
+                   v-model="pacienteStore.historiaFisiatrica.fisiologicosDormir" 
                    :autoResize="true" 
                    :rows="2" 
                    placeholder="Describa el patrón de sueño..."
@@ -212,7 +204,7 @@
                <div>
                  <label class="block text-md font-medium text-700 mb-2">Catarsis</label>
                  <Textarea 
-                   v-model="historiaNueva.fisiologicosCatarsis" 
+                   v-model="pacienteStore.historiaFisiatrica.fisiologicosCatarsis" 
                    :autoResize="true" 
                    :rows="2" 
                    placeholder="Describa el patrón intestinal..."
@@ -223,7 +215,7 @@
                <div>
                  <label class="block text-md font-medium text-700 mb-2">Periodo menstrual</label>
                  <Textarea 
-                   v-model="historiaNueva.fisiologicosPeriodoMenstrual" 
+                   v-model="pacienteStore.historiaFisiatrica.fisiologicosPeriodoMenstrual" 
                    :autoResize="true" 
                    :rows="2" 
                    placeholder="Describa el patrón menstrual..."
@@ -237,7 +229,7 @@
                <div>
                  <label class="block text-md font-medium text-700 mb-2">Alimentación</label>
                  <Textarea 
-                   v-model="historiaNueva.fisiologicosAlimentacion" 
+                   v-model="pacienteStore.historiaFisiatrica.fisiologicosAlimentacion" 
                    :autoResize="true" 
                    :rows="2" 
                    placeholder="Describa los hábitos alimentarios..."
@@ -248,7 +240,7 @@
                <div>
                  <label class="block text-md font-medium text-700 mb-2">Diuresis</label>
                  <Textarea 
-                   v-model="historiaNueva.fisiologicosDiuresis" 
+                   v-model="pacienteStore.historiaFisiatrica.fisiologicosDiuresis" 
                    :autoResize="true" 
                    :rows="2" 
                    placeholder="Describa el patrón urinario..."
@@ -259,7 +251,7 @@
                <div>
                  <label class="block text-md font-medium text-700 mb-2">Sexualidad</label>
                  <Textarea 
-                   v-model="historiaNueva.fisiologicosSexualidad" 
+                   v-model="pacienteStore.historiaFisiatrica.fisiologicosSexualidad" 
                    :autoResize="true" 
                    :rows="2" 
                    placeholder="Describa aspectos relevantes..."
@@ -280,7 +272,7 @@
           <div>
             <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades de comunicación</label>
             <Textarea 
-              v-model="historiaNueva.anamnesisComunicacion" 
+              v-model="pacienteStore.historiaFisiatrica.anamnesisComunicacion" 
               :autoResize="true" 
               :rows="3" 
               placeholder="Describa las capacidades de comunicación..."
@@ -292,7 +284,7 @@
           <div>
             <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades en motricidad</label>
             <Textarea 
-              v-model="historiaNueva.anamnesisMotricidad" 
+              v-model="pacienteStore.historiaFisiatrica.anamnesisMotricidad" 
               :autoResize="true" 
               :rows="3" 
               placeholder="Describa las capacidades motrices..."
@@ -304,7 +296,7 @@
           <div>
             <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades de la vida diaria</label>
             <Textarea 
-              v-model="historiaNueva.anamnesisVidaDiaria" 
+              v-model="pacienteStore.historiaFisiatrica.anamnesisVidaDiaria" 
               :autoResize="true" 
               :rows="3" 
               placeholder="Describa las capacidades para actividades diarias..."
@@ -345,7 +337,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Actitud</label>
                    <Textarea 
-                     v-model="historiaNueva.examenActitud" 
+                     v-model="pacienteStore.historiaFisiatrica.examenActitud" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa la actitud del paciente..."
@@ -356,7 +348,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Comunicación y códigos</label>
                    <Textarea 
-                     v-model="historiaNueva.examenComunicacionCodigos" 
+                     v-model="pacienteStore.historiaFisiatrica.examenComunicacionCodigos" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa la comunicación..."
@@ -367,7 +359,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Piel y faneras</label>
                    <Textarea 
-                     v-model="historiaNueva.examenPielFaneras" 
+                     v-model="pacienteStore.historiaFisiatrica.examenPielFaneras" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado de la piel..."
@@ -384,7 +376,7 @@
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Cabeza</label>
                     <Textarea 
-                      v-model="historiaNueva.examenCabeza" 
+                      v-model="pacienteStore.historiaFisiatrica.examenCabeza" 
                       :autoResize="true" 
                       :rows="2" 
                       placeholder="Describa el estado de la cabeza..."
@@ -395,7 +387,7 @@
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Ojos</label>
                     <Textarea 
-                      v-model="historiaNueva.examenOjos" 
+                      v-model="pacienteStore.historiaFisiatrica.examenOjos" 
                       :autoResize="true" 
                       :rows="2" 
                       placeholder="Describa el estado de los ojos..."
@@ -406,7 +398,7 @@
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Movimientos anormales</label>
                     <Textarea 
-                      v-model="historiaNueva.examenMovimientosAnormales" 
+                      v-model="pacienteStore.historiaFisiatrica.examenMovimientosAnormales" 
                       :autoResize="true" 
                       :rows="2" 
                       placeholder="Describa movimientos anormales..."
@@ -417,7 +409,7 @@
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Estrabismo</label>
                     <Textarea 
-                      v-model="historiaNueva.examenEstrabismo" 
+                      v-model="pacienteStore.historiaFisiatrica.examenEstrabismo" 
                       :autoResize="true" 
                       :rows="2" 
                       placeholder="Describa si hay estrabismo..."
@@ -428,7 +420,7 @@
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Orejas</label>
                     <Textarea 
-                      v-model="historiaNueva.examenOrejas" 
+                      v-model="pacienteStore.historiaFisiatrica.examenOrejas" 
                       :autoResize="true" 
                       :rows="2" 
                       placeholder="Describa el estado de las orejas..."
@@ -439,7 +431,7 @@
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Audición</label>
                     <Textarea 
-                      v-model="historiaNueva.examenAudicion" 
+                      v-model="pacienteStore.historiaFisiatrica.examenAudicion" 
                       :autoResize="true" 
                       :rows="2" 
                       placeholder="Describa la capacidad auditiva..."
@@ -456,7 +448,7 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Boca</label>
                       <Textarea 
-                        v-model="historiaNueva.examenBoca" 
+                        v-model="pacienteStore.historiaFisiatrica.examenBoca" 
                         :autoResize="true" 
                         :rows="2" 
                         placeholder="Describa el estado de la boca..."
@@ -467,7 +459,7 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Labios</label>
                       <Textarea 
-                        v-model="historiaNueva.examenLabios" 
+                        v-model="pacienteStore.historiaFisiatrica.examenLabios" 
                         :autoResize="true" 
                         :rows="2" 
                         placeholder="Describa el estado de los labios..."
@@ -478,7 +470,7 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Lengua</label>
                       <Textarea 
-                        v-model="historiaNueva.examenLengua" 
+                        v-model="pacienteStore.historiaFisiatrica.examenLengua" 
                         :autoResize="true" 
                         :rows="2" 
                         placeholder="Describa el estado de la lengua..."
@@ -489,7 +481,7 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Dentición</label>
                       <Textarea 
-                        v-model="historiaNueva.examenDenticion" 
+                        v-model="pacienteStore.historiaFisiatrica.examenDenticion" 
                         :autoResize="true" 
                         :rows="2" 
                         placeholder="Describa el estado de la dentición..."
@@ -500,7 +492,7 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Mordida</label>
                       <Textarea 
-                        v-model="historiaNueva.examenMordida" 
+                        v-model="pacienteStore.historiaFisiatrica.examenMordida" 
                         :autoResize="true" 
                         :rows="2" 
                         placeholder="Describa el tipo de mordida..."
@@ -511,7 +503,7 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Paladar y velo</label>
                       <Textarea 
-                        v-model="historiaNueva.examenPaladarVelo" 
+                        v-model="pacienteStore.historiaFisiatrica.examenPaladarVelo" 
                         :autoResize="true" 
                         :rows="2" 
                         placeholder="Describa el paladar y velo..."
@@ -522,7 +514,7 @@
                     <div class="md:col-span-2">
                       <label class="block text-900 font-medium mb-2 text-color-primary">Maxilares</label>
                       <Textarea 
-                        v-model="historiaNueva.examenMaxilares" 
+                        v-model="pacienteStore.historiaFisiatrica.examenMaxilares" 
                         :autoResize="true" 
                         :rows="2" 
                         placeholder="Describa el estado de los maxilares..."
@@ -540,7 +532,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Tórax</label>
                    <Textarea 
-                     v-model="historiaNueva.examenTorax" 
+                     v-model="pacienteStore.historiaFisiatrica.examenTorax" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado del tórax..."
@@ -551,7 +543,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Abdomen</label>
                    <Textarea 
-                     v-model="historiaNueva.examenAbdomen" 
+                     v-model="pacienteStore.historiaFisiatrica.examenAbdomen" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado del abdomen..."
@@ -562,7 +554,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Columna vertebral</label>
                    <Textarea 
-                     v-model="historiaNueva.examenColumnaVertebral" 
+                     v-model="pacienteStore.historiaFisiatrica.examenColumnaVertebral" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado de la columna..."
@@ -573,7 +565,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Pelvis</label>
                    <Textarea 
-                     v-model="historiaNueva.examenPelvis" 
+                     v-model="pacienteStore.historiaFisiatrica.examenPelvis" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado de la pelvis..."
@@ -584,7 +576,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Caderas</label>
                    <Textarea 
-                     v-model="historiaNueva.examenCaderas" 
+                     v-model="pacienteStore.historiaFisiatrica.examenCaderas" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado de las caderas..."
@@ -595,7 +587,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">M.M.I.I.</label>
                    <Textarea 
-                     v-model="historiaNueva.examenMmii" 
+                     v-model="pacienteStore.historiaFisiatrica.examenMmii" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa miembros inferiores..."
@@ -606,7 +598,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Pies</label>
                    <Textarea 
-                     v-model="historiaNueva.examenPies" 
+                     v-model="pacienteStore.historiaFisiatrica.examenPies" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado de los pies..."
@@ -617,7 +609,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">M.M.S.S.</label>
                    <Textarea 
-                     v-model="historiaNueva.examenMmss" 
+                     v-model="pacienteStore.historiaFisiatrica.examenMmss" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa miembros superiores..."
@@ -628,7 +620,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Manos</label>
                    <Textarea 
-                     v-model="historiaNueva.examenManos" 
+                     v-model="pacienteStore.historiaFisiatrica.examenManos" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el estado de las manos..."
@@ -639,7 +631,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Lateralidad</label>
                    <Textarea 
-                     v-model="historiaNueva.examenLateralidad" 
+                     v-model="pacienteStore.historiaFisiatrica.examenLateralidad" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa la lateralidad..."
@@ -656,7 +648,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Respiratorio</label>
                    <Textarea 
-                     v-model="historiaNueva.examenApRespiratorio" 
+                     v-model="pacienteStore.historiaFisiatrica.examenApRespiratorio" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el aparato respiratorio..."
@@ -667,7 +659,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Cardiovascular</label>
                    <Textarea 
-                     v-model="historiaNueva.examenApCardiovascular" 
+                     v-model="pacienteStore.historiaFisiatrica.examenApCardiovascular" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el aparato cardiovascular..."
@@ -678,7 +670,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Digestivo</label>
                    <Textarea 
-                     v-model="historiaNueva.examenApDigestivo" 
+                     v-model="pacienteStore.historiaFisiatrica.examenApDigestivo" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el aparato digestivo..."
@@ -689,7 +681,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Actividad refleja</label>
                    <Textarea 
-                     v-model="historiaNueva.examenActividadRefleja" 
+                     v-model="pacienteStore.historiaFisiatrica.examenActividadRefleja" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa la actividad refleja..."
@@ -700,7 +692,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Actividad sensoperceptual</label>
                    <Textarea 
-                     v-model="historiaNueva.examenActividadSensoperceptual" 
+                     v-model="pacienteStore.historiaFisiatrica.examenActividadSensoperceptual" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa la actividad sensoperceptual..."
@@ -711,7 +703,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Reacciones posturales</label>
                    <Textarea 
-                     v-model="historiaNueva.examenReaccionesPosturales" 
+                     v-model="pacienteStore.historiaFisiatrica.examenReaccionesPosturales" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa las reacciones posturales..."
@@ -722,7 +714,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Desplazamiento-marcha</label>
                    <Textarea 
-                     v-model="historiaNueva.examenDesplazamientoMarcha" 
+                     v-model="pacienteStore.historiaFisiatrica.examenDesplazamientoMarcha" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa el desplazamiento y marcha..."
@@ -733,7 +725,7 @@
                  <div>
                    <label class="block text-900 font-medium mb-2 text-color-primary">Etapa del desarrollo</label>
                    <Textarea 
-                     v-model="historiaNueva.examenEtapaDesarrollo" 
+                     v-model="pacienteStore.historiaFisiatrica.examenEtapaDesarrollo" 
                      :autoResize="true" 
                      :rows="2" 
                      placeholder="Describa la etapa del desarrollo..."
@@ -755,7 +747,7 @@
           <div>
             <label class="block text-900 font-medium mb-2 text-color-primary">Diagnóstico Funcional</label>
             <Textarea 
-              v-model="historiaNueva.diagnosticoFuncional" 
+              v-model="pacienteStore.historiaFisiatrica.diagnosticoFuncional" 
               :autoResize="true" 
               :rows="4" 
               placeholder="Describa el diagnóstico funcional..."
@@ -767,7 +759,7 @@
           <div>
             <label class="block text-900 font-medium mb-2 text-color-primary">Conducta a seguir, objetivos</label>
             <Textarea 
-              v-model="historiaNueva.conductaSeguirObjetivos" 
+              v-model="pacienteStore.historiaFisiatrica.conductaSeguirObjetivos" 
               :autoResize="true" 
               :rows="4" 
               placeholder="Describa la conducta a seguir y objetivos..."
@@ -779,7 +771,7 @@
           <div>
             <label class="block text-900 font-medium mb-2 text-color-primary">Objetivos de la familia</label>
             <Textarea 
-              v-model="historiaNueva.objetivosFamilia" 
+              v-model="pacienteStore.historiaFisiatrica.objetivosFamilia" 
               :autoResize="true" 
               :rows="4" 
               placeholder="Describa los objetivos de la familia..."
@@ -832,9 +824,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { showSuccess, showError } from '@/composables/useToast';
+import { usePacienteStore } from '../store';
 
 // Props y emits
 const props = defineProps({
@@ -843,16 +836,19 @@ const props = defineProps({
     required: true
   }
 });
-
-const emit = defineEmits(['historiaCreada']);
-
 // Router
 const router = useRouter();
-const route = useRoute();
 
 // Estado del formulario
+const pacienteStore = usePacienteStore();
 const pasoActivo = ref(0);
 const subTabExamenFisicoActivo = ref(0);
+
+// Inicializar la historia fisiatrica cuando se monta el componente
+onMounted(() => {
+  pacienteStore.inicializarHistoriaFisiatrica();
+  pacienteStore.historiaFisiatrica.fechaEvaluacion = new Date();
+});
 
 // Pasos de la historia
 const pasos = ref([
@@ -871,99 +867,36 @@ const subTabsExamenFisico = ref([
   { id: 4, label: 'Sistema y actividades' }
 ]);
 
-// Datos del paciente (simulado)
-const paciente = ref({
-  id: props.pacienteId,
-  nombre: 'Ana Martinez',
-  dni: '45678901'
-});
-
-// Datos de la nueva historia
-const historiaNueva = ref({
-  fechaEvaluacion: new Date(),
-  derivadosPor: '',
-  antecedentesCuadro: '',
-  medicacionActual: '',
-  estudiosRealizados: '',
-  
-  // Antecedentes
-  antecedentesHereditarios: '',
-  antecedentesPatologicos: '',
-  antecedentesQuirurgicos: '',
-  antecedentesMetabolicos: '',
-  antecedentesInmunologicos: '',
-  
-     // Fisiológicos
-   fisiologicosDormir: '',
-   fisiologicosAlimentacion: '',
-   fisiologicosCatarsis: '',
-   fisiologicosDiuresis: '',
-   fisiologicosPeriodoMenstrual: '',
-   fisiologicosSexualidad: '',
-  
-  // Anamnesis sistémica
-  anamnesisComunicacion: '',
-  anamnesisMotricidad: '',
-  anamnesisVidaDiaria: '',
-  
-     // Examen físico
-   examenActitud: '',
-   examenComunicacionCodigos: '',
-   examenPielFaneras: '',
-   
-   // Cabeza y sentidos
-   examenCabeza: '',
-   examenOjos: '',
-   examenMovimientosAnormales: '',
-   examenEstrabismo: '',
-   examenOrejas: '',
-   examenAudicion: '',
-   examenLabios: '',
-   examenDenticion: '',
-   examenPaladarVelo: '',
-   examenMordida: '',
-   examenMaxilares: '',
-   examenBoca: '',
-   examenLengua: '',
-   
-   // Tronco y extremidades
-   examenTorax: '',
-   examenAbdomen: '',
-   examenColumnaVertebral: '',
-   examenPelvis: '',
-   examenCaderas: '',
-   examenMmii: '',
-   examenPies: '',
-   examenMmss: '',
-   examenManos: '',
-   examenLateralidad: '',
-   
-   // Sistema y actividades
-   examenApRespiratorio: '',
-   examenApCardiovascular: '',
-   examenApDigestivo: '',
-   examenActividadRefleja: '',
-   examenActividadSensoperceptual: '',
-   examenReaccionesPosturales: '',
-   examenDesplazamientoMarcha: '',
-   examenEtapaDesarrollo: '',
-  
-  // Diagnóstico funcional
-  diagnosticoFuncional: '',
-  conductaSeguirObjetivos: '',
-  objetivosFamilia: ''
-});
-
 // Computed properties
 const esFormularioValido = computed(() => {
   if (pasoActivo.value === 0) {
-    return historiaNueva.value.fechaEvaluacion && 
-           historiaNueva.value.derivadosPor.trim().length > 0;
+    return pacienteStore.historiaFisiatrica.fechaEvaluacion && 
+           pacienteStore.historiaFisiatrica.derivadosPor.trim().length > 0;
   }
   return true;
 });
 
-// Métodos
+// Formatear fecha de evaluación a formato legible DD/MM/YYYY
+const fechaEvaluacionFormateada = computed(() => {
+  if (
+    !pacienteStore.historiaFisiatrica.fechaEvaluacion ||
+    pacienteStore.historiaFisiatrica.fechaEvaluacion === 'Sin información'
+  )
+    return 'Sin información';
+
+  // Ajustar a UTC-3 (Argentina, por ejemplo)
+  const fechaOriginal = new Date(pacienteStore.historiaFisiatrica.fechaEvaluacion);
+  // Obtener la hora UTC y restar 3 horas para UTC-3
+  const fechaUTC3 = new Date(fechaOriginal.getTime() - 3 * 60 * 60 * 1000);
+
+  const dia = fechaUTC3.getDate().toString().padStart(2, '0');
+  const mes = (fechaUTC3.getMonth() + 1).toString().padStart(2, '0');
+  const año = fechaUTC3.getFullYear();
+
+  return `${dia}/${mes}/${año}`;
+});
+
+// Métodos  
 const seleccionarPaso = (index) => {
   // Solo permitir ir a pasos ya completados o al siguiente disponible
   if (index <= pasoActivo.value || index === 0) {
@@ -978,9 +911,6 @@ const pasoAnterior = () => {
 };
 
 const pasoSiguiente = () => {
-  console.log(esFormularioValido.value);
-  console.log(pasoActivo.value);
-  console.log(pasos.value.length);
   if (esFormularioValido.value && pasoActivo.value < pasos.value.length - 1) {
     pasoActivo.value++;
   } else if (!esFormularioValido.value) {
@@ -994,19 +924,26 @@ const cancelar = () => {
   }
 };
 
+const onChangeFechaEvaluacion = () => {
+  // La fecha ya se actualiza automáticamente en el v-model
+  // El computed fechaEvaluacionFormateada se recalculará automáticamente
+  console.log('Fecha de evaluación actualizada:', fechaEvaluacionFormateada.value);
+};
+
 const finalizarHistoria = () => {
   if (esFormularioValido.value) {
-    // Aquí implementarías la lógica para guardar la historia
+    console.log(pacienteStore.historiaFisiatrica);
+    pacienteStore.crearHistoriaFisiatrica(pacienteStore.historiaFisiatrica);
     showSuccess('Historia fisiátrica creada exitosamente');
-    emit('historiaCreada', historiaNueva.value);
-    volver();
+    router.push(`/pacientes/${pacienteStore.paciente.hashId}`);
   } else {
     showError('Por favor complete todos los campos obligatorios');
   }
 };
 
 const volver = () => {
-  router.push(`/pacientes/${props.pacienteId}`);
+  pacienteStore.inicializarHistoriaFisiatrica();
+  router.push(`/pacientes/${pacienteStore.paciente.hashId}`);
 };
 </script>
 

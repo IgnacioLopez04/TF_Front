@@ -14,7 +14,8 @@
       <div class="login-section mb-5">
         <GoogleLogin 
           :onSuccess="handleLoginSuccess" 
-          :onError="handleLoginError" 
+          :onError="handleLoginError"
+          @login-success="handleLoginSuccess"
         />
         <div v-if="loading" class="loading-container flex flex-column align-items-center gap-3 mt-4">
           <ProgressSpinner style="width: 50px; height: 50px" />
@@ -56,27 +57,28 @@ const handleLoginSuccess = async (response) => {
     loading.value = true;
     error.value = '';
     
-    // Decodificar el token JWT para obtener información del usuario
-    const payload = JSON.parse(atob(response.credential.split('.')[1]));
-    
-    const userData = {
-      id_usuario: payload.sub,
-      nombre: payload.given_name || '',
-      apellido: payload.family_name || '',
-      email: payload.email,
-      picture: payload.picture
-    };
-    
-    // Llamar al store para hacer login
-    authStore.login(userData, response.credential);
-    
-    showSuccess('¡Bienvenido! Has iniciado sesión correctamente');
-    
-    // Redirigir a la página de inicio
-    router.push('/pacientes');
+    // Ahora response contiene la respuesta del API con user y access_token
+    if (response.user && response.access_token) {
+      const userData = {
+        id_usuario: response.user.id_usuario,
+        nombre: response.user.nombre || '',
+        apellido: response.user.apellido || '',
+        email: response.user.email || '',
+        nivel: response.user.nivel || null,
+      };
+      
+      // Llamar al store para hacer login
+      authStore.login(userData, response.access_token);
+      
+      showSuccess('¡Bienvenido! Has iniciado sesión correctamente');
+      
+      // Redirigir a la página de inicio
+      router.push('/pacientes');
+    } else {
+      throw new Error('Respuesta inválida del servidor');
+    }
     
   } catch (err) {
-    console.error('Error en login:', err);
     error.value = 'Error al iniciar sesión. Por favor, intenta de nuevo.';
     showError('Error al iniciar sesión');
   } finally {

@@ -1,6 +1,19 @@
 import { showError } from '@/composables/useToast';
+import { urlAuth } from '@/utils';
+import { useAxios } from '@/composables/useAxios';
 
-export function useLogin(usuario, accessToken) {
+export const login = async (credential) => {
+  try {
+    const response = await useAxios.postUnauthenticated(`${urlAuth}/login`, {
+      credential,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export function useLogin(usuario, accessToken, startTokenMonitoring) {
   return (userData, token) => {
     try {
       // Guardar token en sessionStorage
@@ -20,7 +33,10 @@ export function useLogin(usuario, accessToken) {
       // Actualizar el token
       accessToken.value = token;
 
-      console.log('Login exitoso:', usuario.value);
+      // Iniciar monitoreo del token
+      if (startTokenMonitoring) {
+        startTokenMonitoring();
+      }
     } catch (error) {
       console.error('Error en login:', error);
       showError('Error al iniciar sesión');
@@ -29,7 +45,7 @@ export function useLogin(usuario, accessToken) {
   };
 }
 
-export function useLogout(usuario, accessToken) {
+export function useLogout(usuario, accessToken, stopTokenMonitoring) {
   return () => {
     try {
       // Remover token de sessionStorage
@@ -49,9 +65,11 @@ export function useLogout(usuario, accessToken) {
       // Resetear el token
       accessToken.value = null;
 
-      console.log('Logout exitoso');
+      // Detener monitoreo del token
+      if (stopTokenMonitoring) {
+        stopTokenMonitoring();
+      }
     } catch (error) {
-      console.error('Error en logout:', error);
       showError('Error al cerrar sesión');
     }
   };

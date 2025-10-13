@@ -6,7 +6,7 @@
       <div class="flex md:flex-row align-items-start gap-4">
         <div class="flex-shrink-0">
           <Avatar 
-            :label="paciente.iniciales"
+            :label="pacienteStore.paciente.iniciales"
             size="xlarge"
             shape="square"
             class="bg-primary text-white text-4xl font-bold"
@@ -14,11 +14,11 @@
           />
         </div>
         <div class="flex-1">
-          <h1 class="text-3xl font-bold text-color-primary mb-3">{{ paciente.nombre }}</h1>
+          <h1 class="text-3xl font-bold text-color-primary mb-3">{{ pacienteStore.paciente.nombre + ' ' + pacienteStore.paciente.apellido }}</h1>
           <div class="flex flex-column sm:flex-row gap-4 text-gray-600">
-            <p class="mb-0"><strong>DNI:</strong> {{ paciente.dni }}</p>
-            <p class="mb-0"><strong>Prestación:</strong> {{ paciente.prestacion }}</p>
-            <p class="mb-0"><strong>Últ. Modificación:</strong> {{ formatearFecha(paciente.ultimaModificacion) }}</p>
+            <p class="mb-0"><strong>DNI:</strong> {{ pacienteStore.paciente.dni }}</p>
+            <p class="mb-0"><strong>Prestación:</strong> {{ pacienteStore.paciente.prestacion }}</p>
+            <p class="mb-0"><strong>Últ. Modificación:</strong> {{ formatearFecha(pacienteStore.paciente.ultimaModificacion) }}</p>
           </div>
         </div>
       </div>
@@ -46,540 +46,87 @@
       <div class="p-4">
         <!-- Tab Informes -->
         <div v-if="tabActivo === 'Informes'">
-          <div class="informe-bg border-round-xl p-3 shadow-md my-3">
-            <div class="flex flex-column sm:flex-row justify-content-between align-items-start mb-3">
-              <h3 class="text-xl font-bold mt-1 sm:mb-0" style="color: #7c3aed;">Avance en la terapia</h3>
-              <div class="text-right text-gray-500 text-sm">
-                <p class="mb-2 font-bold" style="color: #7c3aed;">Dr. Juan Manuel Belgrano</p>
-                <p class="mb-0">Fecha: 26/06/2025</p>
+          <!-- Header con botón de crear nuevo informe -->
+          <div class="flex justify-content-between align-items-center mb-4">
+            <h3 class="text-xl font-bold text-color-primary">Informes</h3>
+            <Button 
+              label="Crear Nuevo Informe" 
+              icon="pi pi-plus"
+              @click="crearNuevoInforme"
+              class="button-primary-custom"
+            />
+          </div>
+          
+          <!-- Lista de informes dinámicos -->
+          <div v-if="informes.length === 0" class="text-center p-6">
+            <i class="pi pi-file-text text-6xl text-gray-400 mb-4"></i>
+            <h4 class="text-lg text-gray-600 mb-2">No hay informes disponibles</h4>
+            <p class="text-gray-500">Crea el primer informe para este paciente</p>
+          </div>
+          
+          <div v-else>
+            <div 
+              v-for="informe in informes" 
+              :key="informe.id"
+              class="informe-bg border-round-xl p-3 shadow-md my-3"
+            >
+              <div class="flex flex-column sm:flex-row justify-content-between align-items-start mb-3">
+                <h3 class="text-xl font-bold mt-1 sm:mb-0" style="color: #7c3aed;">{{ informe.titulo }}</h3>
+                <div class="text-right text-gray-500 text-sm">
+                  <p class="mb-2 font-bold" style="color: #7c3aed;">{{ informe.profesional.nombreCompleto }}</p>
+                  <p class="mb-0">Fecha: {{ informe.fechaCreacion }}</p>
+                  <p class="mb-0 text-xs" v-if="informe.tipoInforme.nombre">Tipo: {{ informe.tipoInforme.nombre }}</p>
+                </div>
               </div>
-            </div>
-            <div class="mb-4">
-              <Textarea 
-                v-model="informeAvance" 
-                :autoResize="true" 
-                :rows="rows" 
-                readonly
-                class="w-full border-gray-300"
-                style="min-height: 120px;"
-              />
-            </div>
-            <div class="flex flex-column sm:flex-row gap-3 justify-content-end">
-              <Button 
-                label="Agregar comentario" 
-                @click="agregarComentario('avance')"
-                class="p-button-outlined p-button-primary"
-              />
-              <Button 
-                label="Ver" 
-                @click="verInforme('avance')"
-                class="p-button-primary"
-              />
-            </div>
-          </div>   
-          <!-- Informe de Evaluación -->
-          <div class="informe-bg border-round-xl p-3 shadow-md my-3">
-            <div class="flex flex-column sm:flex-row justify-content-between align-items-start mb-4">
-              <h3 class="text-xl font-bold mt-1 sm:mb-0" style="color: #7c3aed;">Evaluación inicial</h3>
-              <div class="text-right text-gray-500 text-sm">
-                <p class="mb-1">Lic. Ana Pérez</p>
-                <p class="mb-0">Fecha: 15/06/2025</p>
+              
+              <div class="mb-4">
+                <Textarea 
+                  :value="informe.contenido" 
+                  :autoResize="true" 
+                  :rows="rows" 
+                  readonly
+                  class="w-full border-gray-300"
+                  style="min-height: 120px;"
+                />
               </div>
-            </div>
-            <div class="mb-4">
-              <Textarea 
-                v-model="informeEvaluacion" 
-                :autoResize="true" 
-                :rows="rows" 
-                readonly
-                class="w-full border-gray-300"
-                style="min-height: 120px;"
-              />
-            </div>
-            <div class="flex flex-column sm:flex-row gap-3 justify-content-end">
-              <Button 
-                label="Agregar comentario" 
-                @click="agregarComentario('evaluacion')"
-                class="p-button-outlined p-button-primary"
-              />
-              <Button 
-                label="Ver" 
-                @click="verInforme('avance')"
-                class="p-button-primary"
-              />
+              
+              <!-- Comentarios (anexos) si existen -->
+              <div v-if="informe.anexos && informe.anexos.length > 0" class="mb-4">
+                <h5 class="text-sm font-semibold text-gray-600 mb-2">Comentarios:</h5>
+                <div class="space-y-2">
+                  <div 
+                    v-for="anexo in informe.anexos" 
+                    :key="anexo.id"
+                    class="bg-gray-50 border-round p-3 border border-gray-200"
+                  >
+                    <div class="flex justify-content-between align-items-start mb-2">
+                      <span class="text-sm font-semibold text-color-primary">{{ anexo.titulo }}</span>
+                      <span class="text-xs text-gray-500">{{ anexo.fechaCreacion }}</span>
+                    </div>
+                    <p class="text-sm text-gray-700 m-0">{{ anexo.contenido }}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex flex-column sm:flex-row gap-3 justify-content-end">
+                <Button 
+                  label="Agregar comentario" 
+                  @click="agregarComentario(informe)"
+                  class="p-button-outlined p-button-primary"
+                />
+                <Button 
+                  label="Ver" 
+                  @click="verInforme(informe)"
+                  class="p-button-primary"
+                />
+              </div>
             </div>
           </div>
         </div>
 
         <!-- Tab Historia Fisiátrica -->
         <div v-else-if="tabActivo === 'Historia Fisiátrica'">
-          <div class="p-4">
-            <!-- Header con botón de crear nueva historia -->
-            <div class="flex justify-content-between align-items-center mb-4">
-              <h3 class="text-xl font-bold text-color-primary">Historia Fisiátrica</h3>
-              <Button 
-                label="Crear Nueva Historia Fisiátrica" 
-                icon="pi pi-plus"
-                @click="crearNuevaHistoria"
-                class="button-primary-custom"
-              />
-            </div>
-
-            <!-- Tabs de navegación de la historia -->
-            <div class="bg-white border-round-xl shadow-sm border border-gray-100 mb-6">
-              <div class="flex border-bottom-1 border-gray-200">
-                <button 
-                  v-for="(tabHistoria, index) in tabsHistoria" 
-                  :key="tabHistoria.id"
-                  @click="tabHistoriaActivo = index"
-                  :class="[
-                    'flex-1 p-2 text-center border-none cursor-pointer transition-all duration-200',
-                    tabHistoriaActivo === index 
-                      ? 'bg-white text-color-primary border-bottom-2 border-color-primary' 
-                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                  ]"
-                >
-                  {{ tabHistoria.label }}
-                </button>
-              </div>
-              <!-- Contenido de los tabs de historia -->
-              <div class="p-4">
-                  <!-- Tab Evaluación y Consulta -->
-                  <div v-if="tabHistoriaActivo === 0">
-                    <div class="w-full">
-                      <div class="flex justify-content-between align-items-center">
-                        <h4 class="text-lg font-semibold mb-4 text-color-primary">Evaluación y Consulta</h4> 
-                        <div class="mb-4 flex gap-2">
-                          <label class="block text-900 font-medium mb-2 text-color-primary">Fecha de Evaluación: </label>
-                          <p class="mb-2"> {{ historiaFisiatica.fechaEvaluacion }}</p>
-                        </div>
-                      </div>
-                      <div class="mb-4 md:col-span-2">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Derivados por</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                          <p>{{ historiaFisiatica.derivadosPor }}</p>
-                        </div>
-                      </div>
-                      <div class="mb-4 md:col-span-2">
-                         <label class="block text-900 font-medium mb-2 text-color-primary">Antecedentes del cuadro actual</label>
-                         <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                           <p>{{ historiaFisiatica.antecedentesCuadro }}</p>
-                         </div>
-                       </div>
-                       <div class="mb-4 md:col-span-2">
-                         <label class="block text-900 font-medium mb-2 text-color-primary">Medicación actual</label>
-                         <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                           <p>{{ historiaFisiatica.medicacionActual }}</p>
-                         </div>
-                       </div>
-                       <div class="mb-4 md:col-span-2">
-                         <label class="block text-900 font-medium mb-2 text-color-primary">Estudios realizados</label>
-                         <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                           <p>{{ historiaFisiatica.estudiosRealizados }}</p>
-                         </div>
-                       </div>
-                    </div>
-                  </div>
-                  <!-- Tab Antecedentes -->
-                  <div v-else-if="tabHistoriaActivo === 1">
-                    <h4 class="text-lg font-semibold mb-4 text-color-primary">Antecedentes</h4> 
-                    <!-- Secciones principales -->
-                    <div>
-                      <!-- Hereditarios -->
-                      <div class="mb-4">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Hereditarios</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                          <p>{{ historiaFisiatica.antecedentesHereditarios }}</p>
-                        </div>
-                      </div>
-                      <!-- Patológicos -->
-                      <div class="mb-4">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Patológico</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                          <p>{{ historiaFisiatica.antecedentesPatologicos }}</p>
-                        </div>
-                      </div>
-                      <!-- Quirúrgicos -->
-                      <div class="mb-4">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Quirúrgicos</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                          <p>{{ historiaFisiatica.antecedentesQuirurgicos }}</p>
-                        </div>
-                      </div>
-                      <!-- Metabólicos -->
-                      <div class="mb-4">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Metabólicos</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                          <p>{{ historiaFisiatica.antecedentesMetabolicos }}</p>
-                        </div>
-                      </div>
-                      <!-- Inmunológicos -->
-                      <div class="mb-4">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Inmunológicos</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                          <p>{{ historiaFisiatica.antecedentesInmunologicos }}</p>
-                        </div>
-                      </div>
-                      <!-- Fisiológicos - Layout de dos columnas -->
-                      <div class="flex flex-column mb-4 w-full">
-                        <label class="font-bold text-color-primary">Fisiológicos</label>
-                        <div>
-                          
-                        </div>
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                          <div class="col-span-2">
-                            <label class="block text-900 font-medium mb-2 text-sm">Dormir</label>
-                            <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                              <p>{{ historiaFisiatica.fisiologicosDormir }}</p>
-                            </div>
-                          </div> 
-                          <div class="col-span-2">
-                            <label class="block text-900 font-medium mb-2 text-sm">Catarsis</label>
-                            <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                              <p>{{ historiaFisiatica.fisiologicosCatarsis }}</p>
-                            </div>
-                          </div>
-                          <div class="col-span-2">
-                            <label class="block text-900 font-medium mb-2 text-sm">Periodo menstrual</label>
-                            <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                              <p>{{ historiaFisiatica.fisiologicosPeriodoMenstrual }}</p>
-                            </div>
-                          </div>
-                          <div class="col-span-2">
-                            <label class="block text-900 font-medium mb-2 text-sm">Alimentación</label>
-                            <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                              <p>{{ historiaFisiatica.fisiologicosAlimentacion }}</p>
-                            </div>
-                          </div>
-                          <div class="col-span-2">
-                            <label class="block text-900 font-medium mb-2 text-sm">Diuresis</label>
-                            <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                              <p>{{ historiaFisiatica.fisiologicosDiuresis }}</p>
-                            </div>
-                          </div>
-                          <div class="col-span-2">
-                            <label class="block text-900 font-medium mb-2 text-sm">Sexualidad</label>
-                            <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                              <p>{{ historiaFisiatica.fisiologicosSexualidad }}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Tab Anamnesis Sistémica -->
-                  <div v-else-if="tabHistoriaActivo === 2">
-                    <h4 class="text-lg font-semibold mb-4 text-color-primary">Anamnesis Sistémica</h4>
-                    <div class="flex flex-column gap-4">
-                      <div class="">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades de comunicación</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                          <p>{{ historiaFisiatica.anamnesisComunicacion }}</p>
-                        </div>
-                      </div>
-                      <div class="">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades en motricidad</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                          <p>{{ historiaFisiatica.anamnesisMotricidad }}</p>
-                        </div>
-                      </div>
-                      <div class="">
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades de la vida diaria</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                          <p>{{ historiaFisiatica.anamnesisVidaDiaria }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Tab Examen Físico -->
-                  <div v-else-if="tabHistoriaActivo === 3">
-                    <h4 class="text-lg font-semibold mb-4 text-color-primary">Examen Físico</h4>
-                    <div class="bg-white border-round-xl shadow-sm border border-gray-100 mb-6">
-                      <div class="flex border-bottom-1 border-gray-200">
-                        <button 
-                          v-for="(subTab, index) in subTabsExamenFisico" 
-                          :key="subTab.id"
-                          @click="subTabExamenFisicoActivo = index"
-                          :class="[
-                            'flex-1 p-2 text-center border-none cursor-pointer transition-all duration-200',
-                            subTabExamenFisicoActivo === index 
-                              ? 'bg-white text-color-primary border-bottom-2 border-color-primary' 
-                              : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                          ]"
-                        >
-                          {{ subTab.label }}
-                        </button>
-                      </div>
-                      <div class="p-4">
-                        <div v-if="subTabExamenFisicoActivo === 0">
-                          <h5 class="text-md font-semibold mb-4 text-color-primary">General</h5>
-                          <div class="flex flex-column gap-4">
-                            <div>
-                              <label class="block text-900 font-medium mb-2 text-color-primary">Actitud</label>
-                              <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                <p>{{ historiaFisiatica.examenActitud }}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <label class="block text-900 font-medium mb-2 text-color-primary">Comunicación y códigos</label>
-                              <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                <p>{{ historiaFisiatica.examenComunicacionCodigos }}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <label class="block text-900 font-medium mb-2 text-color-primary">Piel y faneras</label>
-                              <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                <p>{{ historiaFisiatica.examenPielFaneras }}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- Sub-tab Cabeza y sentidos -->
-                        <div v-else-if="subTabExamenFisicoActivo === 1">
-                          <h5 class="text-md font-semibold mb-4 text-color-primary">Cabeza y sentidos</h5>
-                          <div class="flex flex-column gap-4">
-                            <div class="flex flex-column gap-4">
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Cabeza</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenCabeza }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Movimientos anormales</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenMovimientosAnormales }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Orejas</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenOrejas }}</p>
-                                </div>
-                              </div>
-                            </div>                            
-                            <div class="flex flex-column gap-4">
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Ojos</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenOjos }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Estrabismo</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenEstrabismo }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Audición</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenAudicion }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Labios</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenLabios }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Dentición</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenDenticion }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Paladar y velo</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenPaladarVelo }}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <label class="block font-bold mb-2 text-color-primary text-lg">Complejo orofacial</label>
-                              <div class="ml-4 mb-3">
-                                <label class="block text-900 font-medium mb-2 text-sm">Boca</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenBoca }}</p>
-                                </div>
-                              </div>
-                              <div class="ml-4 mb-3">
-                                <label class="block text-900 font-medium mb-2 text-sm">Lengua</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenLengua }}</p>
-                                </div>
-                              </div>
-                              <div class="ml-4 mb-3">
-                                <label class="block text-900 font-medium mb-2 text-sm">Mordida</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenMordida }}</p>
-                                </div>
-                              </div>
-                              <div class="ml-4 mb-3">
-                                <label class="block text-900 font-medium mb-2 text-sm">Maxilares</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenMaxilares }}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- Sub-tab Tronco y extremidades -->
-                        <div v-else-if="subTabExamenFisicoActivo === 2">
-                          <h5 class="text-md font-semibold mb-4 text-color-primary">Tronco y extremidades</h5>
-                          <div class="flex flex-column gap-4">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Tórax</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenTorax }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Columna vertebral</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenColumnaVertebral }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Caderas</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenCaderas }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Pies</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenPies }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Manos</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenManos }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Abdomen</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenAbdomen }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Pelvis</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenPelvis }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">M.M.I.I.</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenMMII }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">M.M.S.S.</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenMMSS }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Lateralidad</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenLateralidad }}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- Sub-tab Sistema y actividades -->
-                        <div v-else-if="subTabExamenFisicoActivo === 3">
-                          <h5 class="text-md font-semibold mb-4 text-color-primary">Sistema y actividades</h5>
-                          <div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Respiratorio</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenApRespiratorio }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Digestivo</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenApDigestivo }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Actividad sensoperceptual</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenActividadSensoperceptual }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Desplazamiento-marcha</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenDesplazamientoMarcha }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Cardiovascular</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenApCardiovascular }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Actividad refleja</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenActividadRefleja }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Reacciones posturales</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenReaccionesPosturales }}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <label class="block text-900 font-medium mb-2 text-color-primary">Etapa del desarrollo</label>
-                                <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                                  <p>{{ historiaFisiatica.examenEtapaDesarrollo }}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Tab Diagnóstico Funcional -->
-                  <div v-else-if="tabHistoriaActivo === 4">
-                    <h4 class="text-lg font-semibold mb-4 text-color-primary">Diagnóstico Funcional</h4>
-                    <div class="flex flex-column gap-4">
-                      <div>
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Diagnóstico Funcional</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                          <p>{{ historiaFisiatica.diagnosticoFuncional }}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Conducta a seguir, objetivos</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                          <p>{{ historiaFisiatica.conductaSeguirObjetivos }}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <label class="block text-900 font-medium mb-2 text-color-primary">Objetivos de la familia</label>
-                        <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                          <p>{{ historiaFisiatica.objetivosFamilia }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <HistoriaFisiatrica :crearHistoriaFisiatrica="crearHistoriaFisiatrica" />
         </div>
 
         <!-- Tab Multimedia -->
@@ -675,6 +222,7 @@
         </div>
       </div>
     </div>
+  </div>
 
     <!-- Modal para Ver Informe -->
     <Dialog 
@@ -703,27 +251,51 @@
               class="w-full"
             />
           </div>
+          
+          <!-- Comentarios (anexos) del informe -->
+          <div v-if="informeSeleccionado.anexos && informeSeleccionado.anexos.length > 0" class="mb-4">
+            <h4 class="text-lg font-semibold mb-3 text-color-primary">Comentarios del Informe</h4>
+            <div class="space-y-3">
+              <div 
+                v-for="anexo in informeSeleccionado.anexos" 
+                :key="anexo.id"
+                class="border-round border border-gray-200 p-4 bg-gray-50"
+              >
+                <div class="flex justify-content-between align-items-start mb-3">
+                  <div class="flex align-items-center">
+                    <i class="pi pi-comment text-color-primary mr-2"></i>
+                    <span class="font-semibold text-color-primary">{{ anexo.titulo }}</span>
+                  </div>
+                  <span class="text-sm text-gray-500">{{ anexo.fechaCreacion }}</span>
+                </div>
+                <p class="text-gray-700 m-0">{{ anexo.contenido }}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Comentarios del informe -->
         <div class="mb-4">
           <h4 class="text-lg font-semibold mb-3 text-color-primary">Comentarios</h4>
-          <div v-if="informeSeleccionado.comentarios && informeSeleccionado.comentarios.length > 0">
+          <div v-if="comentarioLoading" class="text-center p-4 text-gray-500">
+            <ProgressSpinner/>
+          </div>
+          <div v-else-if="comentarios && comentarios.length > 0">
             <Divider/>
             <div 
-              v-for="(comentario, index) in informeSeleccionado.comentarios" 
+              v-for="(comentario, index) in comentarios" 
               :key="index"
               class=" bg-white border-round border border-gray-200"
             >
               <div class="flex justify-content-between align-items-start mb-2">
-                <span class="font-semibold text-color-primary">{{ comentario.autor }}</span>
-                <span class="text-sm text-gray-500">{{ comentario.fecha }}</span>
+                <span class="font-semibold text-color-primary">{{ comentario.profesional.nombre }} {{ comentario.profesional.apellido }}</span>
+                <span class="text-sm text-gray-500">{{ comentario.fechaCreacion }}</span>
               </div>
-              <p class="text-gray-700 m-0">{{ comentario.texto }}</p>
+              <p class="text-gray-700 m-0">{{ comentario.contenido }}</p>
               <Divider/>
             </div>
           </div>
-          <div v-else class="text-center p-4 text-gray-500">
+          <div v-else class="text-center p-4 text-gray-500"> 
             <i class="pi pi-comment text-2xl mb-2"></i>
             <p>No hay comentarios para este informe</p>
           </div>
@@ -748,12 +320,12 @@
     >
       <div>
         <div class="mb-4">
-          <div class="p-2 informe-bg border-round">
-            <h4 class="text-lg font-semibold m-0 mb-2 text-color-primart">{{ informeSeleccionado?.titulo }}</h4>
-            <p class="text-gray-600 m-0">{{ informeSeleccionado?.profesional }} - {{ informeSeleccionado?.fecha }}</p>
+          <h4 class=" m-0 mb-2 text-color-primary">Informe</h4>
+          <div class="py-2 px-3 informe-bg border-round-xl">
+            <h4 class="text-lg font-semibold m-0">{{ informeSeleccionado?.titulo }}</h4>
+            <p class="text-gray-600 m-0 text-right">{{ informeSeleccionado?.profesional }} - {{ informeSeleccionado?.fecha }}</p>
           </div>
         </div>
-        
         <div class="mb-4">
           <label for="nuevoComentario" class="block text-900 font-medium mb-2 text-color-primart">Comentario</label>
           <Textarea 
@@ -766,7 +338,6 @@
           />
         </div>
       </div>
-      
       <template #footer>
         <Button 
           label="Cancelar" 
@@ -889,27 +460,92 @@
         />
       </template>
     </Dialog>
+
+    <!-- Modal para Crear Nuevo Informe -->
+    <Dialog 
+      v-model:visible="modalNuevoInformeVisible" 
+      header="Crear Nuevo Informe"
+      :style="{ width: '60vw' }" 
+      class="p-fluid"
+    >
+      <div class="flex flex-column w-full gap-3">
+        <div class="flex flex-column justify-content-between sm:flex-row gap-4 w-full">
+          <div class="w-full">
+            <label for="tituloInforme" class="block text-900 font-medium mb-2 text-color-primary">Título del Informe</label>
+            <InputText 
+              id="tituloInforme"
+              v-model="nuevoInforme.titulo" 
+              placeholder="Ingrese el título del informe"
+              class="w-full"
+            />
+          </div>
+          <div class="">
+            <label for="fechaInforme" class="block text-900 font-medium mb-2 text-color-primary">Fecha del Informe</label>
+            <DatePicker 
+              id="fechaInforme"
+              v-model="nuevoInforme.fecha" 
+              :showIcon="true"
+              dateFormat="dd/mm/yy"
+              class="w-full"
+            />
+          </div>
+        </div>
+        <div class="">
+          <label for="contenidoInforme" class="block text-900 font-medium mb-2 text-color-primary">Contenido del Informe</label>
+          <Textarea 
+            id="contenidoInforme"
+            v-model="nuevoInforme.contenido" 
+            :rows="7" 
+            placeholder="Escriba el contenido del informe aquí..."
+            class="w-full"
+          />
+        </div>
+      </div>
+      
+      <template #footer>
+        <Button 
+          label="Cancelar" 
+          @click="cancelarNuevoInforme"
+          class="back-button"
+        />
+        <Button 
+          label="Crear Informe" 
+          @click="guardarNuevoInforme"
+          class="button-primary-custom"
+          :disabled="!esInformeValido"
+        />
+      </template>
+    </Dialog>
   </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { showSuccess } from '@/composables/useToast';
+import { showError, showSuccess } from '@/composables/useToast';
+import { usePacienteStore } from '../store';
+import { useAuthStore } from '@/modules/auth/store';
+import HistoriaFisiatrica from '../components/HistoriaFisiatrica.vue';
 
+const pacienteStore = usePacienteStore();
 const route = useRoute();
 const router = useRouter();
 const tabActivo = ref('Informes');
 const rows = ref(5);
+const authStore = useAuthStore();
 
 // Estados de los modales
 const modalVerVisible = ref(false);
 const modalComentarioVisible = ref(false);
 const modalMultimediaVisible = ref(false);
+const modalNuevoInformeVisible = ref(false);
 const informeSeleccionado = ref(null);
 const nuevoComentario = ref('');
 const tipoMultimedia = ref('imagen');
 const archivoSeleccionado = ref(null);
 const vistaPrevia = ref(null);
+const informes = ref([]);
+const comentarios = ref([]);
+const comentarioLoading = ref(false);
 
 // Formulario de nuevo multimedia
 const nuevoMultimedia = ref({
@@ -918,111 +554,11 @@ const nuevoMultimedia = ref({
   fecha: new Date()
 });
 
-// Estado del tab de historia fisiátrica
-const tabHistoriaActivo = ref(0);
-
-// Estado del sub-tab de examen físico
-const subTabExamenFisicoActivo = ref(0);
-
-// Tabs de navegación de la historia
-const tabsHistoria = ref([
-  { id: 1, label: 'Evaluación y Consulta' },
-  { id: 2, label: 'Antecedentes' },
-  { id: 3, label: 'Anamnesis Sistémica' },
-  { id: 4, label: 'Examen Físico' },
-  { id: 5, label: 'Diagnóstico Funcional' }
-]);
-
-// Sub-tabs de navegación del examen físico
-const subTabsExamenFisico = ref([
-  { id: 1, label: 'General' },
-  { id: 2, label: 'Cabeza y sentidos' },
-  { id: 3, label: 'Tronco y extremidades' },
-  { id: 4, label: 'Sistema y actividades' }
-]);
-
-// Datos de la historia fisiátrica
-const historiaFisiatica = ref({
-  fechaEvaluacion: '15/06/2025',
-  derivadosPor: 'Dolor lumbar crónico, limitación funcional en actividades de la vida diaria. Derivado por traumatólogo Dr. García.',
-  antecedentesCuadro: 'Paciente refiere dolor lumbar de 6 meses de evolución, que se agrava con la bipedestación prolongada y la flexión del tronco.',
-  medicacionActual: 'Ibuprofeno 600mg cada 8 horas, Paracetamol 500mg según necesidad.',
-  estudiosRealizados: 'Radiografía de columna lumbosacra: leve escoliosis. Resonancia magnética: protrusión discal L4-L5.',
-  
-  // Antecedentes
-  antecedentesHereditarios: 'Padre con antecedentes de lumbalgia crónica.',
-  antecedentesPatologicos: 'Hipertensión arterial controlada con medicación.',
-  antecedentesQuirurgicos: 'Apendicectomía a los 25 años.',
-  antecedentesMetabolicos: 'Diabetes tipo 2 controlada con dieta y medicación.',
-  antecedentesInmunologicos: 'Sin antecedentes relevantes.',
-  
-  // Fisiológicos
-  fisiologicosDormir: 'Patrón de sueño alterado por el dolor, duerme 5-6 horas por noche.',
-  fisiologicosCatarsis: 'Función intestinal normal.',
-  fisiologicosPeriodoMenstrual: 'No aplica.',
-  fisiologicosAlimentacion: 'Dieta balanceada, sin restricciones especiales.',
-  fisiologicosDiuresis: 'Función urinaria normal.',
-  fisiologicosSexualidad: 'Sin alteraciones reportadas.',
-  
-  // Anamnesis sistémica
-  anamnesisComunicacion: 'Comunicación verbal normal, sin alteraciones del lenguaje.',
-  anamnesisMotricidad: 'Limitación en la flexión del tronco, dolor al levantar objetos pesados.',
-  anamnesisVidaDiaria: 'Dificultad para vestirse, calzarse y realizar tareas domésticas que requieren flexión.',
-  
-  // Examen físico - General
-  examenActitud: 'Paciente colaborador, se queja de dolor lumbar.',
-  examenComunicacionCodigos: 'Comunicación verbal clara y coherente.',
-  examenPielFaneras: 'Piel y faneras normales.',
-  
-  // Examen físico - Cabeza y sentidos
-  examenCabeza: 'Cabeza normocéfala, sin alteraciones.',
-  examenMovimientosAnormales: 'Sin movimientos anormales.',
-  examenOrejas: 'Orejas normales.',
-  
-  // Complejo orofacial
-  examenBoca: 'Boca normal.',
-  examenLengua: 'Lengua normal.',
-  examenMordida: 'Mordida normal.',
-  examenMaxilares: 'Maxilares normales.',
-  
-  // Sentidos
-  examenOjos: 'Ojos normales, movimientos oculares conservados.',
-  examenEstrabismo: 'Sin estrabismo.',
-  examenAudicion: 'Audición normal.',
-  examenLabios: 'Labios normales.',
-  examenDenticion: 'Dentición completa.',
-  examenPaladarVelo: 'Paladar y velo normales.',
-  
-  // Examen físico - Tronco y extremidades
-  examenTorax: 'Tórax normal.',
-  examenColumnaVertebral: 'Dolor a la palpación en región lumbar, limitación de movimientos.',
-  examenCaderas: 'Caderas normales.',
-  examenPies: 'Pies normales.',
-  examenManos: 'Manos normales.',
-  
-  // Columna derecha
-  examenAbdomen: 'Abdomen blando, no doloroso.',
-  examenPelvis: 'Pelvis normal.',
-  examenMMII: 'Miembros inferiores normales.',
-  examenMMSS: 'Miembros superiores normales.',
-  examenLateralidad: 'Diestro.',
-  
-  // Examen físico - Sistema y actividades
-  examenApRespiratorio: 'Aparato respiratorio normal.',
-  examenApDigestivo: 'Aparato digestivo normal.',
-  examenActividadSensoperceptual: 'Sensibilidad normal.',
-  examenDesplazamientoMarcha: 'Marcha normal, sin alteraciones.',
-  
-  // Columna derecha
-  examenApCardiovascular: 'Aparato cardiovascular normal.',
-  examenActividadRefleja: 'Reflejos osteotendinosos normales.',
-  examenReaccionesPosturales: 'Reacciones posturales normales.',
-  examenEtapaDesarrollo: 'Desarrollo normal para la edad.',
-  
-  // Diagnóstico funcional
-  diagnosticoFuncional: 'Lumbalgia crónica mecánica con limitación funcional moderada. Dolor lumbar de origen discal (protrusión L4-L5) con irradiación a miembro inferior derecho.',
-  conductaSeguirObjetivos: 'Tratamiento fisiátrico con ejercicios de fortalecimiento de la musculatura lumbar y abdominal. Educación en higiene postural. Control del dolor con técnicas de fisioterapia.',
-  objetivosFamilia: 'Apoyo en la realización de ejercicios domiciliarios. Modificación del entorno para evitar posturas que agraven el dolor.'
+// Formulario de nuevo informe
+const nuevoInforme = ref({
+  titulo: '',
+  contenido: '',
+  fecha: new Date()
 });
 
 // Datos multimedia de ejemplo
@@ -1053,23 +589,6 @@ const videos = ref([
   }
 ]);
 
-
-
-// Datos del paciente (aquí conectarías con tu API)
-const paciente = ref({
-  id: 1,
-  nombre: 'Ana Martínez',
-  dni: '45678901',
-  iniciales: 'AM',
-  prestacion: 'Hogar',
-  ultimaModificacion: '2025-07-25'
-});
-
-// Contenido de los informes
-const informeAvance = ref(`Paciente muestra una mejoría significativa en la movilidad del miembro superior derecho. Se recomienda continuar con el programa de ejercicios establecido y realizar seguimiento semanal para evaluar progresos. La terapia ocupacional ha sido efectiva en la recuperación de la funcionalidad.`);
-
-const informeEvaluacion = ref(`Se realiza evaluación inicial. Paciente refiere dolor moderado en la zona lumbar. Se inicia tratamiento fisiátrico con sesiones de fisioterapia tres veces por semana. Se recomienda reposo relativo y evitar movimientos bruscos.`);
-
 // Configuración de tabs
 const tabs = ref([
   { label: 'Informes', icon: 'pi pi-file-text' },
@@ -1077,87 +596,71 @@ const tabs = ref([
   { label: 'Multimedia', icon: 'pi pi-images' }
 ]);
 
+const crearHistoriaFisiatrica = computed(() => {
+  return pacienteStore.historiaFisiatrica.fechaEvaluacion === `Sin información`;
+});
+
 // Métodos
-const verInforme = (tipo) => {
-  // Configurar el informe seleccionado según el tipo
-  if (tipo === 'avance') {
-    informeSeleccionado.value = {
-      titulo: 'Avance en la terapia',
-      profesional: 'Dr. Juan Manuel Belgrano',
-      fecha: '26/06/2025',
-      contenido: informeAvance.value,
-      comentarios: [
-        {
-          autor: 'Dr. Carlos López',
-          fecha: '27/06/2025',
-          texto: 'Excelente progreso del paciente. Recomiendo continuar con la terapia actual.'
-        },
-        {
-          autor: 'Lic. María González',
-          fecha: '28/06/2025',
-          texto: 'Paciente muestra mejoría en la coordinación motora.'
-        }
-      ]
-    };
-  } else if (tipo === 'evaluacion') {
-    informeSeleccionado.value = {
-      titulo: 'Evaluación inicial',
-      profesional: 'Lic. Ana Pérez',
-      fecha: '15/06/2025',
-      contenido: informeEvaluacion.value,
-      comentarios: [
-        {
-          autor: 'Dr. Roberto Silva',
-          fecha: '16/06/2025',
-          texto: 'Evaluación completa y detallada. Tratamiento bien planificado.'
-        }
-      ]
-    };
+const verInforme = async (informe) => {
+  comentarioLoading.value = true;
+  try{
+    comentarios.value = await pacienteStore.obtenerComentarios(informe.hashId);
+
+  }catch(error){
+    showError('No es posible obtener los comentarios');
+  }finally{
+    comentarioLoading.value = false;
   }
+  
+  // Configurar el informe seleccionado con los datos reales
+  informeSeleccionado.value = {
+    id: informe.id,
+    titulo: informe.titulo,
+    profesional: informe.profesional.nombreCompleto,
+    fecha: informe.fechaCreacion,
+    contenido: informe.contenido,
+    tipoInforme: informe.tipoInforme.nombre,
+    anexos: informe.anexos || [],
+    comentarios: informe.comentarios || []
+  };
   
   modalVerVisible.value = true;
 };
 
-const agregarComentario = (tipo) => {
-  // Configurar el informe seleccionado según el tipo
-  if (tipo === 'avance') {
-    informeSeleccionado.value = {
-      titulo: 'Avance en la terapia',
-      profesional: 'Dr. Juan Manuel Belgrano',
-      fecha: '26/06/2025',
-      contenido: informeAvance.value
-    };
-  } else if (tipo === 'evaluacion') {
-    informeSeleccionado.value = {
-      titulo: 'Evaluación inicial',
-      profesional: 'Lic. Ana Pérez',
-      fecha: '15/06/2025',
-      contenido: informeEvaluacion.value
-    };
-  }
-  
-  nuevoComentario.value = '';
+const agregarComentario = async (informe) => {
+  // Configurar el informe seleccionado con los datos reales
+  informeSeleccionado.value = {
+    id: informe.id,
+    titulo: informe.titulo,
+    profesional: informe.profesional.nombreCompleto,
+    fecha: informe.fechaCreacion,
+    contenido: informe.contenido,
+    tipoInforme: informe.tipoInforme.nombre,
+    comentarios: informe.comentarios || [],
+    hashId: informe.hashId
+  };
+
   modalComentarioVisible.value = true;
 };
 
-const guardarComentario = () => {
+const guardarComentario = async () => {
   if (nuevoComentario.value.trim()) {
-    // Aquí implementarías la lógica para guardar el comentario en tu API
     const comentario = {
-      autor: 'Usuario Actual', // Esto vendría de tu sistema de autenticación
+      idUsuario: authStore.usuario.id_usuario,
       fecha: new Date().toLocaleDateString('es-ES'),
       texto: nuevoComentario.value.trim()
     };
-    
-    // Agregar el comentario al informe seleccionado
-    if (!informeSeleccionado.value.comentarios) {
-      informeSeleccionado.value.comentarios = [];
+
+    try{
+      await pacienteStore.crearComentario(comentario, informeSeleccionado.value.hashId);
+      
+      comentarios.value = await pacienteStore.obtenerComentarios(informeSeleccionado.value.hashId);
+      showSuccess('Comentario agregado correctamente');
+      nuevoComentario.value = '';
+      modalComentarioVisible.value = false;
+    }catch(error){
+      showError('No es posible agregar el comentario');
     }
-    informeSeleccionado.value.comentarios.push(comentario);
-    
-    showSuccess('Comentario agregado correctamente');
-    modalComentarioVisible.value = false;
-    nuevoComentario.value = '';
   }
 };
 
@@ -1271,11 +774,66 @@ const crearNuevaHistoria = () => {
   router.push(`/pacientes/${route.params.id}/nueva-historia`);
 };
 
+// Funciones para nuevo informe
+const crearNuevoInforme = () => {
+  limpiarFormularioInforme();
+  modalNuevoInformeVisible.value = true;
+};
+
+const limpiarFormularioInforme = () => {
+  nuevoInforme.value = {
+    titulo: '',
+    contenido: '',
+    fecha: new Date()
+  };
+};
+
+const cancelarNuevoInforme = () => {
+  modalNuevoInformeVisible.value = false;
+  limpiarFormularioInforme();
+};
+
+const guardarNuevoInforme = async () => {
+
+  const user = authStore.usuario;
+
+  if (esInformeValido.value) {
+
+    const informe = {
+      idUsuario: user.id_usuario,
+      titulo: nuevoInforme.value.titulo,
+      contenido: nuevoInforme.value.contenido,
+      fecha: formatearFecha(nuevoInforme.value.fecha),
+      dniPaciente: pacienteStore.paciente.dni,
+      hashIdEHR: pacienteStore.paciente.hashIdEHR,
+    };
+
+    try {
+      await pacienteStore.crearInforme(informe);
+
+      showSuccess('Informe creado correctamente');
+      modalNuevoInformeVisible.value = false;
+      limpiarFormularioInforme();
+      
+      // Refrescar la lista de informes
+      informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
+    } catch (error) {
+      showError('No es posible crear el informe');
+    }
+  }
+};
+
 // Computed properties
 const esFormularioValido = computed(() => {
   return nuevoMultimedia.value.titulo.trim() && 
          archivoSeleccionado.value && 
          nuevoMultimedia.value.fecha;
+});
+
+const esInformeValido = computed(() => {
+  return nuevoInforme.value.titulo.trim() && 
+         nuevoInforme.value.contenido.trim() && 
+         nuevoInforme.value.fecha;
 });
 
 const formatearFecha = (fecha) => {
@@ -1287,13 +845,14 @@ const formatearFecha = (fecha) => {
   });
 };
 
-onMounted(() => {
-  // Aquí cargarías los datos del paciente desde tu API usando route.params.id
-  const pacienteId = route.params.id;
-  console.log('Cargando paciente con ID:', pacienteId);
-  
-  // Ejemplo de carga de datos
-  // cargarPaciente(pacienteId);
+onMounted(async () => {
+  try{
+    pacienteStore.paciente = await pacienteStore.obtenerPaciente(route.params.id);
+    informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
+    pacienteStore.historiaFisiatrica = await pacienteStore.obtenerHistoriaFisiatrica(pacienteStore.paciente.hashId);
+  }catch(error){
+    showError('No es posible obtener el paciente');
+  }
 });
 </script>
 

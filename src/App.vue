@@ -11,7 +11,6 @@
   import { setToast } from '@/composables/useToast';
   import { computed, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
-  import { showSuccess, showError, showWarning, showInfo } from '@/composables/useToast';
   import LayoutView from '@/layout/LayoutView.vue';
 
   const router = useRouter();
@@ -21,11 +20,4 @@
     const toast = useToast();
     setToast(toast);
   })
-  
-  const handleClick = () => {
-    showSuccess('Exito!')
-    showError('Error!')
-    showWarning('Advertencia!')
-    showInfo('Info!')
-  }
 </script>
