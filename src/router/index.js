@@ -5,6 +5,7 @@ import {
 } from 'vue-router';
 import authRoutes from '@/modules/auth/routes';
 import pacienteRoutes from '@/modules/paciente/routes';
+import administracionRoutes from '@/modules/administracion/routes';
 
 const routes = [
   {
@@ -16,6 +17,9 @@ const routes = [
   },
   {
     ...pacienteRoutes,
+  },
+  {
+    ...administracionRoutes,
   },
   {
     path: '/:pathMatch(.*)*',

@@ -15,6 +15,7 @@ export const urlAuth = `${AUTH_URL}/auth`;
 export const urlAbm = `${BACKEND_URL}/abm`;
 export const urlPaciente = `${BACKEND_URL}/paciente`;
 export const urlEhr = `${BACKEND_URL}/ehr`;
+export const urlFile = `${BACKEND_URL}/file`;
 
 // URLs para FHIR
 export const urlFhir = `${FHIR_URL}/fhir`;
@@ -22,4 +23,6 @@ export const urlFhirLocation = `${urlFhir}/Location`;
 export const urlFhirOrganization = `${urlFhir}/Organization`;
 export const urlFhirPatient = `${urlFhir}/Patient`;
 export const urlFhirReport = `${urlFhir}/DiagnosticReport`;
+export const urlFhirDocumentReference = `${urlFhir}/DocumentReference`;
 export const urlFhirAnnex = `${urlFhir}/Annex`;
+export const urlFhirPractitioner = `${urlFhir}/Practitioner`;
