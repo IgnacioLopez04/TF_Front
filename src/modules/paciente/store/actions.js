@@ -4,7 +4,7 @@ import {
   urlFhirOrganization,
   urlFhirPatient,
   urlFhirReport,
-  urlEhr,
+  urlFhirDocumentReference,
 } from '@/utils';
 import {
   extractFhirResources,
@@ -15,6 +15,8 @@ import {
   transformarHistoriaFisiatrica,
 } from '@/utils/fhirHelper';
 import FhirService from '@/services/fhirService';
+import { useAuthStore } from '@/modules/auth/store';
+const authStore = useAuthStore();
 
 export default {
   async crearPaciente(pacienteData) {
@@ -495,15 +497,12 @@ export default {
   },
 
   async obtenerHistoriaFisiatrica(hashId) {
-    console.log('hashId', hashId);
     try {
       // Buscar la historia fisiatrica usando operación específica
       const response = await useAxios.get(
         `${urlFhirReport}/$get-historia?patient=${hashId}`,
       );
-      console.log('response', response);
       const resources = extractFhirResources(response.data);
-      console.log('resources', resources);
 
       // Filtrar solo las historias fisiatricas (usando el código LOINC específico)
       const historiasFisiatricas = resources.filter((resource) =>
@@ -661,6 +660,145 @@ export default {
       return null;
     } catch (error) {
       console.error('Error en obtenerHistoriaFisiatrica:', error);
+      throw error;
+    }
+  },
+
+  async agregarImagen(nuevoMultimedia) {
+    try {
+      // Crear FormData para enviar archivo + metadatos al FHIR Server
+      const formData = new FormData();
+
+      // Agregar el archivo
+      formData.append('file', nuevoMultimedia.archivo);
+
+      // Crear DocumentReference con extensiones
+      const documentReference = {
+        resourceType: 'DocumentReference',
+        status: 'current',
+        type: {
+          text: nuevoMultimedia.tipo === 'imagen' ? 'Imagen' : 'Video',
+        },
+        subject: {
+          reference: `Patient/${this.paciente.hashId}`,
+        },
+        extension: [
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/patient-hash-id',
+            valueString: this.paciente.hashId,
+          },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/user-id',
+            valueString: authStore.usuario.id_usuario || '',
+          },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/file-upload',
+            valueBoolean: true,
+          },
+        ],
+      };
+
+      // Agregar DocumentReference como JSON string
+      formData.append('documentReference', JSON.stringify(documentReference));
+
+      // Enviar archivo + metadatos al servidor FHIR (flujo correcto)
+      const response = await useAxios.post(
+        `${urlFhirDocumentReference}/$upload-file`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async agregarVideo(nuevoMultimedia) {
+    try {
+      // Crear FormData para enviar archivo + metadatos al FHIR Server
+      const formData = new FormData();
+
+      // Agregar el archivo
+      formData.append('file', nuevoMultimedia.archivo);
+
+      // Crear DocumentReference con extensiones
+      const documentReference = {
+        resourceType: 'DocumentReference',
+        status: 'current',
+        type: {
+          text: 'Video',
+        },
+        subject: {
+          reference: `Patient/${this.paciente.hashId}`,
+        },
+        extension: [
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/patient-hash-id',
+            valueString: this.paciente.hashId,
+          },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/user-id',
+            valueString: authStore.usuario.id_usuario || '',
+          },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/file-upload',
+            valueBoolean: true,
+          },
+        ],
+      };
+
+      // Agregar DocumentReference como JSON string
+      formData.append('documentReference', JSON.stringify(documentReference));
+
+      // Enviar archivo + metadatos al servidor FHIR (flujo correcto)
+      const response = await useAxios.post(
+        `${urlFhirDocumentReference}/$upload-file`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async obtenerArchivos(hashId) {
+    try {
+      const response = await useAxios.get(
+        `${urlFhirDocumentReference}/$get-files?patient=${this.paciente.hashId}`,
+      );
+      const resources = extractFhirResources(response.data);
+
+      // Transformar los DocumentReferences a formato legible
+      const archivosLegibles = resources.map((archivo) => {
+        const extensionValues = getExtensionValues(archivo.extension, {
+          'http://example.org/fhir/StructureDefinition/file-type': 'tipo',
+          'http://example.org/fhir/StructureDefinition/file-url': 'url',
+          'http://example.org/fhir/StructureDefinition/file-name': 'nombre',
+        });
+
+        return {
+          id: archivo.id,
+          nombre: archivo.description || extensionValues.nombre || 'Archivo',
+          tipo: extensionValues.tipo || 'Desconocido',
+          url: extensionValues.url || '',
+          fechaCreacion: archivo.date || new Date().toISOString(),
+        };
+      });
+
+      this.archivos = archivosLegibles;
+      return archivosLegibles;
+    } catch (error) {
       throw error;
     }
   },

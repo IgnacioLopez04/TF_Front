@@ -570,7 +570,6 @@ export function transformarComentario(diagnosticReport) {
  * @returns {Object} Objeto con la información de la historia fisiatrica en formato legible
  */
 export function transformarHistoriaFisiatrica(diagnosticReport) {
-  console.log('diagnosticReport', diagnosticReport);
   // Extraer información básica de la historia fisiatrica
   const historiaFisiatrica = {
     id: diagnosticReport.id || 'N/A',

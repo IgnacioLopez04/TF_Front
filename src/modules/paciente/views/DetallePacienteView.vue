@@ -152,7 +152,7 @@
             </div>
 
             <!-- Sección de Imágenes -->
-            <div class="mb-6">
+            <div class="mb-6" v-if="imagenes.length > 0">
               <h4 class="text-lg font-semibold mb-3 text-color-primary">Imágenes</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div 
@@ -183,7 +183,7 @@
             </div>
 
             <!-- Sección de Videos -->
-            <div class="mb-6">
+            <div class="mb-6" v-if="videos.length > 0">
               <h4 class="text-lg font-semibold mb-3 text-color-primary">Videos</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div 
@@ -388,22 +388,26 @@
             {{ tipoMultimedia === 'imagen' ? 'Seleccionar Imagen' : 'Seleccionar Video' }}
           </label>
           <div class="flex align-items-center gap-3">
-            <input 
-              type="file" 
-              id="archivoMultimedia"
-              ref="archivoInput"
+            <FileUpload 
+              chooseLabel="Seleccionar Archivo" 
+              @select="onArchivoSeleccionado"
+              mode="basic"
               :accept="tipoMultimedia === 'imagen' ? 'image/*' : 'video/*'"
-              @change="onArchivoSeleccionado"
-              class="hidden"
-            />
-            <Button 
-              label="Seleccionar Archivo" 
-              @click="$refs.archivoInput.click()"
+              customUpload="true"
               class="p-button-outlined p-button-primary"
+              ref="fileUploadRef"
             />
-            <span v-if="archivoSeleccionado" class="text-sm text-gray-600">
-              {{ archivoSeleccionado.name }}
-            </span>
+            <div v-if="archivoSeleccionado" class="flex align-items-center gap-2 flex-1">
+              <span class="text-sm text-gray-600 flex-1">
+                {{ archivoSeleccionado.name }}
+              </span>
+              <Button 
+                icon="pi pi-times" 
+                @click="eliminarArchivo"
+                class="p-button-text p-button-danger p-button-rounded"
+                v-tooltip.top="'Eliminar archivo'"
+              />
+            </div>
           </div>
         </div>
 
@@ -423,14 +427,15 @@
         <div v-if="tipoMultimedia === 'video' && archivoSeleccionado" class="mb-4">
           <label class="block text-900 font-medium mb-2 text-color-primary">Vista Previa</label>
           <div class="text-center">
-            <video 
+            <FileUpload 
               v-if="archivoSeleccionado"
-              :src="vistaPrevia"
+              :value="archivoSeleccionado"
+              mode="basic"
               controls
+              :auto="true"
+              :customUpload="true"
               class="max-w-full h-32 border-round border border-gray-200"
-            >
-              Tu navegador no soporta el elemento video.
-            </video>
+            />
           </div>
         </div>
 
@@ -457,6 +462,7 @@
           @click="guardarMultimedia"
           class="button-primary-custom"
           :disabled="!esFormularioValido"
+          :loading="guardandoMultimediaLoading"
         />
       </template>
     </Dialog>
@@ -543,10 +549,11 @@ const nuevoComentario = ref('');
 const tipoMultimedia = ref('imagen');
 const archivoSeleccionado = ref(null);
 const vistaPrevia = ref(null);
+const fileUploadRef = ref(null);
 const informes = ref([]);
 const comentarios = ref([]);
 const comentarioLoading = ref(false);
-
+const guardandoMultimediaLoading = ref(false);  
 // Formulario de nuevo multimedia
 const nuevoMultimedia = ref({
   titulo: '',
@@ -562,32 +569,9 @@ const nuevoInforme = ref({
 });
 
 // Datos multimedia de ejemplo
-const imagenes = ref([
-  {
-    id: 1,
-    nombre: 'radiografia_lumbar_15062025.jpg',
-    fecha: '15/06/2025',
-    thumbnail: 'https://via.placeholder.com/300x200/7c3aed/ffffff?text=Radiografía+Lumbar',
-    url: 'https://via.placeholder.com/800x600/7c3aed/ffffff?text=Radiografía+Lumbar+Completa'
-  },
-  {
-    id: 2,
-    nombre: 'ejercicio_fisiatrico_18062025.png',
-    fecha: '18/06/2025',
-    thumbnail: 'https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Ejercicio+Fisiatrico',
-    url: 'https://via.placeholder.com/800x600/8b5cf6/ffffff?text=Ejercicio+Fisiatrico+Completo'
-  }
-]);
+const imagenes = ref([]);
 
-const videos = ref([
-  {
-    id: 1,
-    nombre: 'video_marcha_20062025.mp4',
-    fecha: '20/06/2025',
-    url: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
-    duracion: '2:30'
-  }
-]);
+const videos = ref([]);
 
 // Configuración de tabs
 const tabs = ref([
@@ -665,17 +649,26 @@ const guardarComentario = async () => {
 };
 
 // Funciones para multimedia
-const agregarImagen = () => {
-  tipoMultimedia.value = 'imagen';
-  limpiarFormularioMultimedia();
-  modalMultimediaVisible.value = true;
+const agregarImagen = async () => {
+  try{
+    tipoMultimedia.value = 'imagen';
+    limpiarFormularioMultimedia();
+    modalMultimediaVisible.value = true;
+  }catch(error){
+    showError('No es posible agregar la imagen');
+  }
 };
 
-const agregarVideo = () => {
-  tipoMultimedia.value = 'video';
-  limpiarFormularioMultimedia();
-  modalMultimediaVisible.value = true;
+const agregarVideo = async () => {
+  try{
+    tipoMultimedia.value = 'video';
+    limpiarFormularioMultimedia();
+    modalMultimediaVisible.value = true;
+  }catch(error){
+    showError('No es posible agregar el video');
+  }
 };
+
 
 const limpiarFormularioMultimedia = () => {
   nuevoMultimedia.value = {
@@ -688,7 +681,7 @@ const limpiarFormularioMultimedia = () => {
 };
 
 const onArchivoSeleccionado = (event) => {
-  const archivo = event.target.files[0];
+  const archivo = event.files[0];
   if (archivo) {
     archivoSeleccionado.value = archivo;
     
@@ -714,7 +707,15 @@ const cancelarMultimedia = () => {
   limpiarFormularioMultimedia();
 };
 
-const guardarMultimedia = () => {
+const eliminarArchivo = () => {
+  archivoSeleccionado.value = null;
+  vistaPrevia.value = null;
+  if (fileUploadRef.value) {
+    fileUploadRef.value.clear();
+  }
+};
+
+const guardarMultimedia = async () => {
   if (esFormularioValido.value) {
     // Aquí implementarías la lógica para guardar en tu API
     const multimedia = {
@@ -727,25 +728,30 @@ const guardarMultimedia = () => {
     };
     
     if (tipoMultimedia.value === 'imagen') {
-      // Agregar a la lista de imágenes
-      imagenes.value.push({
-        id: multimedia.id,
-        nombre: multimedia.archivo.name,
-        fecha: formatearFecha(multimedia.fecha),
-        thumbnail: vistaPrevia.value,
-        url: vistaPrevia.value
-      });
-      showSuccess('Imagen agregada correctamente');
+      try{
+        guardandoMultimediaLoading.value = true;
+        await pacienteStore.agregarImagen(multimedia);
+        imagenes.value.push(multimedia);
+        // imagenes.value = await pacienteStore.obtenerImagenes(pacienteStore.paciente.hashId);
+        showSuccess('Imagen agregada correctamente');
+      }catch(error){
+        showError('No es posible agregar la imagen');
+      }finally{
+        guardandoMultimediaLoading.value = false;
+      }
     } else {
       // Agregar a la lista de videos
-      videos.value.push({
-        id: multimedia.id,
-        nombre: multimedia.archivo.name,
-        fecha: formatearFecha(multimedia.fecha),
-        url: vistaPrevia.value,
-        duracion: '0:00' // Aquí podrías calcular la duración real
-      });
-      showSuccess('Video agregado correctamente');
+      try{
+        guardandoMultimediaLoading.value = true;
+        await pacienteStore.agregarVideo(multimedia);
+        videos.value.push(multimedia);
+        // videos.value = await pacienteStore.obtenerVideos(pacienteStore.paciente.hashId);
+        showSuccess('Video agregado correctamente');
+      }catch(error){
+        showError('No es posible agregar el video');
+      }finally{
+        guardandoMultimediaLoading.value = false;
+      }
     }
     
     modalMultimediaVisible.value = false;
