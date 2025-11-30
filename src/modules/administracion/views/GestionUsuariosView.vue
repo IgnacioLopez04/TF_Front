@@ -19,13 +19,6 @@
       <ProgressSpinner />
     </div>
 
-    <!-- Error state -->
-    <div v-else-if="administracionStore.error" class="p-4">
-      <Message severity="error" :closable="false">
-        {{ administracionStore.error }}
-      </Message>
-    </div>
-
     <!-- Lista de usuarios -->
     <div v-else class="flex flex-column gap-3 px-3">
       <Card 
@@ -61,6 +54,28 @@
                 </div>
               </div>
             </div>
+            <div class="flex gap-2 align-items-center action-buttons">
+              <Button 
+                icon="pi pi-pencil"
+                class="p-button-text p-button-rounded action-btn edit-btn"
+                @click="editarUsuario(usuario)"
+                title="Editar usuario"
+              />
+              <Button 
+                v-if="usuario.activo"
+                icon="pi pi-times-circle"
+                class="p-button-text p-button-rounded action-btn deactivate-btn"
+                @click="toggleEstadoUsuario(usuario)"
+                title="Desactivar usuario"
+              />
+              <Button 
+                v-else
+                icon="pi pi-check-circle"
+                class="p-button-text p-button-rounded action-btn activate-btn"
+                @click="toggleEstadoUsuario(usuario)"
+                title="Reactivar usuario"
+              />
+            </div>
           </div>
         </template>
       </Card>
@@ -71,13 +86,105 @@
       <i class="pi pi-users" style="font-size: 3rem; color: #9ca3af; margin-bottom: 1rem;"></i>
       <p>No se encontraron usuarios</p>
     </div>
+
+    <!-- Dialog para editar usuario -->
+    <Dialog 
+      v-model:visible="modalEditarVisible" 
+      header="Editar Usuario"
+      :style="{ width: '50vw' }" 
+      :modal="true"
+      class="p-fluid"
+    >
+      <div class="flex flex-column gap-4">
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="nombre" class="block text-900 font-medium mb-2">Nombre</label>
+            <InputText 
+              id="nombre"
+              v-model="formularioUsuario.nombre" 
+              placeholder="Nombre"
+              class="w-full"
+            />
+          </div>
+          <div class="flex-1">
+            <label for="apellido" class="block text-900 font-medium mb-2">Apellido</label>
+            <InputText 
+              id="apellido"
+              v-model="formularioUsuario.apellido" 
+              placeholder="Apellido"
+              class="w-full"
+            />
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="dni" class="block text-900 font-medium mb-2">DNI</label>
+            <InputText 
+              id="dni"
+              v-model="formularioUsuario.dni" 
+              placeholder="DNI"
+              class="w-full"
+            />
+          </div>
+          <div class="flex-1">
+            <label for="email" class="block text-900 font-medium mb-2">Email</label>
+            <InputText 
+              id="email"
+              v-model="formularioUsuario.email" 
+              placeholder="Email"
+              type="email"
+              class="w-full"
+            />
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-1">
+            <label for="fechaNacimiento" class="block text-900 font-medium mb-2">Fecha de Nacimiento</label>
+            <Calendar 
+              id="fechaNacimiento"
+              v-model="formularioUsuario.fechaNacimiento" 
+              dateFormat="dd/mm/yy"
+              placeholder="Seleccione una fecha"
+              class="w-full"
+              :showIcon="true"
+            />
+          </div>
+          <div class="flex-1">
+            <label for="idTipoUsuario" class="block text-900 font-medium mb-2">Tipo de Usuario</label>
+            <InputText 
+              id="idTipoUsuario"
+              v-model="formularioUsuario.idTipoUsuario" 
+              placeholder="Tipo de Usuario"
+              class="w-full"
+            />
+          </div>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button 
+          label="Cancelar" 
+          icon="pi pi-times"
+          @click="cerrarModalEditar"
+          class="p-button-text"
+        />
+        <Button 
+          label="Guardar" 
+          icon="pi pi-check"
+          @click="guardarUsuario"
+          class="p-button-primary"
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAdministracionStore } from '../store';
-import { showError } from '@/composables/useToast';
+import { showError, showSuccess } from '@/composables/useToast';
 
 const administracionStore = useAdministracionStore();
 
@@ -87,6 +194,18 @@ const filtros = ref([
   { id: 'activos', label: 'Activos' },
   { id: 'inactivos', label: 'Inactivos' }
 ]);
+
+// Estado para el modal de edición
+const modalEditarVisible = ref(false);
+const usuarioSeleccionado = ref(null);
+const formularioUsuario = ref({
+  nombre: '',
+  apellido: '',
+  dni: '',
+  email: '',
+  fechaNacimiento: null,
+  idTipoUsuario: ''
+});
 
 // Computed para filtrar usuarios
 const usuariosFiltrados = computed(() => {
@@ -135,6 +254,56 @@ const getEstadoBadgeClass = (activo) => {
   return activo 
     ? 'status-badge status-active' 
     : 'status-badge status-inactive';
+};
+
+const editarUsuario = (usuario) => {
+  usuarioSeleccionado.value = usuario;
+  // Cargar datos del usuario en el formulario
+  formularioUsuario.value = {
+    nombre: usuario.nombre || '',
+    apellido: usuario.apellido || '',
+    dni: usuario.dni || '',
+    email: usuario.email || '',
+    fechaNacimiento: usuario.fechaNacimiento ? new Date(usuario.fechaNacimiento) : null,
+    idTipoUsuario: usuario.idTipoUsuario || ''
+  };
+  modalEditarVisible.value = true;
+};
+
+const cerrarModalEditar = () => {
+  modalEditarVisible.value = false;
+  usuarioSeleccionado.value = null;
+  formularioUsuario.value = {
+    nombre: '',
+    apellido: '',
+    dni: '',
+    email: '',
+    fechaNacimiento: null,
+    idTipoUsuario: ''
+  };
+};
+
+const guardarUsuario = () => {
+  // TODO: Implementar guardado de usuario
+  console.log('Guardar usuario:', formularioUsuario.value);
+  cerrarModalEditar();
+};
+
+const toggleEstadoUsuario = async (usuario) => {
+  try {
+    const nuevoEstado = !usuario.activo;
+    await administracionStore.actualizarEstadoUsuario(usuario.hashId, nuevoEstado);
+    const mensaje = nuevoEstado 
+      ? `Usuario ${usuario.nombre} ${usuario.apellido} activado correctamente`
+      : `Usuario ${usuario.nombre} ${usuario.apellido} desactivado correctamente`;
+    showSuccess(mensaje);
+  } catch (error) {
+    console.log(error)
+    const mensaje = usuario.activo
+      ? 'Error al desactivar el usuario'
+      : 'Error al activar el usuario';
+    showError(mensaje);
+  }
 };
 
 onMounted(async () => {
@@ -244,6 +413,61 @@ onMounted(async () => {
 .status-inactive {
   background-color: #fee2e2;
   color: #991b1b;
+}
+
+/* Botones de acción */
+.action-buttons {
+  flex-shrink: 0;
+}
+
+.action-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn :deep(.p-button-icon) {
+  font-size: 1.25rem;
+}
+
+.edit-btn {
+  color: #8b5cf6 !important;
+}
+
+.edit-btn:hover {
+  background-color: #e9d5ff !important;
+  color: #7c3aed !important;
+}
+
+.activate-btn {
+  color: #10b981 !important;
+}
+
+.activate-btn:hover {
+  background-color: #d1fae5 !important;
+  color: #059669 !important;
+}
+
+.deactivate-btn {
+  color: #ef4444 !important;
+}
+
+.deactivate-btn:hover {
+  background-color: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+/* Estilos para el Dialog de edición */
+:deep(.p-dialog-header) {
+  background-color: #f8f7ff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+:deep(.p-dialog .p-dialog-header .p-dialog-title) {
+  color: #8b5cf6;
+  font-weight: bold;
 }
 
 /* Responsive */
