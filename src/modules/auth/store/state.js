@@ -8,6 +8,7 @@ export function useAuthState() {
     email: '',
     picture: '',
     nivel: null,
+    hashId: '',
   });
 
   const accessToken = ref(null);

@@ -208,8 +208,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAdministracionStore } from '../store';
 import { showError, showSuccess } from '@/composables/useToast';
+import { useAuthStore } from '@/modules/auth/store';
 
 const administracionStore = useAdministracionStore();
+const authStore = useAuthStore();
 
 const modalConfirmarVisible = ref(false);
 const accionTexto = ref('');
@@ -325,6 +327,13 @@ const toggleEstadoUsuarioConfirmar = (usuario) => {
 
 const toggleEstadoUsuario = async (usuario) => {
   try {
+    console.log(usuario.activo)
+    if(authStore.usuario.hashId === usuario.hashId && usuario.activo) {
+      showError('No es posible desactivar el usuario logeado. Cambie de usuario para realizar esta acción.');
+      modalConfirmarVisible.value = false;
+      return;
+    }
+    
     const nuevoEstado = !usuario.activo;
     await administracionStore.actualizarEstadoUsuario(usuario.hashId, nuevoEstado);
     const mensaje = nuevoEstado 

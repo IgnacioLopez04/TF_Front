@@ -28,6 +28,7 @@ export function useLogin(usuario, accessToken, startTokenMonitoring) {
         picture: userData.picture || '',
         nivel: userData.nivel || null,
         id_sucursal: userData.id_sucursal || null,
+        hashId: userData.hashId || '',
       };
 
       // Actualizar el token
