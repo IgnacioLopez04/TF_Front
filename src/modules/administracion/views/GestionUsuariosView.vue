@@ -12,6 +12,13 @@
           class="border-round filter-btn"
         />
       </div>
+      <Button 
+        icon="pi pi-plus"
+        label="Nuevo Usuario"
+        @click="abrirModalCrear"
+        class="p-button-primary create-user-btn"
+        style="background-color: #8b5cf6; border-color: #8b5cf6;"
+      />
     </div>
 
     <!-- Loading state -->
@@ -87,10 +94,10 @@
       <p>No se encontraron usuarios</p>
     </div>
 
-    <!-- Dialog para editar usuario -->
+    <!-- Dialog para crear/editar usuario -->
     <Dialog 
       v-model:visible="modalEditarVisible" 
-      header="Editar Usuario"
+      :header="modoCrear ? 'Crear Usuario' : 'Editar Usuario'"
       :style="{ width: '50vw' }" 
       :modal="true"
       class="p-fluid"
@@ -104,7 +111,11 @@
               v-model="formularioUsuario.nombre" 
               placeholder="Nombre"
               class="w-full"
+              :class="{ 'p-invalid': erroresValidacion.nombre }"
+              @keypress="(e)=> soloLetras(e)"
+              @input="(event) => filtrarSoloLetras(event, 'nombre')"
             />
+            <small v-if="erroresValidacion.nombre" class="p-error">{{ erroresValidacion.nombre }}</small>
           </div>
           <div class="flex-1">
             <label for="apellido" class="block text-900 font-medium mb-2">Apellido</label>
@@ -113,7 +124,10 @@
               v-model="formularioUsuario.apellido" 
               placeholder="Apellido"
               class="w-full"
+              :class="{ 'p-invalid': erroresValidacion.apellido }"
+              @keypress="(e)=> soloLetras(e)"
             />
+            <small v-if="erroresValidacion.apellido" class="p-error">{{ erroresValidacion.apellido }}</small>
           </div>
         </div>
 
@@ -125,7 +139,11 @@
               v-model="formularioUsuario.dni" 
               placeholder="DNI"
               class="w-full"
+              :class="{ 'p-invalid': erroresValidacion.dni }"
+              maxlength="8"
+              @keypress="(e)=> soloNumeros(e)"
             />
+            <small v-if="erroresValidacion.dni" class="p-error">{{ erroresValidacion.dni }}</small>
           </div>
           <div class="flex-1">
             <label for="email" class="block text-900 font-medium mb-2">Email</label>
@@ -148,8 +166,12 @@
               dateFormat="dd/mm/yy"
               placeholder="Seleccione una fecha"
               class="w-full"
+              :class="{ 'p-invalid': erroresValidacion.fechaNacimiento }"
               :showIcon="true"
+              :maxDate="fechaMaxima"
+              @date-select="() => validarFechaNacimiento(formularioUsuario.fechaNacimiento)"
             />
+            <small v-if="erroresValidacion.fechaNacimiento" class="p-error">{{ erroresValidacion.fechaNacimiento }}</small>
           </div>
           <div class="flex-1">
             <label for="idTipoUsuario" class="block text-900 font-medium mb-2">Tipo de Usuario</label>
@@ -224,8 +246,9 @@ const filtros = ref([
   { id: 'inactivos', label: 'Inactivos' }
 ]);
 
-// Estado para el modal de edición
+// Estado para el modal de edición/creación
 const modalEditarVisible = ref(false);
+const modoCrear = ref(false);
 const usuarioSeleccionado = ref(null);
 const formularioUsuario = ref({
   nombre: '',
@@ -234,6 +257,21 @@ const formularioUsuario = ref({
   email: '',
   fechaNacimiento: null,
   idTipoUsuario: ''
+});
+
+// Estado para errores de validación
+const erroresValidacion = ref({
+  nombre: '',
+  apellido: '',
+  dni: '',
+  fechaNacimiento: ''
+});
+
+// Fecha máxima para el calendario (ayer)
+const fechaMaxima = computed(() => {
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() - 1);
+  return hoy;
 });
 
 // Computed para filtrar usuarios
@@ -285,7 +323,94 @@ const getEstadoBadgeClass = (activo) => {
     : 'status-badge status-inactive';
 };
 
+// Funciones de validación y filtrado
+const soloLetras = (event) => {
+  const isPrintable = event.key && event.key.length === 1 
+  const isAllowed = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(event.key);
+  if(!isPrintable || !isAllowed) {
+    event.preventDefault();
+  }
+};
+
+const soloNumeros = (event) => {
+  const isPrintable = event.key && event.key.length === 1 
+  const isAllowed = /^\d+$/.test(event.key);
+  if(!isPrintable || !isAllowed) {
+    event.preventDefault();
+  }
+};
+
+const validarNombre = (valor, campo) => {
+  if (!valor || valor.trim() === '') {
+    erroresValidacion.value[campo] = `El ${campo} es obligatorio`;
+    return false;
+  }
+  if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(valor.trim())) {
+    erroresValidacion.value[campo] = `El ${campo} solo puede contener letras y acentos`;
+    return false;
+  }
+  erroresValidacion.value[campo] = '';
+  return true;
+};
+
+const validarDNI = (valor) => {
+  if (valor && valor.trim() !== '') {
+    if (!/^\d+$/.test(valor.trim())) {
+      erroresValidacion.value.dni = 'El DNI solo puede contener números';
+      return false;
+    }
+    if (valor.trim().length > 8) {
+      erroresValidacion.value.dni = 'El DNI no puede tener más de 8 dígitos';
+      return false;
+    }
+  }
+  erroresValidacion.value.dni = '';
+  return true;
+};
+
+const validarFechaNacimiento = (fecha) => {
+  if (!fecha) {
+    erroresValidacion.value.fechaNacimiento = '';
+    return true; // La fecha es opcional
+  }
+  
+  const fechaSeleccionada = new Date(fecha);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  fechaSeleccionada.setHours(0, 0, 0, 0);
+  
+  if (fechaSeleccionada >= hoy) {
+    erroresValidacion.value.fechaNacimiento = 'La fecha de nacimiento debe ser anterior al día de hoy';
+    return false;
+  }
+  
+  erroresValidacion.value.fechaNacimiento = '';
+  return true;
+};
+
+const abrirModalCrear = () => {
+  modoCrear.value = true;
+  usuarioSeleccionado.value = null;
+  formularioUsuario.value = {
+    nombre: '',
+    apellido: '',
+    dni: '',
+    email: '',
+    fechaNacimiento: null,
+    idTipoUsuario: ''
+  };
+  // Limpiar errores de validación
+  erroresValidacion.value = {
+    nombre: '',
+    apellido: '',
+    dni: '',
+    fechaNacimiento: ''
+  };
+  modalEditarVisible.value = true;
+};
+
 const editarUsuario = (usuario) => {
+  modoCrear.value = false;
   usuarioSeleccionado.value = usuario;
   // Cargar datos del usuario en el formulario
   formularioUsuario.value = {
@@ -301,6 +426,7 @@ const editarUsuario = (usuario) => {
 
 const cerrarModalEditar = () => {
   modalEditarVisible.value = false;
+  modoCrear.value = false;
   usuarioSeleccionado.value = null;
   formularioUsuario.value = {
     nombre: '',
@@ -310,12 +436,77 @@ const cerrarModalEditar = () => {
     fechaNacimiento: null,
     idTipoUsuario: ''
   };
+  // Limpiar errores de validación
+  erroresValidacion.value = {
+    nombre: '',
+    apellido: '',
+    dni: '',
+    fechaNacimiento: ''
+  };
 };
 
-const guardarUsuario = () => {
-  // TODO: Implementar guardado de usuario
-  console.log('Guardar usuario:', formularioUsuario.value);
-  cerrarModalEditar();
+const guardarUsuario = async () => {
+  try {
+    // Validaciones completas
+    let esValido = true;
+    
+    // Validar nombre
+    if (!validarNombre(formularioUsuario.value.nombre, 'nombre')) {
+      esValido = false;
+    }
+    
+    // Validar apellido
+    if (!validarNombre(formularioUsuario.value.apellido, 'apellido')) {
+      esValido = false;
+    }
+    
+    // Validar DNI (opcional pero si se ingresa debe ser válido)
+    if (formularioUsuario.value.dni && formularioUsuario.value.dni.trim() !== '') {
+      if (!validarDNI(formularioUsuario.value.dni)) {
+        esValido = false;
+      }
+    }
+    
+    // Validar fecha de nacimiento
+    if (!validarFechaNacimiento(formularioUsuario.value.fechaNacimiento)) {
+      esValido = false;
+    }
+    
+    if (!esValido) {
+      showError('Por favor, corrija los errores en el formulario');
+      return;
+    }
+
+    // Preparar datos para enviar
+    const datosUsuario = { ...formularioUsuario.value };
+    
+    // Formatear fecha solo como YYYY-MM-DD sin hora
+    if (datosUsuario.fechaNacimiento) {
+      const fecha = new Date(datosUsuario.fechaNacimiento);
+      const year = fecha.getFullYear();
+      const month = String(fecha.getMonth() + 1).padStart(2, '0');
+      const day = String(fecha.getDate()).padStart(2, '0');
+      datosUsuario.fechaNacimiento = `${year}-${month}-${day}`;
+    }
+
+    if (modoCrear.value) {
+      // Crear nuevo usuario
+      await administracionStore.crearUsuario(datosUsuario);
+      showSuccess(`Usuario ${formularioUsuario.value.nombre} ${formularioUsuario.value.apellido} creado correctamente`);
+    } else {
+      // Editar usuario existente
+      // TODO: Implementar edición de usuario
+      console.log('Editar usuario:', datosUsuario);
+      showError('La funcionalidad de edición aún no está implementada');
+    }
+    
+    cerrarModalEditar();
+  } catch (error) {
+    const mensaje = modoCrear.value 
+      ? 'Error al crear el usuario'
+      : 'Error al editar el usuario';
+    showError(mensaje);
+  }
 };
 
 const toggleEstadoUsuarioConfirmar = (usuario) => {
