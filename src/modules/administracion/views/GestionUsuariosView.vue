@@ -65,14 +65,14 @@
                 v-if="usuario.activo"
                 icon="pi pi-times-circle"
                 class="p-button-text p-button-rounded action-btn deactivate-btn"
-                @click="toggleEstadoUsuario(usuario)"
+                @click="toggleEstadoUsuarioConfirmar(usuario)"
                 title="Desactivar usuario"
               />
               <Button 
                 v-else
                 icon="pi pi-check-circle"
                 class="p-button-text p-button-rounded action-btn activate-btn"
-                @click="toggleEstadoUsuario(usuario)"
+                @click="toggleEstadoUsuarioConfirmar(usuario)"
                 title="Reactivar usuario"
               />
             </div>
@@ -179,6 +179,29 @@
       </template>
     </Dialog>
   </div>
+  <Dialog
+    v-model:visible="modalConfirmarVisible"
+    :header="accionTexto ? 'Desactivar usuario' : 'Reactivar usuario'"
+    :style="{ width: '50vw' }"
+    :modal="true"
+    class="p-fluid"
+  >
+    <p>¿Está seguro que desea {{ accionTexto }} al usuario {{ identificadorUsuario }}?</p>
+    <template #footer>
+      <Button 
+        label="Cancelar" 
+        icon="pi pi-times"
+        @click="modalConfirmarVisible = false"
+        class="p-button-text"
+      />
+      <Button 
+        label="Confirmar" 
+        icon="pi pi-check"
+        @click="toggleEstadoUsuario(usuarioSeleccionado)"
+        class="p-button-primary"
+      />
+    </template>
+  </Dialog>
 </template>
 
 <script setup>
@@ -187,6 +210,10 @@ import { useAdministracionStore } from '../store';
 import { showError, showSuccess } from '@/composables/useToast';
 
 const administracionStore = useAdministracionStore();
+
+const modalConfirmarVisible = ref(false);
+const accionTexto = ref('');
+const identificadorUsuario = ref('');
 
 const filtroActivo = ref('todos');
 const filtros = ref([
@@ -289,6 +316,13 @@ const guardarUsuario = () => {
   cerrarModalEditar();
 };
 
+const toggleEstadoUsuarioConfirmar = (usuario) => {
+  modalConfirmarVisible.value = true;
+  usuarioSeleccionado.value = usuario;
+  accionTexto.value = usuario.activo ? 'desactivar' : 'reactivar';
+  identificadorUsuario.value = `${usuario.nombre} ${usuario.apellido}`;
+};
+
 const toggleEstadoUsuario = async (usuario) => {
   try {
     const nuevoEstado = !usuario.activo;
@@ -297,12 +331,13 @@ const toggleEstadoUsuario = async (usuario) => {
       ? `Usuario ${usuario.nombre} ${usuario.apellido} activado correctamente`
       : `Usuario ${usuario.nombre} ${usuario.apellido} desactivado correctamente`;
     showSuccess(mensaje);
+    modalConfirmarVisible.value = false;
   } catch (error) {
-    console.log(error)
     const mensaje = usuario.activo
       ? 'Error al desactivar el usuario'
       : 'Error al activar el usuario';
     showError(mensaje);
+    modalConfirmarVisible.value = false;
   }
 };
 
