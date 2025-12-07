@@ -502,6 +502,10 @@ const guardarUsuario = async () => {
     
     cerrarModalEditar();
   } catch (error) {
+    if(error.response.status === 400) {
+      showError('Usuario ya existe. Por favor, active el usuario existente o controle los datos ingresados.');
+      return;
+    }
     const mensaje = modoCrear.value 
       ? 'Error al crear el usuario'
       : 'Error al editar el usuario';
