@@ -1,24 +1,36 @@
 <template>
   <div class="page-container p-4">
     <!-- Header con filtros -->
-    <div class="flex justify-content-between align-items-center mb-4">
-      <div class="flex gap-2 p-3 surface-100 border-round">
+    <div class="header-container flex justify-content-between align-items-center mb-4">
+      <div class="filters-container flex gap-2 align-items-center">
+        <div class="flex gap-2 p-3 surface-100 border-round filters-wrapper">
+          <Button 
+            v-for="filtro in filtros"
+            :key="filtro.id"
+            :label="filtro.label" 
+            :class="{ 'p-button-outlined': filtroActivo !== filtro.id, 'active-filter-btn': filtroActivo === filtro.id }"
+            @click="cambiarFiltro(filtro.id)"
+            class="border-round filter-btn"
+          />
+        </div>
+      </div>
+      <div class="search-and-action flex gap-2 align-items-center">
+        <span class="p-input-icon-left search-input-container">
+          <i class="pi pi-search" />
+          <InputText 
+            v-model="terminoBusqueda"
+            placeholder="Buscar por nombre, DNI, email..."
+            class="search-input"
+          />
+        </span>
         <Button 
-          v-for="filtro in filtros"
-          :key="filtro.id"
-          :label="filtro.label" 
-          :class="{ 'p-button-outlined': filtroActivo !== filtro.id, 'active-filter-btn': filtroActivo === filtro.id }"
-          @click="cambiarFiltro(filtro.id)"
-          class="border-round filter-btn"
+          icon="pi pi-plus"
+          label="Nuevo Usuario"
+          @click="abrirModalCrear"
+          class="p-button-primary create-user-btn"
+          style="background-color: #8b5cf6; border-color: #8b5cf6;"
         />
       </div>
-      <Button 
-        icon="pi pi-plus"
-        label="Nuevo Usuario"
-        @click="abrirModalCrear"
-        class="p-button-primary create-user-btn"
-        style="background-color: #8b5cf6; border-color: #8b5cf6;"
-      />
     </div>
 
     <!-- Loading state -->
@@ -34,24 +46,24 @@
         class="user-card"
       >
         <template #content>
-          <div class="flex justify-content-between align-items-center">
-            <div class="flex align-items-center gap-3">
+          <div class="user-card-content flex justify-content-between align-items-center">
+            <div class="user-info-section flex align-items-center gap-3">
               <Avatar 
                 :label="getInitials(usuario.nombre, usuario.apellido)"
                 size="large"
                 shape="circle"
                 class="user-avatar"
               />
-              <div class="flex flex-column gap-1">
+              <div class="flex flex-column gap-1 user-details">
                 <h3 class="user-name m-0">{{ usuario.nombre }} {{ usuario.apellido }}</h3>
-                <div class="flex gap-4 flex-wrap">
+                <div class="flex gap-4 flex-wrap user-info-row">
                   <p class="user-info m-0" v-if="usuario.dni">DNI: {{ usuario.dni }}</p>
                   <p class="user-info m-0" v-if="usuario.email">Email: {{ usuario.email }}</p>
                   <p class="user-info m-0" v-if="usuario.fechaNacimiento">
                     Fecha Nacimiento: {{ formatearFecha(usuario.fechaNacimiento) }}
                   </p>
                 </div>
-                <div class="flex gap-3 align-items-center flex-wrap">
+                <div class="flex gap-3 align-items-center flex-wrap user-status-row">
                   <span :class="getEstadoBadgeClass(usuario.activo)">
                     {{ usuario.activo ? 'Activo' : 'Inactivo' }}
                   </span>
@@ -98,13 +110,12 @@
     <Dialog 
       v-model:visible="modalEditarVisible" 
       :header="modoCrear ? 'Crear Usuario' : 'Editar Usuario'"
-      :style="{ width: '50vw' }" 
       :modal="true"
-      class="p-fluid"
+      class="p-fluid dialog-responsive"
     >
-      <div class="flex flex-column gap-4">
-        <div class="flex gap-3">
-          <div class="flex-1">
+      <div class="flex flex-column gap-4 form-container">
+        <div class="flex gap-3 form-row">
+          <div class="flex-1 form-field">
             <label for="nombre" class="block text-900 font-medium mb-2">Nombre</label>
             <InputText 
               id="nombre"
@@ -113,11 +124,10 @@
               class="w-full"
               :class="{ 'p-invalid': erroresValidacion.nombre }"
               @keypress="(e)=> soloLetras(e)"
-              @input="(event) => filtrarSoloLetras(event, 'nombre')"
             />
             <small v-if="erroresValidacion.nombre" class="p-error">{{ erroresValidacion.nombre }}</small>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 form-field">
             <label for="apellido" class="block text-900 font-medium mb-2">Apellido</label>
             <InputText 
               id="apellido"
@@ -131,8 +141,8 @@
           </div>
         </div>
 
-        <div class="flex gap-3">
-          <div class="flex-1">
+        <div class="flex gap-3 form-row">
+          <div class="flex-1 form-field">
             <label for="dni" class="block text-900 font-medium mb-2">DNI</label>
             <InputText 
               id="dni"
@@ -145,7 +155,7 @@
             />
             <small v-if="erroresValidacion.dni" class="p-error">{{ erroresValidacion.dni }}</small>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 form-field">
             <label for="email" class="block text-900 font-medium mb-2">Email</label>
             <InputText 
               id="email"
@@ -157,8 +167,8 @@
           </div>
         </div>
 
-        <div class="flex gap-3">
-          <div class="flex-1">
+        <div class="flex gap-3 form-row">
+          <div class="flex-1 form-field">
             <label for="fechaNacimiento" class="block text-900 font-medium mb-2">Fecha de Nacimiento</label>
             <Calendar 
               id="fechaNacimiento"
@@ -173,7 +183,7 @@
             />
             <small v-if="erroresValidacion.fechaNacimiento" class="p-error">{{ erroresValidacion.fechaNacimiento }}</small>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 form-field">
             <label for="idTipoUsuario" class="block text-900 font-medium mb-2">Tipo de Usuario</label>
             <InputText 
               id="idTipoUsuario"
@@ -204,9 +214,8 @@
   <Dialog
     v-model:visible="modalConfirmarVisible"
     :header="accionTexto ? 'Desactivar usuario' : 'Reactivar usuario'"
-    :style="{ width: '50vw' }"
     :modal="true"
-    class="p-fluid"
+    class="p-fluid dialog-responsive"
   >
     <p>¿Está seguro que desea {{ accionTexto }} al usuario {{ identificadorUsuario }}?</p>
     <template #footer>
@@ -246,6 +255,9 @@ const filtros = ref([
   { id: 'inactivos', label: 'Inactivos' }
 ]);
 
+// Estado para el término de búsqueda
+const terminoBusqueda = ref('');
+
 // Estado para el modal de edición/creación
 const modalEditarVisible = ref(false);
 const modoCrear = ref(false);
@@ -276,19 +288,33 @@ const fechaMaxima = computed(() => {
 
 // Computed para filtrar usuarios
 const usuariosFiltrados = computed(() => {
-  if (filtroActivo.value === 'todos') {
-    return administracionStore.usuarios;
-  }
+  let usuarios = administracionStore.usuarios;
   
+  // Filtrar por estado
   if (filtroActivo.value === 'activos') {
-    return administracionStore.usuarios.filter(usuario => usuario.activo === true);
+    usuarios = usuarios.filter(usuario => usuario.activo === true);
+  } else if (filtroActivo.value === 'inactivos') {
+    usuarios = usuarios.filter(usuario => usuario.activo === false);
   }
   
-  if (filtroActivo.value === 'inactivos') {
-    return administracionStore.usuarios.filter(usuario => usuario.activo === false);
+  // Filtrar por término de búsqueda
+  if (terminoBusqueda.value && terminoBusqueda.value.trim() !== '') {
+    const termino = terminoBusqueda.value.trim().toLowerCase();
+    usuarios = usuarios.filter(usuario => {
+      // Buscar en nombre completo (nombre + apellido)
+      const nombreCompleto = `${usuario.nombre || ''} ${usuario.apellido || ''}`.toLowerCase();
+      const dni = usuario.dni ? usuario.dni.toString().toLowerCase() : '';
+      const email = usuario.email ? usuario.email.toLowerCase() : '';
+      const idTipoUsuario = usuario.idTipoUsuario ? usuario.idTipoUsuario.toString().toLowerCase() : '';
+      
+      return nombreCompleto.includes(termino) ||
+             dni.includes(termino) ||
+             email.includes(termino) ||
+             idTipoUsuario.includes(termino);
+    });
   }
   
-  return administracionStore.usuarios;
+  return usuarios;
 });
 
 // Métodos
@@ -591,12 +617,39 @@ onMounted(async () => {
 .page-container {
   background-color: #f8f7ff;
   min-height: 100vh;
+  max-width: 100%;
 }
 
 /* Contenedor de filtros */
 .surface-100 {
   background-color: white!important;
   border: 1px solid #e5e7eb !important;
+}
+
+/* Campo de búsqueda */
+.search-input-container {
+  position: relative;
+}
+
+.search-input-container :deep(.p-inputtext) {
+  width: 300px;
+  padding-left: 2.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.search-input-container :deep(.p-inputtext:focus) {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.2);
+}
+
+.search-input-container :deep(.pi-search) {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  z-index: 1;
 }
 
 /* Tarjetas de usuarios */
@@ -709,16 +762,146 @@ onMounted(async () => {
   font-weight: bold;
 }
 
+/* Diálogos responsive - Desktop */
+.dialog-responsive :deep(.p-dialog) {
+  width: 50vw;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-  .flex.justify-content-between {
+  .page-container {
+    padding: 1rem;
+  }
+
+  /* Header responsive */
+  .header-container {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
   }
-  
-  .surface-100 {
+
+  .filters-container {
+    width: 100%;
     justify-content: center;
+  }
+
+  .filters-wrapper {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .search-and-action {
+    flex-direction: column;
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .search-input-container {
+    width: 100%;
+  }
+
+  .search-input-container :deep(.p-inputtext) {
+    width: 100%;
+  }
+
+  .create-user-btn {
+    width: 100%;
+  }
+
+  /* Tarjetas de usuarios responsive */
+  .user-card :deep(.p-card-body) {
+    padding: 1rem;
+  }
+
+  .user-card-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .user-info-section {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .user-details {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-name {
+    font-size: 1.1rem;
+  }
+
+  .user-info-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .user-info {
+    font-size: 0.8rem;
+    word-break: break-word;
+  }
+
+  .user-status-row {
+    gap: 0.5rem;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: flex-end;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .user-avatar :deep(.p-avatar) {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+  }
+
+  /* Diálogos responsive - Mobile */
+  .dialog-responsive :deep(.p-dialog) {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 1rem auto;
+  }
+
+  .dialog-responsive :deep(.p-dialog-content) {
+    padding: 1rem;
+  }
+
+  .dialog-responsive :deep(.p-dialog-header) {
+    padding: 1rem;
+  }
+
+  .dialog-responsive :deep(.p-dialog-header .p-dialog-title) {
+    font-size: 1.1rem;
+  }
+
+  .dialog-responsive :deep(.p-dialog-footer) {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .dialog-responsive :deep(.p-dialog-footer .p-button) {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Formularios responsive */
+  .form-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-field {
+    width: 100%;
   }
 }
 </style>
