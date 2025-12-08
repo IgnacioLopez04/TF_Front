@@ -71,7 +71,7 @@ const allMenuItems = [
     to: '/administracion',
     name: 'Administración',
     hasAccess: () => {
-      return true;
+      return authStore.usuario.id_tipo_usuario === 2;
     }
   }
 ];

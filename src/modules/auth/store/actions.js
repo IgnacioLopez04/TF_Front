@@ -26,9 +26,9 @@ export function useLogin(usuario, accessToken, startTokenMonitoring) {
         apellido: userData.apellido || '',
         email: userData.email || '',
         picture: userData.picture || '',
-        nivel: userData.nivel || null,
         id_sucursal: userData.id_sucursal || null,
         hashId: userData.hashId || '',
+        id_tipo_usuario: userData.id_tipo_usuario || null,
       };
 
       // Actualizar el token
@@ -59,8 +59,9 @@ export function useLogout(usuario, accessToken, stopTokenMonitoring) {
         apellido: '',
         email: '',
         picture: '',
-        nivel: null,
         id_sucursal: null,
+        hashId: '',
+        id_tipo_usuario: null,
       };
 
       // Resetear el token

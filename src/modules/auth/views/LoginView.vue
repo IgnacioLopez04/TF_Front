@@ -66,6 +66,7 @@ const handleLoginSuccess = async (response) => {
         email: response.user.email || '',
         nivel: response.user.nivel || null,
         hashId: response.user.hash_id || '',
+        id_tipo_usuario: response.user.id_tipo_usuario || null,
       };
       
       // Llamar al store para hacer login

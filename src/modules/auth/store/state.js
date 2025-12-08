@@ -9,6 +9,7 @@ export function useAuthState() {
     picture: '',
     nivel: null,
     hashId: '',
+    id_tipo_usuario: null,
   });
 
   const accessToken = ref(null);
