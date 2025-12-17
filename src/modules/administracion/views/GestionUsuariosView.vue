@@ -185,11 +185,16 @@
           </div>
           <div class="flex-1 form-field">
             <label for="idTipoUsuario" class="block text-900 font-medium mb-2">Tipo de Usuario</label>
-            <InputText 
+            <Dropdown 
               id="idTipoUsuario"
               v-model="formularioUsuario.idTipoUsuario" 
-              placeholder="Tipo de Usuario"
+              :options="tiposUsuarioOptions"
+              optionLabel="display"
+              optionValue="code"
+              placeholder="Seleccione un tipo de usuario"
               class="w-full"
+              :filter="true"
+              filterPlaceholder="Buscar tipo..."
             />
           </div>
         </div>
@@ -284,6 +289,17 @@ const fechaMaxima = computed(() => {
   const hoy = new Date();
   hoy.setDate(hoy.getDate() - 1);
   return hoy;
+});
+
+// Computed para las opciones del dropdown de tipos de usuario
+const tiposUsuarioOptions = computed(() => {
+  if (!administracionStore.tiposUsuario || administracionStore.tiposUsuario.length === 0) {
+    return [];
+  }
+  return administracionStore.tiposUsuario.map(tipo => ({
+    code: tipo.code,
+    display: tipo.display || tipo.code || 'Sin nombre',
+  }));
 });
 
 // Computed para filtrar usuarios
@@ -573,9 +589,13 @@ const toggleEstadoUsuario = async (usuario) => {
 
 onMounted(async () => {
   try {
-    await administracionStore.obtenerUsuarios();
+    // Cargar usuarios y tipos de usuario en paralelo
+    await Promise.all([
+      administracionStore.obtenerUsuarios(),
+      administracionStore.obtenerTiposUsuario(),
+    ]);
   } catch (error) {
-    showError('No es posible obtener los usuarios');
+    showError('No es posible obtener los datos de usuarios');
   }
 });
 </script>

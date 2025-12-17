@@ -274,5 +274,42 @@ export default {
       throw error;
     }
   },
+  async obtenerTiposUsuario() {
+    try {
+      const response = await useAxios.get(
+        `${urlFhirPractitioner}/$get-user-types`,
+      );
+
+      // Procesar el ValueSet FHIR y extraer los conceptos
+      const valueSet = response.data;
+      const tipos = [];
+
+      if (valueSet && valueSet.compose && valueSet.compose.include) {
+        // Recorrer todos los includes del ValueSet
+        for (const include of valueSet.compose.include) {
+          if (include.concept && Array.isArray(include.concept)) {
+            // Extraer cada concepto y transformarlo a formato { code, display }
+            for (const concept of include.concept) {
+              tipos.push({
+                code: concept.code || '',
+                display: concept.display || concept.code || 'Sin nombre',
+              });
+            }
+          }
+        }
+      }
+
+      // Guardar los tipos en el state
+      this.tiposUsuario = tipos;
+
+      return tipos;
+    } catch (error) {
+      this.error =
+        error.response?.data?.message ||
+        error.message ||
+        'Error al obtener los tipos de usuario';
+      throw error;
+    }
+  },
 };
 
