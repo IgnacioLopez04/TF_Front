@@ -537,9 +537,8 @@ const guardarUsuario = async () => {
       showSuccess(`Usuario ${formularioUsuario.value.nombre} ${formularioUsuario.value.apellido} creado correctamente`);
     } else {
       // Editar usuario existente
-      // TODO: Implementar edición de usuario
-      console.log('Editar usuario:', datosUsuario);
-      showError('La funcionalidad de edición aún no está implementada');
+      await administracionStore.editarUsuario(usuarioSeleccionado.value.hashId, datosUsuario);
+      showSuccess(`Usuario ${formularioUsuario.value.nombre} ${formularioUsuario.value.apellido} actualizado correctamente`);
     }
     
     cerrarModalEditar();
