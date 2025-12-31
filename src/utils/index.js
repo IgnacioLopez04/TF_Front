@@ -1,6 +1,6 @@
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 const AUTH_URL = import.meta.env.VITE_AUTH_URL || 'http://localhost:8080';
-const FHIR_URL = import.meta.env.VITE_FHIR_URL || 'http://localhost:8080';
+export const FHIR_URL = import.meta.env.VITE_FHIR_URL || 'http://localhost:8080';
 
 // Google OAuth Configuration
 export const GOOGLE_CLIENT_ID =

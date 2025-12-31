@@ -5,7 +5,9 @@ import {
   urlFhirPatient,
   urlFhirReport,
   urlFhirDocumentReference,
+  urlFile,
 } from '@/utils';
+import { FHIR_URL } from '@/utils';
 import {
   extractFhirResources,
   getExtensionValues,
@@ -695,15 +697,23 @@ export default {
             url: 'http://mi-servidor/fhir/StructureDefinition/file-upload',
             valueBoolean: true,
           },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/file-title',
+            valueString: nuevoMultimedia.titulo || '',
+          },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/file-description',
+            valueString: nuevoMultimedia.descripcion || '',
+          },
         ],
       };
 
       // Agregar DocumentReference como JSON string
       formData.append('documentReference', JSON.stringify(documentReference));
 
-      // Enviar archivo + metadatos al servidor FHIR (flujo correcto)
+      // Enviar archivo + metadatos al nuevo endpoint Spring Boot
       const response = await useAxios.post(
-        `${urlFhirDocumentReference}/$upload-file`,
+        `${FHIR_URL}/api/file/upload`,
         formData,
         {
           headers: {
@@ -749,15 +759,23 @@ export default {
             url: 'http://mi-servidor/fhir/StructureDefinition/file-upload',
             valueBoolean: true,
           },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/file-title',
+            valueString: nuevoMultimedia.titulo || '',
+          },
+          {
+            url: 'http://mi-servidor/fhir/StructureDefinition/file-description',
+            valueString: nuevoMultimedia.descripcion || '',
+          },
         ],
       };
 
       // Agregar DocumentReference como JSON string
       formData.append('documentReference', JSON.stringify(documentReference));
 
-      // Enviar archivo + metadatos al servidor FHIR (flujo correcto)
+      // Enviar archivo + metadatos al nuevo endpoint Spring Boot
       const response = await useAxios.post(
-        `${urlFhirDocumentReference}/$upload-file`,
+        `${FHIR_URL}/api/file/upload`,
         formData,
         {
           headers: {
@@ -787,17 +805,86 @@ export default {
           'http://example.org/fhir/StructureDefinition/file-name': 'nombre',
         });
 
+        // Obtener URL del contenido del DocumentReference si está disponible
+        let url = extensionValues.url || '';
+        if (!url && archivo.content && archivo.content.length > 0) {
+          url = archivo.content[0].attachment?.url || '';
+        }
+
+        // Obtener tipo MIME del contenido
+        let tipoMime = extensionValues.tipo || '';
+        if (!tipoMime && archivo.content && archivo.content.length > 0) {
+          tipoMime = archivo.content[0].attachment?.contentType || '';
+        }
+
         return {
           id: archivo.id,
           nombre: archivo.description || extensionValues.nombre || 'Archivo',
-          tipo: extensionValues.tipo || 'Desconocido',
-          url: extensionValues.url || '',
+          tipo: tipoMime || extensionValues.tipo || 'Desconocido',
+          url: url,
+          thumbnail: url, // Por ahora usamos la misma URL para thumbnail
           fechaCreacion: archivo.date || new Date().toISOString(),
         };
       });
 
       this.archivos = archivosLegibles;
       return archivosLegibles;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async obtenerDocumentos(hashId) {
+    try {
+      // Llamar al endpoint FHIR que actúa como proxy al backend
+      // El servidor FHIR obtiene los documentos desde la tabla documento y los transforma a DocumentReference
+      const response = await useAxios.get(
+        `${urlFhirDocumentReference}/$get-files?patient=${hashId}`,
+      );
+
+      // Extraer recursos del Bundle FHIR
+      const resources = extractFhirResources(response.data);
+
+      // Transformar los DocumentReferences a formato legible
+      const documentosLegibles = resources.map((documento) => {
+        const extensionValues = getExtensionValues(documento.extension, {
+          'http://example.org/fhir/StructureDefinition/file-type': 'tipo',
+          'http://example.org/fhir/StructureDefinition/file-url': 'url',
+          'http://example.org/fhir/StructureDefinition/file-name': 'nombre',
+          'http://example.org/fhir/StructureDefinition/file-title': 'titulo',
+          'http://example.org/fhir/StructureDefinition/file-description':
+            'descripcion',
+        });
+
+        // Obtener URL del contenido del DocumentReference si está disponible
+        let url = extensionValues.url || '';
+        if (!url && documento.content && documento.content.length > 0) {
+          url = documento.content[0].attachment?.url || '';
+        }
+
+        // Validar que la URL sea válida
+        const isValidUrl =
+          url && (url.startsWith('http://') || url.startsWith('https://'));
+
+        // Obtener tipo MIME del contenido
+        let tipoMime = extensionValues.tipo || '';
+        if (!tipoMime && documento.content && documento.content.length > 0) {
+          tipoMime = documento.content[0].attachment?.contentType || '';
+        }
+
+        // Mapear al formato esperado por cargarMultimedia()
+        return {
+          id: documento.id,
+          name: documento.description || extensionValues.nombre || 'Archivo',
+          type: tipoMime || extensionValues.tipo || 'Desconocido',
+          url: isValidUrl ? url : '',
+          titulo: extensionValues.titulo || documento.description || '',
+          descripcion: extensionValues.descripcion || '',
+          fechaCreacion: documento.date || new Date().toISOString(),
+        };
+      });
+
+      return documentosLegibles;
     } catch (error) {
       throw error;
     }
