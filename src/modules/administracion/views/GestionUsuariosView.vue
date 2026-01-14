@@ -41,7 +41,7 @@
     <!-- Lista de usuarios -->
     <div v-else class="flex flex-column gap-3 px-3">
       <Card 
-        v-for="usuario in usuariosFiltrados" 
+        v-for="usuario in usuariosPaginados" 
         :key="usuario.hashId"
         class="user-card"
       >
@@ -98,6 +98,18 @@
           </div>
         </template>
       </Card>
+    </div>
+
+    <!-- Paginación -->
+    <div v-if="!administracionStore.loading && usuariosFiltrados.length > 0" class="flex justify-content-center mt-4">
+      <Paginator
+        :first="(paginaActual - 1) * elementosPorPagina"
+        :rows="elementosPorPagina"
+        :totalRecords="usuariosFiltrados.length"
+        @page="onPageChange"
+        :rowsPerPageOptions="[5, 10, 20, 50]"
+        template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+      />
     </div>
 
     <!-- Mensaje cuando no hay usuarios -->
@@ -241,7 +253,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useAdministracionStore } from '../store';
 import { showError, showSuccess } from '@/composables/useToast';
 import { useAuthStore } from '@/modules/auth/store';
@@ -262,6 +274,10 @@ const filtros = ref([
 
 // Estado para el término de búsqueda
 const terminoBusqueda = ref('');
+
+// Estado para paginación
+const paginaActual = ref(1);
+const elementosPorPagina = ref(10);
 
 // Estado para el modal de edición/creación
 const modalEditarVisible = ref(false);
@@ -333,10 +349,30 @@ const usuariosFiltrados = computed(() => {
   return usuarios;
 });
 
+// Computed para usuarios paginados
+const usuariosPaginados = computed(() => {
+  const inicio = (paginaActual.value - 1) * elementosPorPagina.value;
+  const fin = inicio + elementosPorPagina.value;
+  return usuariosFiltrados.value.slice(inicio, fin);
+});
+
 // Métodos
 const cambiarFiltro = (filtro) => {
   filtroActivo.value = filtro;
+  paginaActual.value = 1; // Resetear a la primera página al cambiar filtro
 };
+
+const onPageChange = (event) => {
+  paginaActual.value = Math.floor(event.first / elementosPorPagina.value) + 1;
+  elementosPorPagina.value = event.rows;
+  // Scroll al inicio de la lista
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Resetear página cuando cambia el término de búsqueda
+watch(terminoBusqueda, () => {
+  paginaActual.value = 1;
+});
 
 const getInitials = (nombre, apellido) => {
   const firstInitial = nombre ? nombre.charAt(0).toUpperCase() : '';

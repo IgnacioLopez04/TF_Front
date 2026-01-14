@@ -94,6 +94,12 @@ const allAdminMenuItems = [
     name: 'Gestión de Usuarios',
     icon: 'pi pi-users',
     hasAccess: () => true
+  },
+  {
+    to: '/administracion/pacientes',
+    name: 'Gestión de Pacientes',
+    icon: 'pi pi-user',
+    hasAccess: () => true
   }
 ];
 
