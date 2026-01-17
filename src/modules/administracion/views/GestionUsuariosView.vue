@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container p-4">
+  <div class="page-container">
     <!-- Header con filtros -->
     <div class="header-container flex justify-content-between align-items-center mb-4">
       <div class="filters-container flex gap-2 align-items-center">
@@ -277,7 +277,7 @@ const terminoBusqueda = ref('');
 
 // Estado para paginación
 const paginaActual = ref(1);
-const elementosPorPagina = ref(10);
+const elementosPorPagina = ref(5);
 
 // Estado para el modal de edición/creación
 const modalEditarVisible = ref(false);

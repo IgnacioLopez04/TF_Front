@@ -156,8 +156,8 @@ export default {
       const pacientes = resources.map((resource) => {
         // Obtener extensiones usando la función helper
         const extensionValues = getExtensionValues(resource.extension, {
-          'http://mi-servidor/fhir/StructureDefinition/hash-id': 'hash_id',
-          'http://mi-servidor/fhir/StructureDefinition/prestacion':
+          'http://mi-servidor.com/fhir/StructureDefinition/hash-id': 'hash_id',
+          'http://mi-servidor.com/fhir/StructureDefinition/prestacion':
             'prestacion',
         });
 
@@ -193,9 +193,9 @@ export default {
       );
 
       const extensionValues = getExtensionValues(resource[0].extension, {
-        'http://mi-servidor/fhir/StructureDefinition/hash-id': 'hash_id',
-        'http://mi-servidor/fhir/StructureDefinition/prestacion': 'prestacion',
-        'http://mi-servidor/fhir/StructureDefinition/hash-id-ehr':
+        'http://mi-servidor.com/fhir/StructureDefinition/hash-id': 'hash_id',
+        'http://mi-servidor.com/fhir/StructureDefinition/prestacion': 'prestacion',
+        'http://mi-servidor.com/fhir/StructureDefinition/hash-id-ehr':
           'hash_id_EHR',
       });
 

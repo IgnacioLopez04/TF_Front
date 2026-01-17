@@ -1,5 +1,5 @@
 <template>
-  <div class="page-container p-4">
+  <div class="page-container">
     <!-- Header con filtros -->
     <div class="header-container flex justify-content-between align-items-center mb-4">
       <div class="filters-container flex gap-2 align-items-center">
@@ -140,7 +140,7 @@
           <h3 class="text-xl font-semibold text-purple-600 mb-4">Identificación del Paciente</h3>
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="nombre" class="block text-900 font-medium mb-2">Nombre/s</label>
+              <label for="nombre" class="block text-900 font-medium mb-2 pt-2">Nombre/s</label>
               <InputText 
                 id="nombre"
                 v-model="formularioPaciente.nombre" 
@@ -152,7 +152,7 @@
               <small v-if="erroresValidacion.nombre" class="p-error">{{ erroresValidacion.nombre }}</small>
             </div>
             <div class="flex-1 form-field">
-              <label for="apellido" class="block text-900 font-medium mb-2">Apellido/s</label>
+              <label for="apellido" class="block text-900 font-medium mb-2 pt-2">Apellido/s</label>
               <InputText 
                 id="apellido"
                 v-model="formularioPaciente.apellido" 
@@ -167,7 +167,7 @@
 
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="dni" class="block text-900 font-medium mb-2">DNI</label>
+              <label for="dni" class="block text-900 font-medium mb-2 pt-2">DNI</label>
               <InputText 
                 id="dni"
                 v-model="formularioPaciente.dni" 
@@ -180,10 +180,10 @@
               <small v-if="erroresValidacion.dni" class="p-error">{{ erroresValidacion.dni }}</small>
             </div>
             <div class="flex-1 form-field">
-              <label for="prestacion" class="block text-900 font-medium mb-2">Prestación</label>
+              <label for="prestacion" class="block text-900 font-medium mb-2 pt-2">Prestación</label>
               <Dropdown 
                 id="prestacion"
-                v-model="formularioPaciente.prestacion" 
+                v-model="formularioPaciente.idPrestacion" 
                 :options="prestacionesOptions"
                 optionLabel="name"
                 optionValue="id"
@@ -199,7 +199,7 @@
 
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="fechaNacimiento" class="block text-900 font-medium mb-2">Fecha de Nacimiento</label>
+              <label for="fechaNacimiento" class="block text-900 font-medium mb-2 pt-2">Fecha de Nacimiento</label>
               <Calendar 
                 id="fechaNacimiento"
                 v-model="formularioPaciente.fechaNacimiento" 
@@ -218,7 +218,7 @@
           <h3 class="text-xl font-semibold text-purple-600 mb-4">Ocupación</h3>
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="ocupacionActual" class="block text-900 font-medium mb-2">Actual</label>
+              <label for="ocupacionActual" class="block text-900 font-medium mb-2 pt-2">Actual</label>
               <InputText 
                 id="ocupacionActual"
                 v-model="formularioPaciente.ocupacionActual" 
@@ -227,7 +227,7 @@
               />
             </div>
             <div class="flex-1 form-field">
-              <label for="ocupacionAnterior" class="block text-900 font-medium mb-2">Anterior</label>
+              <label for="ocupacionAnterior" class="block text-900 font-medium mb-2 pt-2">Anterior</label>
               <InputText 
                 id="ocupacionAnterior"
                 v-model="formularioPaciente.ocupacionAnterior" 
@@ -243,7 +243,7 @@
           <h3 class="text-xl font-semibold text-purple-600 mb-4">Domicilio Actual</h3>
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="calle" class="block text-900 font-medium mb-2">Calle</label>
+              <label for="calle" class="block text-900 font-medium mb-2 pt-2">Calle</label>
               <InputText 
                 id="calle"
                 v-model="formularioPaciente.calle" 
@@ -254,7 +254,7 @@
               <small v-if="erroresValidacion.calle" class="p-error">{{ erroresValidacion.calle }}</small>
             </div>
             <div class="flex-1 form-field">
-              <label for="numero" class="block text-900 font-medium mb-2">Número</label>
+              <label for="numero" class="block text-900 font-medium mb-2 pt-2">Número</label>
               <InputText 
                 id="numero"
                 v-model="formularioPaciente.numero" 
@@ -266,7 +266,7 @@
 
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="pisoDepto" class="block text-900 font-medium mb-2">Piso / Departamento</label>
+              <label for="pisoDepto" class="block text-900 font-medium mb-2 pt-2">Piso / Departamento</label>
               <InputText 
                 id="pisoDepto"
                 v-model="formularioPaciente.pisoDepto" 
@@ -275,7 +275,7 @@
               />
             </div>
             <div class="flex-1 form-field">
-              <label for="barrio" class="block text-900 font-medium mb-2">Barrio</label>
+              <label for="barrio" class="block text-900 font-medium mb-2 pt-2">Barrio</label>
               <InputText 
                 id="barrio"
                 v-model="formularioPaciente.barrio" 
@@ -289,7 +289,7 @@
 
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="provincia" class="block text-900 font-medium mb-2">Provincia</label>
+              <label for="provincia" class="block text-900 font-medium mb-2 pt-2">Provincia</label>
               <Dropdown
                 id="provincia"
                 v-model="formularioPaciente.provincia"
@@ -306,7 +306,7 @@
               <small v-if="erroresValidacion.provincia" class="p-error">{{ erroresValidacion.provincia }}</small>
             </div>
             <div class="flex-1 form-field">
-              <label for="localidad" class="block text-900 font-medium mb-2">Localidad</label>
+              <label for="localidad" class="block text-900 font-medium mb-2 pt-2">Localidad</label>
               <Dropdown
                 id="localidad"
                 v-model="formularioPaciente.localidad"
@@ -326,7 +326,7 @@
 
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="conQuienVive" class="block text-900 font-medium mb-2">Con quien vive</label>
+              <label for="conQuienVive" class="block text-900 font-medium mb-2 pt-2">Con quien vive</label>
               <InputText 
                 id="conQuienVive"
                 v-model="formularioPaciente.conQuienVive" 
@@ -342,7 +342,7 @@
           <h3 class="text-xl font-semibold text-purple-600 mb-4">Obra Social / Mutual</h3>
           <div class="flex gap-3 form-row">
             <div class="flex-1 form-field">
-              <label for="mutual" class="block text-900 font-medium mb-2">Obra Social / Mutual</label>
+              <label for="mutual" class="block text-900 font-medium mb-2 pt-2">Obra Social / Mutual</label>
               <Dropdown 
                 id="mutual"
                 v-model="formularioPaciente.mutual" 
@@ -358,7 +358,7 @@
               <small v-if="erroresValidacion.mutual" class="p-error">{{ erroresValidacion.mutual }}</small>
             </div>
             <div class="flex-1 form-field">
-              <label for="numeroAfiliado" class="block text-900 font-medium mb-2">Número de afiliado</label>
+              <label for="numeroAfiliado" class="block text-900 font-medium mb-2 pt-2">Número de afiliado</label>
               <InputText 
                 id="numeroAfiliado"
                 v-model="formularioPaciente.numeroAfiliado" 
@@ -398,7 +398,7 @@
             </div>
             <div class="flex gap-3 form-row">
               <div class="flex-1 form-field">
-                <label :for="`nombreTutor${index}`" class="block text-900 font-medium mb-2">Nombre completo</label>
+                <label :for="`nombreTutor${index}`" class="block text-900 font-medium mb-2 pt-2">Nombre completo</label>
                 <InputText
                   :id="`nombreTutor${index}`"
                   v-model="tutor.nombre"
@@ -407,7 +407,7 @@
                 />
               </div>
               <div class="flex-1 form-field">
-                <label :for="`dniTutor${index}`" class="block text-900 font-medium mb-2">DNI</label>
+                <label :for="`dniTutor${index}`" class="block text-900 font-medium mb-2 pt-2">DNI</label>
                 <InputText
                   :id="`dniTutor${index}`"
                   v-model="tutor.dni"
@@ -418,7 +418,7 @@
             </div>
             <div class="flex gap-3 form-row">
               <div class="flex-1 form-field">
-                <label :for="`fechaNacimientoTutor${index}`" class="block text-900 font-medium mb-2">Fecha de nacimiento</label>
+                <label :for="`fechaNacimientoTutor${index}`" class="block text-900 font-medium mb-2 pt-2">Fecha de nacimiento</label>
                 <Calendar
                   :id="`fechaNacimientoTutor${index}`"
                   v-model="tutor.fechaNacimiento"
@@ -429,7 +429,7 @@
                 />
               </div>
               <div class="flex-1 form-field">
-                <label :for="`ocupacionTutor${index}`" class="block text-900 font-medium mb-2">Ocupación</label>
+                <label :for="`ocupacionTutor${index}`" class="block text-900 font-medium mb-2 pt-2">Ocupación</label>
                 <InputText
                   :id="`ocupacionTutor${index}`"
                   v-model="tutor.ocupacion"
@@ -440,7 +440,7 @@
             </div>
             <div class="flex gap-3 form-row">
               <div class="flex-1 form-field">
-                <label :for="`lugarNacimientoTutor${index}`" class="block text-900 font-medium mb-2">Lugar de nacimiento</label>
+                <label :for="`lugarNacimientoTutor${index}`" class="block text-900 font-medium mb-2 pt-2">Lugar de nacimiento</label>
                 <InputText
                   :id="`lugarNacimientoTutor${index}`"
                   v-model="tutor.lugarNacimiento"
@@ -449,7 +449,7 @@
                 />
               </div>
               <div class="flex-1 form-field">
-                <label :for="`relacionTutor${index}`" class="block text-900 font-medium mb-2">Relación</label>
+                <label :for="`relacionTutor${index}`" class="block text-900 font-medium mb-2 pt-2">Relación</label>
                 <InputText
                   :id="`relacionTutor${index}`"
                   v-model="tutor.relacion"
@@ -458,7 +458,7 @@
                 />
               </div>
               <div class="flex-1 form-field">
-                <label :for="`conviveTutor${index}`" class="block text-900 font-medium mb-2">Convive</label>
+                <label :for="`conviveTutor${index}`" class="block text-900 font-medium mb-2 pt-2">Convive</label>
                 <Dropdown
                   :id="`conviveTutor${index}`"
                   v-model="tutor.convive"
@@ -541,7 +541,7 @@ const terminoBusqueda = ref('');
 
 // Estado para paginación
 const paginaActual = ref(1);
-const elementosPorPagina = ref(10);
+const elementosPorPagina = ref(5);
 
 const modalEditarVisible = ref(false);
 const pacienteSeleccionado = ref(null);
@@ -549,6 +549,7 @@ const formularioPaciente = ref({
   nombre: '',
   apellido: '',
   dni: '',
+  idPrestacion: null,
   prestacion: null,
   fechaNacimiento: null,
   ocupacionActual: '',
@@ -752,6 +753,7 @@ const editarPaciente = async (paciente) => {
       nombre: pacienteCompleto.nombre || '',
       apellido: pacienteCompleto.apellido || '',
       dni: pacienteCompleto.dni || '',
+      idPrestacion: pacienteCompleto.idPrestacion != null ? pacienteCompleto.idPrestacion : null,
       prestacion: pacienteCompleto.prestacion || null,
       fechaNacimiento: pacienteCompleto.fechaNacimiento ? new Date(pacienteCompleto.fechaNacimiento) : null,
       ocupacionActual: pacienteCompleto.ocupacionActual || '',
@@ -760,8 +762,8 @@ const editarPaciente = async (paciente) => {
       numero: pacienteCompleto.numero || '',
       pisoDepto: pacienteCompleto.pisoDepto || '',
       barrio: pacienteCompleto.barrio || '',
-      localidad: pacienteCompleto.localidad || null,
-      provincia: pacienteCompleto.provincia || null,
+      localidad: pacienteCompleto.localidad != null ? String(pacienteCompleto.localidad) : null,
+      provincia: pacienteCompleto.provincia != null ? String(pacienteCompleto.provincia) : null,
       conQuienVive: pacienteCompleto.conQuienVive || '',
       mutual: pacienteCompleto.mutual || null,
       numeroAfiliado: pacienteCompleto.numeroAfiliado || '',
@@ -796,6 +798,7 @@ const cerrarModalEditar = () => {
     nombre: '',
     apellido: '',
     dni: '',
+    idPrestacion: null,
     prestacion: null,
     fechaNacimiento: null,
     ocupacionActual: '',

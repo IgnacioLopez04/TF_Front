@@ -444,7 +444,7 @@ export default {
 
         // Extraer todas las extensiones
         const extensionValues = getExtensionValues(resource.extension || [], {
-          'http://mi-servidor/fhir/StructureDefinition/hash-id': 'hash_id',
+          'http://mi-servidor.com/fhir/StructureDefinition/hash-id': 'hash_id',
           'http://mi-servidor.com/fhir/StructureDefinition/id_ciudad':
             'localidad',
           'http://mi-servidor.com/fhir/StructureDefinition/barrio': 'barrio',
@@ -579,7 +579,6 @@ export default {
 
       const response = await useAxios.get(`${urlFhirPatient}/${hashIdLimpio}`);
       const resources = extractFhirResources(response.data);
-
       if (!resources || resources.length === 0) {
         throw new Error('Paciente no encontrado');
       }
@@ -592,13 +591,15 @@ export default {
 
       // Extraer todas las extensiones
       const extensionValues = getExtensionValues(resource.extension || [], {
-        'http://mi-servidor/fhir/StructureDefinition/hash-id': 'hash_id',
+        'http://mi-servidor.com/fhir/StructureDefinition/hash-id': 'hash_id',
         'http://mi-servidor.com/fhir/StructureDefinition/id_ciudad':
           'localidad',
         'http://mi-servidor.com/fhir/StructureDefinition/barrio': 'barrio',
         'http://mi-servidor.com/fhir/StructureDefinition/calle': 'calle',
-        'http://mi-servidor.com/fhir/StructureDefinition/id_prestacion':
+        'http://mi-servidor.com/fhir/StructureDefinition/prestacion':
           'prestacion',
+        'http://mi-servidor.com/fhir/StructureDefinition/id_prestacion':
+          'id_prestacion',
         'http://mi-servidor.com/fhir/StructureDefinition/piso_departamento':
           'pisoDepto',
         'http://mi-servidor.com/fhir/StructureDefinition/tutores': 'tutores',
@@ -666,31 +667,34 @@ export default {
           ? resource.name[0].family
           : '';
 
-      return {
-        hashId: extensionValues.hash_id || resource.id || null,
-        dni: dni,
-        nombre: nombre,
-        apellido: apellido,
-        fechaNacimiento: resource.birthDate || null,
-        prestacion: extensionValues.prestacion || null,
-        ocupacionActual: ocupacionActual || '',
-        ocupacionAnterior: ocupacionAnterior || '',
-        calle: extensionValues.calle || '',
-        numero: numero || '',
-        pisoDepto: extensionValues.pisoDepto || '',
-        barrio: extensionValues.barrio || '',
-        localidad: extensionValues.localidad || null,
-        provincia: provincia || null,
-        conQuienVive: conQuienVive || '',
-        mutual: mutual || null,
-        numeroAfiliado: numeroAfiliado || '',
-        tutores: tutores || [],
-        activo: !inactivo,
-        iniciales:
-          nombre && apellido
-            ? `${nombre[0]}${apellido[0]}`.toUpperCase()
-            : '??',
-      };
+          const responseReturn = {
+            hashId: extensionValues.hash_id || resource.id || null,
+            dni: dni,
+            nombre: nombre,
+            apellido: apellido,
+            fechaNacimiento: resource.birthDate || null,
+            prestacion: extensionValues.prestacion || null,
+            idPrestacion: extensionValues.id_prestacion || null,
+            ocupacionActual: ocupacionActual || '',
+            ocupacionAnterior: ocupacionAnterior || '',
+            calle: extensionValues.calle || '',
+            numero: numero || '',
+            pisoDepto: extensionValues.pisoDepto || '',
+            barrio: extensionValues.barrio || '',
+            localidad: extensionValues.localidad ? String(extensionValues.localidad) : null,
+            provincia: provincia ? String(provincia) : null,
+            conQuienVive: conQuienVive || '',
+            mutual: mutual || null,
+            numeroAfiliado: numeroAfiliado || '',
+            tutores: tutores || [],
+            activo: !inactivo,
+            iniciales:
+              nombre && apellido
+                ? `${nombre[0]}${apellido[0]}`.toUpperCase()
+                : '??',
+          };
+
+      return responseReturn;
     } catch (error) {
       this.error =
         error.response?.data?.message ||

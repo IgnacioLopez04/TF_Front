@@ -331,8 +331,8 @@ export const getExtensionValue = (extensions, url) => {
  * @example
  * const extensions = resource.extension;
  * const values = getExtensionValues(extensions, {
- *   'http://mi-servidor/fhir/StructureDefinition/hash-id': 'hash_id',
- *   'http://mi-servidor/fhir/StructureDefinition/prestacion': 'prestacion'
+ *   'http://mi-servidor.com/fhir/StructureDefinition/hash-id': 'hash_id',
+ *   'http://mi-servidor.com/fhir/StructureDefinition/prestacion': 'prestacion'
  * });
  * // Resultado: { hash_id: 'abc123', prestacion: 'Hogar' }
  */
