@@ -69,9 +69,25 @@ export default {
             valueString: pacienteData.pisoDepto,
           },
           {
+            url: 'http://mi-servidor.com/fhir/StructureDefinition/con_quien_vive',
+            valueString: pacienteData.conQuienVive,
+          },
+          {
             url: 'http://mi-servidor.com/fhir/StructureDefinition/inactivo',
             valueBoolean: !pacienteData.activo,
           },
+          ...(pacienteData.mutual != null && pacienteData.mutual !== ''
+            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/id_mutual', valueString: String(pacienteData.mutual) }]
+            : []),
+          ...(pacienteData.numeroAfiliado
+            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/numero_afiliado', valueString: pacienteData.numeroAfiliado }]
+            : []),
+          ...(pacienteData.ocupacionActual
+            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/ocupacion_actual', valueString: pacienteData.ocupacionActual }]
+            : []),
+          ...(pacienteData.ocupacionAnterior
+            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/ocupacion_anterior', valueString: pacienteData.ocupacionAnterior }]
+            : []),
           // Extensión para tutores si existen
           ...(pacienteData.tutores && pacienteData.tutores.length > 0
             ? [

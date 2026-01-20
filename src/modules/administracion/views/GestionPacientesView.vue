@@ -701,6 +701,9 @@ const getPrestacionNombre = (id) => {
 
 const getMutualNombre = (id) => {
   if (!id) return 'N/A';
+  if (!administracionStore.mutuales || !Array.isArray(administracionStore.mutuales)) {
+    return id; // Retornar el ID si mutuales no está disponible todavía
+  }
   const mutual = administracionStore.mutuales.find(m => m.id === id);
   return mutual ? mutual.name : id;
 };
