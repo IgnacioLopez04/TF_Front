@@ -433,7 +433,10 @@ export default {
     this.error = null;
 
     try {
-      const response = await useAxios.get(`${urlFhirPatient}?_type=patient`);
+      // Incluir includeInactive=true para obtener todos los pacientes (activos e inactivos)
+      const response = await useAxios.get(
+        `${urlFhirPatient}?_type=patient&includeInactive=true`,
+      );
       const resources = extractFhirResources(response.data);
 
       this.pacientes = resources.map((resource) => {
@@ -456,17 +459,25 @@ export default {
           'http://mi-servidor.com/fhir/StructureDefinition/tutores': 'tutores',
         });
 
-        // Extraer inactivo (valueBoolean)
-        let inactivo = false;
-        if (resource.extension && Array.isArray(resource.extension)) {
-          const inactivoExt = resource.extension.find(
-            (ext) =>
-              ext.url ===
-              'http://mi-servidor.com/fhir/StructureDefinition/inactivo',
-          );
-          if (inactivoExt && inactivoExt.valueBoolean !== undefined) {
-            inactivo = inactivoExt.valueBoolean;
+        // Determinar estado activo/inactivo
+        // Prioridad: 1) campo FHIR active, 2) extensión inactivo
+        let activo = true; // Por defecto activo
+        if (resource.active !== undefined && resource.active !== null) {
+          activo = resource.active;
+        } else {
+          // Fallback a extensión inactivo
+          let inactivo = false;
+          if (resource.extension && Array.isArray(resource.extension)) {
+            const inactivoExt = resource.extension.find(
+              (ext) =>
+                ext.url ===
+                'http://mi-servidor.com/fhir/StructureDefinition/inactivo',
+            );
+            if (inactivoExt && inactivoExt.valueBoolean !== undefined) {
+              inactivo = inactivoExt.valueBoolean;
+            }
           }
+          activo = !inactivo;
         }
 
         // Extraer ocupación (puede estar en extensiones adicionales)
@@ -545,12 +556,25 @@ export default {
           mutual: mutual || null,
           numeroAfiliado: numeroAfiliado || '',
           tutores: tutores || [],
-          activo: !inactivo,
+          activo: activo,
           iniciales:
             nombre && apellido
               ? `${nombre[0]}${apellido[0]}`.toUpperCase()
               : '??',
         };
+      });
+
+      // Ordenar pacientes: primero activos, luego inactivos
+      // Dentro de cada grupo, ordenar por nombre y apellido
+      this.pacientes.sort((a, b) => {
+        // Primero por estado (activos primero: true > false)
+        if (a.activo !== b.activo) {
+          return b.activo - a.activo; // true (1) antes que false (0)
+        }
+        // Si tienen el mismo estado, ordenar por nombre y apellido
+        const nombreA = `${a.nombre || ''} ${a.apellido || ''}`.toLowerCase();
+        const nombreB = `${b.nombre || ''} ${b.apellido || ''}`.toLowerCase();
+        return nombreA.localeCompare(nombreB);
       });
     } catch (error) {
       console.error('Error al obtener pacientes:', error);
