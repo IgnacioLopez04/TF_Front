@@ -175,6 +175,8 @@ export default {
           'http://mi-servidor.com/fhir/StructureDefinition/hash-id': 'hash_id',
           'http://mi-servidor.com/fhir/StructureDefinition/prestacion':
             'prestacion',
+          'http://mi-servidor.com/fhir/StructureDefinition/ultima-modificacion':
+            'ultimaModificacion',
         });
 
         // Obtener DNI del identificador FHIR
@@ -189,6 +191,7 @@ export default {
           apellido: resource.name[0].family,
           prestacion: extensionValues.prestacion,
           iniciales: resource.name[0].given[0][0] + resource.name[0].family[0],
+          ultimaModificacion: extensionValues.ultimaModificacion ?? null,
         };
       });
 
@@ -210,9 +213,12 @@ export default {
 
       const extensionValues = getExtensionValues(resource[0].extension, {
         'http://mi-servidor.com/fhir/StructureDefinition/hash-id': 'hash_id',
-        'http://mi-servidor.com/fhir/StructureDefinition/prestacion': 'prestacion',
+        'http://mi-servidor.com/fhir/StructureDefinition/prestacion':
+          'prestacion',
         'http://mi-servidor.com/fhir/StructureDefinition/hash-id-ehr':
           'hash_id_EHR',
+        'http://mi-servidor.com/fhir/StructureDefinition/ultima-modificacion':
+          'ultimaModificacion',
       });
 
       const data = {
@@ -224,6 +230,7 @@ export default {
         iniciales:
           resource[0].name[0].given[0][0] + resource[0].name[0].family[0],
         hashIdEHR: extensionValues.hash_id_EHR,
+        ultimaModificacion: extensionValues.ultimaModificacion ?? null,
       };
       return data;
     } catch (error) {
