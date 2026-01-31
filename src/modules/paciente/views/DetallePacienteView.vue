@@ -774,6 +774,7 @@ const guardarComentario = async () => {
       await pacienteStore.crearComentario(comentario, informeSeleccionado.value.hashId);
       
       comentarios.value = await pacienteStore.obtenerComentarios(informeSeleccionado.value.hashId);
+      pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
       showSuccess('Comentario agregado correctamente');
       nuevoComentario.value = '';
       modalComentarioVisible.value = false;
@@ -869,6 +870,7 @@ const guardarMultimedia = async () => {
         showSuccess('Imagen agregada correctamente');
         // Recargar la lista de multimedia
         await cargarMultimedia();
+        pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
       }catch(error){
         showError('No es posible agregar la imagen');
       }finally{
@@ -882,6 +884,7 @@ const guardarMultimedia = async () => {
         showSuccess('Video agregado correctamente');
         // Recargar la lista de multimedia
         await cargarMultimedia();
+        pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
       }catch(error){
         showError('No es posible agregar el video');
       }finally{
@@ -1086,6 +1089,7 @@ const guardarNuevoInforme = async () => {
       
       // Refrescar la lista de informes
       informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
+      pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
     } catch (error) {
       showError('No es posible crear el informe');
     }
