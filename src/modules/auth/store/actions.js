@@ -16,9 +16,6 @@ export const login = async (credential) => {
 export function useLogin(usuario, accessToken, startTokenMonitoring) {
   return (userData, token) => {
     try {
-      // Guardar token en sessionStorage
-      sessionStorage.setItem('accessToken', token);
-
       // Actualizar el estado del usuario
       usuario.value = {
         id_usuario: userData.id_usuario,
@@ -80,15 +77,11 @@ export function useLogout(usuario, accessToken, stopTokenMonitoring) {
 export function useCheckAuth(accessToken, logout) {
   return () => {
     try {
-      const token = sessionStorage.getItem('accessToken');
-
-      if (!token) {
+      if (!accessToken.value) {
         logout();
         showError('Inicie sesión para continuar');
         return { isAuthenticated: false };
       }
-
-      accessToken.value = token;
       return { isAuthenticated: true };
     } catch (error) {
       console.error('Error al verificar autenticación:', error);
