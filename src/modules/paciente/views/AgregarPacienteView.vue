@@ -564,7 +564,6 @@ const guardarPaciente = async () => {
 
   isSubmitting.value = true;
   try {
-    console.log({paciente: { ...pacienteStore.paciente, tutores: pacienteStore.tutores}});
     await pacienteStore.crearPaciente({ ...pacienteStore.paciente, tutores: pacienteStore.tutores });
     showSuccess('Paciente guardado exitosamente');
 
