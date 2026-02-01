@@ -8,8 +8,14 @@
           <span class="text-xl font-bold text-700">TF Causana</span>
         </div>
         <div class="flex align-items-center gap-3">
-          <!-- <router-link to="/" class="nav-link text-600 hover:text-700 no-underline">Inicio</router-link> -->
-          <router-link to="/pacientes" class="nav-link text-600 hover:text-700 no-underline">Pacientes</router-link>
+          <router-link 
+            v-for="item in menuItems" 
+            :key="item.to"
+            :to="item.to" 
+            class="nav-link text-600 hover:text-700 no-underline"
+          >
+            {{ item.name }}
+          </router-link>
         </div>
       </div>
       <div class="flex align-items-center gap-3">
@@ -50,9 +56,29 @@
 import { useAuthStore } from '@/modules/auth/store';
 import { useRouter } from 'vue-router';
 import { showSuccess } from '@/composables/useToast';
+import { computed } from 'vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
+
+const allMenuItems = [
+  {
+    to: '/pacientes',
+    name: 'Pacientes',
+    hasAccess: () => true
+  },
+  {
+    to: '/administracion',
+    name: 'Administración',
+    hasAccess: () => {
+      return authStore.usuario.id_tipo_usuario === 2;
+    }
+  }
+];
+
+const menuItems = computed(() => {
+  return allMenuItems.filter(item => item.hasAccess());
+});
 
 const logout = () => {
   authStore.logout();

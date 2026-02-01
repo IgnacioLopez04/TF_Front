@@ -1,10 +1,6 @@
 <template>
   <div>
     <div>
-      <h1>¡Bienvenido al Sistema de Historias Clínicas!</h1>
-      <p>Has iniciado sesión correctamente</p>
-    </div>
-    <div>
       <div>
         <Avatar 
           v-if="authStore.usuario.picture" 

@@ -39,4 +39,41 @@ body {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+:deep(.p-button-primary) {
+  background-color: #8b5cf6 !important;
+  border-color: #8b5cf6 !important;
+  color: white !important;
+}
+
+:deep(.p-button-primary:hover) {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+  transition: all 0.2s ease;
+}
+
+:deep(.p-button-outlined.p-button-secondary) {
+  background-color: white !important;
+  border-color: #8b5cf6 !important;
+  color: #8b5cf6 !important;
+}
+
+:deep(.p-button-outlined.p-button-secondary:hover) {
+  background-color: #d8b4fe !important;
+  border-color: #7c3aed !important;
+  color: #7c3aed !important;
+  transition: all 0.2s ease;
+}
+
+:deep(.p-button-secondary) {
+  background-color: #8b5cf6 !important;
+  border-color: #8b5cf6 !important;
+  color: white !important;
+}
+
+:deep(.p-button-secondary:hover) {
+  background-color: #7c3aed !important;
+  border-color: #7c3aed !important;
+  transition: all 0.2s ease;
+}
+
 

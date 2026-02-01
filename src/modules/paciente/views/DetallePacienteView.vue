@@ -152,7 +152,7 @@
             </div>
 
             <!-- Sección de Imágenes -->
-            <div class="mb-6">
+            <div class="mb-6" v-if="imagenes.length > 0">
               <h4 class="text-lg font-semibold mb-3 text-color-primary">Imágenes</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div 
@@ -160,22 +160,43 @@
                   :key="imagen.id"
                   class="bg-white border-round-xl p-3 shadow-md"
                 >
-                  <div class="text-center mb-3">
-                    <img 
-                      :src="imagen.thumbnail" 
-                      :alt="imagen.nombre"
-                      class="w-full h-32 object-cover border-round"
-                      @click="verImagen(imagen)"
-                      style="cursor: pointer;"
-                    />
+                  <div class="text-center mb-3 position-relative" style="min-height: 128px;">
+                    <div v-if="imagen.thumbnail && !imagen.error" class="w-full h-32 border-round overflow-hidden position-relative">
+                      <img 
+                        :src="imagen.thumbnail" 
+                        :alt="imagen.titulo || imagen.nombre"
+                        class="w-full h-32 object-cover border-round"
+                        @click="verImagen(imagen)"
+                        @load="imagen.loading = false"
+                        @error="handlePreviewImageError(imagen)"
+                        style="cursor: pointer;"
+                      />
+                      <div v-if="imagen.loading" class="position-absolute top-0 left-0 w-full h-full bg-gray-100 bg-opacity-75 flex align-items-center justify-content-center">
+                        <ProgressSpinner style="width: 30px; height: 30px;" />
+                      </div>
+                    </div>
+                    <div v-else-if="imagen.loading && !imagen.thumbnail" class="w-full h-32 border-round bg-gray-100 flex align-items-center justify-content-center">
+                      <ProgressSpinner style="width: 30px; height: 30px;" />
+                    </div>
+                    <div v-else-if="imagen.error || !imagen.thumbnail" class="w-full h-32 border-round bg-gray-100 flex align-items-center justify-content-center flex-column">
+                      <i class="pi pi-image text-3xl text-gray-400 mb-2"></i>
+                      <p class="text-xs text-gray-500">{{ imagen.error ? 'Error al cargar' : 'Sin previsualización' }}</p>
+                    </div>
                   </div>
                   <div class="text-center">
-                    <p class="text-sm text-gray-600 mb-1 font-mono">{{ imagen.nombre }}</p>
+                    <p class="text-sm font-semibold text-color-primary mb-1">
+                      {{ imagen.titulo || imagen.nombre }}
+                    </p>
+                    <p v-if="imagen.descripcion" class="text-xs text-gray-600 mb-2 line-height-3" style="min-height: 2.5rem;">
+                      {{ imagen.descripcion }}
+                    </p>
+                    <p v-if="!imagen.titulo" class="text-xs text-gray-500 mb-1 font-mono">{{ imagen.nombre }}</p>
                     <p class="text-xs text-gray-500 mb-2">{{ imagen.fecha }}</p>
                     <Button 
                       label="Ver imagen" 
                       @click="verImagen(imagen)"
                       class="p-button-text p-button-link text-color-primary p-0"
+                      :disabled="imagen.error"
                     />
                   </div>
                 </div>
@@ -183,7 +204,7 @@
             </div>
 
             <!-- Sección de Videos -->
-            <div class="mb-6">
+            <div class="mb-6" v-if="videos.length > 0">
               <h4 class="text-lg font-semibold mb-3 text-color-primary">Videos</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div 
@@ -201,7 +222,13 @@
                     </div>
                   </div>
                   <div class="text-center">
-                    <p class="text-sm text-gray-600 mb-1 font-mono">{{ video.nombre }}</p>
+                    <p class="text-sm font-semibold text-color-primary mb-1">
+                      {{ video.titulo || video.nombre }}
+                    </p>
+                    <p v-if="video.descripcion" class="text-xs text-gray-600 mb-2 line-height-3" style="min-height: 2.5rem;">
+                      {{ video.descripcion }}
+                    </p>
+                    <p v-if="!video.titulo" class="text-xs text-gray-500 mb-1 font-mono">{{ video.nombre }}</p>
                     <p class="text-xs text-gray-500 mb-2">{{ video.fecha }}</p>
                     <Button 
                       label="Ver video" 
@@ -213,8 +240,14 @@
               </div>
             </div>
 
+            <!-- Loading state -->
+            <div v-if="cargandoMultimedia" class="text-center p-6">
+              <ProgressSpinner />
+              <p class="mt-3 text-gray-500">Cargando archivos multimedia...</p>
+            </div>
+
             <!-- Mensaje cuando no hay contenido -->
-            <div v-if="imagenes.length === 0 && videos.length === 0" class="text-center p-6">
+            <div v-else-if="imagenes.length === 0 && videos.length === 0" class="text-center p-6">
               <i class="pi pi-images text-3xl text-gray-400 mb-3"></i>
               <p class="text-gray-500">No hay contenido multimedia disponible</p>
             </div>
@@ -388,22 +421,26 @@
             {{ tipoMultimedia === 'imagen' ? 'Seleccionar Imagen' : 'Seleccionar Video' }}
           </label>
           <div class="flex align-items-center gap-3">
-            <input 
-              type="file" 
-              id="archivoMultimedia"
-              ref="archivoInput"
+            <FileUpload 
+              chooseLabel="Seleccionar Archivo" 
+              @select="onArchivoSeleccionado"
+              mode="basic"
               :accept="tipoMultimedia === 'imagen' ? 'image/*' : 'video/*'"
-              @change="onArchivoSeleccionado"
-              class="hidden"
-            />
-            <Button 
-              label="Seleccionar Archivo" 
-              @click="$refs.archivoInput.click()"
+              customUpload="true"
               class="p-button-outlined p-button-primary"
+              ref="fileUploadRef"
             />
-            <span v-if="archivoSeleccionado" class="text-sm text-gray-600">
-              {{ archivoSeleccionado.name }}
-            </span>
+            <div v-if="archivoSeleccionado" class="flex align-items-center gap-2 flex-1">
+              <span class="text-sm text-gray-600 flex-1">
+                {{ archivoSeleccionado.name }}
+              </span>
+              <Button 
+                icon="pi pi-times" 
+                @click="eliminarArchivo"
+                class="p-button-text p-button-danger p-button-rounded"
+                v-tooltip.top="'Eliminar archivo'"
+              />
+            </div>
           </div>
         </div>
 
@@ -423,14 +460,15 @@
         <div v-if="tipoMultimedia === 'video' && archivoSeleccionado" class="mb-4">
           <label class="block text-900 font-medium mb-2 text-color-primary">Vista Previa</label>
           <div class="text-center">
-            <video 
+            <FileUpload 
               v-if="archivoSeleccionado"
-              :src="vistaPrevia"
+              :value="archivoSeleccionado"
+              mode="basic"
               controls
+              :auto="true"
+              :customUpload="true"
               class="max-w-full h-32 border-round border border-gray-200"
-            >
-              Tu navegador no soporta el elemento video.
-            </video>
+            />
           </div>
         </div>
 
@@ -457,6 +495,7 @@
           @click="guardarMultimedia"
           class="button-primary-custom"
           :disabled="!esFormularioValido"
+          :loading="guardandoMultimediaLoading"
         />
       </template>
     </Dialog>
@@ -516,10 +555,106 @@
         />
       </template>
     </Dialog>
+
+    <!-- Modal para Ver Imagen Completa -->
+    <Dialog 
+      v-model:visible="modalImagenVisible" 
+      :header="imagenSeleccionada?.titulo || imagenSeleccionada?.nombre || 'Imagen'"
+      :style="{ width: '90vw', maxWidth: '1200px' }" 
+      :maximizable="true"
+      class="p-fluid"
+    >
+      <div v-if="imagenSeleccionada" class="text-center">
+        <div v-if="urlImagenModal" class="mb-3">
+          <img 
+            :src="urlImagenModal" 
+            :alt="imagenSeleccionada.titulo || imagenSeleccionada.nombre"
+            class="max-w-full h-auto border-round"
+            style="max-height: 80vh;"
+            @error="handleImageError"
+          />
+        </div>
+        <div v-else class="p-6">
+          <ProgressSpinner />
+          <p class="mt-3 text-gray-600">Cargando imagen...</p>
+        </div>
+        <div class="mt-4 text-left">
+          <p v-if="imagenSeleccionada.titulo" class="text-lg font-semibold text-color-primary mb-2">
+            {{ imagenSeleccionada.titulo }}
+          </p>
+          <p v-if="imagenSeleccionada.descripcion" class="text-sm text-gray-700 mb-3 line-height-3">
+            {{ imagenSeleccionada.descripcion }}
+          </p>
+          <div class="border-top-1 border-gray-200 pt-3">
+            <p class="text-sm text-gray-600 mb-1"><strong>Nombre del archivo:</strong> {{ imagenSeleccionada.nombre }}</p>
+            <p class="text-sm text-gray-600 mb-0"><strong>Fecha:</strong> {{ imagenSeleccionada.fecha }}</p>
+            <p class="text-sm text-gray-600 mb-0"><strong>Titulo:</strong> {{ imagenSeleccionada.titulo }}</p>
+            <p class="text-sm text-gray-600 mb-0"><strong>Descripcion:</strong> {{ imagenSeleccionada.descripcion }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <template #footer>
+        <Button 
+          label="Cerrar" 
+          @click="modalImagenVisible = false"
+          class="back-button"
+        />
+      </template>
+    </Dialog>
+
+    <!-- Modal para Reproducir Video -->
+    <Dialog 
+      v-model:visible="modalVideoVisible" 
+      :header="videoSeleccionado?.titulo || videoSeleccionado?.nombre || 'Video'"
+      :style="{ width: '90vw', maxWidth: '1200px' }" 
+      :maximizable="true"
+      class="p-fluid"
+    >
+      <div v-if="videoSeleccionado" class="text-center">
+        <div v-if="urlVideoModal" class="mb-3">
+          <video 
+            :src="urlVideoModal" 
+            controls
+            class="w-full border-round"
+            style="max-height: 80vh;"
+            @error="handleVideoError"
+          >
+            Tu navegador no soporta la reproducción de video.
+          </video>
+        </div>
+        <div v-else class="p-6">
+          <ProgressSpinner />
+          <p class="mt-3 text-gray-600">Cargando video...</p>
+        </div>
+        <div class="mt-4 text-left">
+          <p v-if="videoSeleccionado.titulo" class="text-lg font-semibold text-color-primary mb-2">
+            {{ videoSeleccionado.titulo }}
+          </p>
+          <p v-if="videoSeleccionado.descripcion" class="text-sm text-gray-700 mb-3 line-height-3">
+            {{ videoSeleccionado.descripcion }}
+          </p>
+          <div class="border-top-1 border-gray-200 pt-3">
+            <p class="text-sm text-gray-600 mb-1"><strong>Nombre del archivo:</strong> {{ videoSeleccionado.nombre }}</p>
+            <p class="text-sm text-gray-600 mb-0"><strong>Fecha:</strong> {{ videoSeleccionado.fecha }}</p>
+            <p class="text-sm text-gray-600 mb-0"><strong>Titulo:</strong> {{ videoSeleccionado.titulo }}</p>
+            <p class="text-sm text-gray-600 mb-0"><strong>Descripcion:</strong> {{ videoSeleccionado.descripcion }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <template #footer>
+        <Button 
+          label="Cerrar" 
+          @click="modalVideoVisible = false"
+          class="back-button"
+        />
+      </template>
+    </Dialog>
   </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { showError, showSuccess } from '@/composables/useToast';
 import { usePacienteStore } from '../store';
@@ -543,10 +678,11 @@ const nuevoComentario = ref('');
 const tipoMultimedia = ref('imagen');
 const archivoSeleccionado = ref(null);
 const vistaPrevia = ref(null);
+const fileUploadRef = ref(null);
 const informes = ref([]);
 const comentarios = ref([]);
 const comentarioLoading = ref(false);
-
+const guardandoMultimediaLoading = ref(false);  
 // Formulario de nuevo multimedia
 const nuevoMultimedia = ref({
   titulo: '',
@@ -561,33 +697,16 @@ const nuevoInforme = ref({
   fecha: new Date()
 });
 
-// Datos multimedia de ejemplo
-const imagenes = ref([
-  {
-    id: 1,
-    nombre: 'radiografia_lumbar_15062025.jpg',
-    fecha: '15/06/2025',
-    thumbnail: 'https://via.placeholder.com/300x200/7c3aed/ffffff?text=Radiografía+Lumbar',
-    url: 'https://via.placeholder.com/800x600/7c3aed/ffffff?text=Radiografía+Lumbar+Completa'
-  },
-  {
-    id: 2,
-    nombre: 'ejercicio_fisiatrico_18062025.png',
-    fecha: '18/06/2025',
-    thumbnail: 'https://via.placeholder.com/300x200/8b5cf6/ffffff?text=Ejercicio+Fisiatrico',
-    url: 'https://via.placeholder.com/800x600/8b5cf6/ffffff?text=Ejercicio+Fisiatrico+Completo'
-  }
-]);
-
-const videos = ref([
-  {
-    id: 1,
-    nombre: 'video_marcha_20062025.mp4',
-    fecha: '20/06/2025',
-    url: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
-    duracion: '2:30'
-  }
-]);
+// Datos multimedia
+const imagenes = ref([]);
+const videos = ref([]);
+const cargandoMultimedia = ref(false);
+const imagenSeleccionada = ref(null);
+const videoSeleccionado = ref(null);
+const modalImagenVisible = ref(false);
+const modalVideoVisible = ref(false);
+const urlImagenModal = ref('');
+const urlVideoModal = ref('');
 
 // Configuración de tabs
 const tabs = ref([
@@ -655,6 +774,7 @@ const guardarComentario = async () => {
       await pacienteStore.crearComentario(comentario, informeSeleccionado.value.hashId);
       
       comentarios.value = await pacienteStore.obtenerComentarios(informeSeleccionado.value.hashId);
+      pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
       showSuccess('Comentario agregado correctamente');
       nuevoComentario.value = '';
       modalComentarioVisible.value = false;
@@ -665,17 +785,26 @@ const guardarComentario = async () => {
 };
 
 // Funciones para multimedia
-const agregarImagen = () => {
-  tipoMultimedia.value = 'imagen';
-  limpiarFormularioMultimedia();
-  modalMultimediaVisible.value = true;
+const agregarImagen = async () => {
+  try{
+    tipoMultimedia.value = 'imagen';
+    limpiarFormularioMultimedia();
+    modalMultimediaVisible.value = true;
+  }catch(error){
+    showError('No es posible agregar la imagen');
+  }
 };
 
-const agregarVideo = () => {
-  tipoMultimedia.value = 'video';
-  limpiarFormularioMultimedia();
-  modalMultimediaVisible.value = true;
+const agregarVideo = async () => {
+  try{
+    tipoMultimedia.value = 'video';
+    limpiarFormularioMultimedia();
+    modalMultimediaVisible.value = true;
+  }catch(error){
+    showError('No es posible agregar el video');
+  }
 };
+
 
 const limpiarFormularioMultimedia = () => {
   nuevoMultimedia.value = {
@@ -688,7 +817,7 @@ const limpiarFormularioMultimedia = () => {
 };
 
 const onArchivoSeleccionado = (event) => {
-  const archivo = event.target.files[0];
+  const archivo = event.files[0];
   if (archivo) {
     archivoSeleccionado.value = archivo;
     
@@ -714,7 +843,15 @@ const cancelarMultimedia = () => {
   limpiarFormularioMultimedia();
 };
 
-const guardarMultimedia = () => {
+const eliminarArchivo = () => {
+  archivoSeleccionado.value = null;
+  vistaPrevia.value = null;
+  if (fileUploadRef.value) {
+    fileUploadRef.value.clear();
+  }
+};
+
+const guardarMultimedia = async () => {
   if (esFormularioValido.value) {
     // Aquí implementarías la lógica para guardar en tu API
     const multimedia = {
@@ -727,25 +864,32 @@ const guardarMultimedia = () => {
     };
     
     if (tipoMultimedia.value === 'imagen') {
-      // Agregar a la lista de imágenes
-      imagenes.value.push({
-        id: multimedia.id,
-        nombre: multimedia.archivo.name,
-        fecha: formatearFecha(multimedia.fecha),
-        thumbnail: vistaPrevia.value,
-        url: vistaPrevia.value
-      });
-      showSuccess('Imagen agregada correctamente');
+      try{
+        guardandoMultimediaLoading.value = true;
+        await pacienteStore.agregarImagen(multimedia);
+        showSuccess('Imagen agregada correctamente');
+        // Recargar la lista de multimedia
+        await cargarMultimedia();
+        pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
+      }catch(error){
+        showError('No es posible agregar la imagen');
+      }finally{
+        guardandoMultimediaLoading.value = false;
+      }
     } else {
       // Agregar a la lista de videos
-      videos.value.push({
-        id: multimedia.id,
-        nombre: multimedia.archivo.name,
-        fecha: formatearFecha(multimedia.fecha),
-        url: vistaPrevia.value,
-        duracion: '0:00' // Aquí podrías calcular la duración real
-      });
-      showSuccess('Video agregado correctamente');
+      try{
+        guardandoMultimediaLoading.value = true;
+        await pacienteStore.agregarVideo(multimedia);
+        showSuccess('Video agregado correctamente');
+        // Recargar la lista de multimedia
+        await cargarMultimedia();
+        pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
+      }catch(error){
+        showError('No es posible agregar el video');
+      }finally{
+        guardandoMultimediaLoading.value = false;
+      }
     }
     
     modalMultimediaVisible.value = false;
@@ -753,16 +897,144 @@ const guardarMultimedia = () => {
   }
 };
 
-const verImagen = (imagen) => {
-  showSuccess(`Abriendo imagen: ${imagen.nombre}`);
-  // Aquí implementarías la lógica para ver la imagen completa
-  // Podrías abrir un modal con la imagen en tamaño completo
+// Función para cargar multimedia desde el servidor
+const cargarMultimedia = async () => {
+  if (cargandoMultimedia.value) return;
+  
+  try {
+    cargandoMultimedia.value = true;
+    const archivos = await pacienteStore.obtenerDocumentos(pacienteStore.paciente.hashId);
+    
+    imagenes.value = archivos
+      .filter(archivo => {
+        const tipo = archivo.type?.toLowerCase() || '';
+        return tipo.startsWith('image/');
+      })
+      .map(archivo => {
+        // Validar que la URL existe y es válida
+        const hasValidUrl = archivo.url && (archivo.url.startsWith('http://') || archivo.url.startsWith('https://'));
+        
+        return {
+          id: archivo.id,
+          nombre: archivo.name,
+          url: archivo.url || '',
+          thumbnail: archivo.url || '', 
+          tipo: archivo.type,
+          titulo: archivo.titulo || '',
+          descripcion: archivo.descripcion || '',
+          fechaCreacion: archivo.fechaCreacion,
+          fecha: archivo.fechaCreacion ? formatearFecha(archivo.fechaCreacion) : '',
+          loading: hasValidUrl, // Solo mostrar loading si hay URL válida
+          error: !hasValidUrl // Marcar como error si no hay URL válida
+        };
+      });
+    
+    videos.value = archivos
+      .filter(archivo => {
+        const tipo = archivo.type?.toLowerCase() || '';
+        return tipo.startsWith('video/');
+      })
+      .map(archivo => {
+        // Validar que la URL existe y es válida
+        const hasValidUrl = archivo.url && (archivo.url.startsWith('http://') || archivo.url.startsWith('https://'));
+        
+        return {
+          id: archivo.id,
+          nombre: archivo.name,
+          url: archivo.url || '',
+          tipo: archivo.type,
+          titulo: archivo.titulo || '',
+          descripcion: archivo.descripcion || '',
+          fechaCreacion: archivo.fechaCreacion,
+          fecha: archivo.fechaCreacion ? formatearFecha(archivo.fechaCreacion) : '',
+          loading: false,
+          error: !hasValidUrl // Marcar como error si no hay URL válida
+        };
+      });
+
+    
+  } catch (error) {
+    showError('No se pudieron cargar los archivos multimedia');
+  } finally {
+    cargandoMultimedia.value = false;
+  }
 };
 
-const verVideo = (video) => {
-  showSuccess(`Reproduciendo video: ${video.nombre}`);
-  // Aquí implementarías la lógica para reproducir el video
-  // Podrías abrir un modal con un reproductor de video
+const verImagen = async (imagen) => {
+  imagenSeleccionada.value = imagen;
+  urlImagenModal.value = imagen.url;
+  modalImagenVisible.value = true;
+};
+
+const verVideo = async (video) => {
+  videoSeleccionado.value = video;
+  urlVideoModal.value = video.url;
+  modalVideoVisible.value = true;
+};
+
+// Watcher para cargar multimedia cuando se cambia al tab
+watch(tabActivo, (newTab) => {
+  if (newTab === 'Multimedia' && pacienteStore.paciente?.hashId) {
+    cargarMultimedia();
+  }
+});
+
+// Manejo de errores de carga de imágenes y videos
+const handleImageError = async () => {
+  console.error('Error al cargar imagen en modal:', urlImagenModal.value);
+  showError('No se pudo cargar la imagen. La URL puede haber expirado. Intenta recargar la página.');
+  
+  // Intentar recargar los documentos para obtener nuevas URLs firmadas
+  try {
+    await cargarMultimedia();
+    if (imagenSeleccionada.value) {
+      // Buscar la imagen actualizada
+      const imagenActualizada = imagenes.value.find(img => img.id === imagenSeleccionada.value.id);
+      if (imagenActualizada && imagenActualizada.url) {
+        urlImagenModal.value = imagenActualizada.url;
+        return;
+      }
+    }
+  } catch (error) {
+    console.error('Error al recargar multimedia:', error);
+  }
+  
+  urlImagenModal.value = '';
+};
+
+const handleVideoError = async () => {
+  console.error('Error al cargar video en modal:', urlVideoModal.value);
+  showError('No se pudo cargar el video. La URL puede haber expirado. Intenta recargar la página.');
+  
+  // Intentar recargar los documentos para obtener nuevas URLs firmadas
+  try {
+    await cargarMultimedia();
+    if (videoSeleccionado.value) {
+      // Buscar el video actualizado
+      const videoActualizado = videos.value.find(vid => vid.id === videoSeleccionado.value.id);
+      if (videoActualizado && videoActualizado.url) {
+        urlVideoModal.value = videoActualizado.url;
+        return;
+      }
+    }
+  } catch (error) {
+    console.error('Error al recargar multimedia:', error);
+  }
+  
+  urlVideoModal.value = '';
+};
+
+const handlePreviewImageError = async (imagen) => {
+  imagen.loading = false;
+  imagen.error = true;
+  console.error('Error al cargar previsualización de imagen:', imagen.nombre, imagen.url);
+  
+  // Si la URL parece haber expirado o hay un error de acceso, intentar recargar
+  // Las URLs firmadas de S3 expiran después de 10 minutos
+  if (imagen.url && !imagen.url.includes('error')) {
+    // Marcar que hubo un error pero mantener la URL para que el usuario pueda intentar verla en el modal
+    console.warn('Posible URL expirada o error de acceso:', imagen.url);
+  }
 };
 
 const volverALista = () => {
@@ -817,6 +1089,7 @@ const guardarNuevoInforme = async () => {
       
       // Refrescar la lista de informes
       informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
+      pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
     } catch (error) {
       showError('No es posible crear el informe');
     }
@@ -850,6 +1123,11 @@ onMounted(async () => {
     pacienteStore.paciente = await pacienteStore.obtenerPaciente(route.params.id);
     informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
     pacienteStore.historiaFisiatrica = await pacienteStore.obtenerHistoriaFisiatrica(pacienteStore.paciente.hashId);
+    
+    // Cargar multimedia si el tab activo es Multimedia
+    if (tabActivo.value === 'Multimedia') {
+      cargarMultimedia();
+    }
   }catch(error){
     showError('No es posible obtener el paciente');
   }

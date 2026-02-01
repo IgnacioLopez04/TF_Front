@@ -16,6 +16,7 @@ import Message from 'primevue/message';
 import ProgressSpinner from 'primevue/progressspinner';
 import Dialog from 'primevue/dialog';
 import Divider from 'primevue/divider';
+import FileUpload from 'primevue/fileupload';
 
 // Componentes de navegación
 import Tabs from 'primevue/tabs';
@@ -24,6 +25,7 @@ import TabPanel from 'primevue/tabpanel';
 import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import Timeline from 'primevue/timeline';
+import Paginator from 'primevue/paginator';
 
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
@@ -51,5 +53,7 @@ export default {
     app.component('Tab', Tab);
     app.component('Timeline', Timeline);
     app.component('Divider', Divider);
+    app.component('FileUpload', FileUpload);
+    app.component('Paginator', Paginator);
   },
 };
