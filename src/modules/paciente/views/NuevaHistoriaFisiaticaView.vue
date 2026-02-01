@@ -927,12 +927,10 @@ const cancelar = () => {
 const onChangeFechaEvaluacion = () => {
   // La fecha ya se actualiza automáticamente en el v-model
   // El computed fechaEvaluacionFormateada se recalculará automáticamente
-  console.log('Fecha de evaluación actualizada:', fechaEvaluacionFormateada.value);
 };
 
 const finalizarHistoria = () => {
   if (esFormularioValido.value) {
-    console.log(pacienteStore.historiaFisiatrica);
     pacienteStore.crearHistoriaFisiatrica(pacienteStore.historiaFisiatrica);
     showSuccess('Historia fisiátrica creada exitosamente');
     router.push(`/pacientes/${pacienteStore.paciente.hashId}`);

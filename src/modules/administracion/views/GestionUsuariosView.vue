@@ -599,7 +599,6 @@ const toggleEstadoUsuarioConfirmar = (usuario) => {
 
 const toggleEstadoUsuario = async (usuario) => {
   try {
-    console.log(usuario.activo)
     if(authStore.usuario.hashId === usuario.hashId && usuario.activo) {
       showError('No es posible desactivar el usuario logeado. Cambie de usuario para realizar esta acción.');
       modalConfirmarVisible.value = false;
