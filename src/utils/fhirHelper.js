@@ -817,8 +817,21 @@ function guardarSeccion(historiaFisiatrica, seccion, contenido) {
       historiaFisiatrica[seccion] = {};
     }
   } else {
-    // Para campos de texto simple
-    historiaFisiatrica[seccion] = contenidoTexto;
+    // Para campos de texto simple: si las líneas tienen formato "- clave: valor", extraer solo el valor
+    const lineasProcesadas = contenido.map((linea) => {
+      if (linea.startsWith('- ') && linea.includes(': ')) {
+        const sinGuion = linea.substring(2);
+        const idxColon = sinGuion.indexOf(': ');
+        return idxColon !== -1
+          ? sinGuion.substring(idxColon + 2).trim()
+          : sinGuion.trim();
+      }
+      return linea.trim();
+    });
+    historiaFisiatrica[seccion] = lineasProcesadas
+      .filter(Boolean)
+      .join('\n')
+      .trim();
   }
 }
 

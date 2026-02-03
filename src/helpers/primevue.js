@@ -26,6 +26,7 @@ import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
 import Timeline from 'primevue/timeline';
 import Paginator from 'primevue/paginator';
+import Tag from 'primevue/tag';
 
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
@@ -55,5 +56,6 @@ export default {
     app.component('Divider', Divider);
     app.component('FileUpload', FileUpload);
     app.component('Paginator', Paginator);
+    app.component('Tag', Tag);
   },
 };

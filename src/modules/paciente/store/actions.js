@@ -691,6 +691,29 @@ export default {
     }
   },
 
+  async obtenerHistorialHistoriaFisiatrica(hashId) {
+    try {
+      const response = await useAxios.get(
+        `${urlFhirReport}/$get-historia-history?patient=${hashId}`,
+      );
+      const resources = extractFhirResources(response.data);
+      const historiasFisiatricas = resources.filter((resource) =>
+        resource.code?.coding?.some(
+          (coding) =>
+            coding.system === 'http://loinc.org' && coding.code === '11450-4',
+        ),
+      );
+      this.historialHistoriaFisiatrica = historiasFisiatricas;
+      this.versionHistoriaSeleccionada = null;
+      return historiasFisiatricas;
+    } catch (error) {
+      console.error('Error en obtenerHistorialHistoriaFisiatrica:', error);
+      this.historialHistoriaFisiatrica = [];
+      this.versionHistoriaSeleccionada = null;
+      return [];
+    }
+  },
+
   async agregarImagen(nuevoMultimedia) {
     try {
       // Crear FormData para enviar archivo + metadatos al FHIR Server

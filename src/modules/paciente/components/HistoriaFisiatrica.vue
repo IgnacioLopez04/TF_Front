@@ -472,7 +472,7 @@
  </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePacienteStore } from '../store';
 
@@ -489,6 +489,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
     required: true
+  },
+  historiaParaMostrar: {
+    type: Object,
+    default: null
   }
 });
 
@@ -507,7 +511,14 @@ const subTabsExamenFisico = ref([
   { id: 4, label: 'Sistema y actividades' }
 ]);
 
-const historiaFisiatica = ref(pacienteStore.historiaFisiatrica);
+const historiaFisiatica = computed(() => {
+  const raw = props.historiaParaMostrar ?? pacienteStore.historiaFisiatrica;
+  if (!raw) return {};
+  return {
+    ...raw,
+    fechaEvaluacion: raw.fechaEvaluacion ?? raw.fechaCreacion ?? 'Sin información'
+  };
+});
 
 // Formatear fecha de evaluación a formato legible DD/MM/YYYY
 const formatearFecha = (fecha) => {
