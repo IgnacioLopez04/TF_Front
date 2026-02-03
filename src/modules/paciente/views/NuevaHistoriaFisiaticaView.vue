@@ -815,6 +815,8 @@
           v-else
           label="Finalizar" 
           icon="pi pi-check"
+          :loading="guardandoHistoria"
+          :disabled="guardandoHistoria"
           @click="finalizarHistoria"
           class="button-primary-custom border-round"
         />
@@ -843,6 +845,7 @@ const router = useRouter();
 const pacienteStore = usePacienteStore();
 const pasoActivo = ref(0);
 const subTabExamenFisicoActivo = ref(0);
+const guardandoHistoria = ref(false);
 
 // Inicializar la historia fisiatrica cuando se monta el componente
 onMounted(() => {
@@ -929,13 +932,20 @@ const onChangeFechaEvaluacion = () => {
   // El computed fechaEvaluacionFormateada se recalculará automáticamente
 };
 
-const finalizarHistoria = () => {
-  if (esFormularioValido.value) {
-    pacienteStore.crearHistoriaFisiatrica(pacienteStore.historiaFisiatrica);
+const finalizarHistoria = async () => {
+  if (!esFormularioValido.value) {
+    showError('Por favor complete todos los campos obligatorios');
+    return;
+  }
+  guardandoHistoria.value = true;
+  try {
+    await pacienteStore.crearHistoriaFisiatrica(pacienteStore.historiaFisiatrica);
     showSuccess('Historia fisiátrica creada exitosamente');
     router.push(`/pacientes/${pacienteStore.paciente.hashId}`);
-  } else {
-    showError('Por favor complete todos los campos obligatorios');
+  } catch (error) {
+    showError('No se pudo guardar la historia fisiátrica');
+  } finally {
+    guardandoHistoria.value = false;
   }
 };
 

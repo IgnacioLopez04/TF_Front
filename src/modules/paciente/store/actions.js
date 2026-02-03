@@ -18,6 +18,7 @@ import {
 } from '@/utils/fhirHelper';
 import FhirService from '@/services/fhirService';
 import { useAuthStore } from '@/modules/auth/store';
+import { getDefaultHistoriaFisiatrica } from '@/modules/paciente/store/state';
 const authStore = useAuthStore();
 
 export default {
@@ -680,9 +681,10 @@ export default {
         return this.historiaFisiatrica;
       }
 
-      // Si no hay historias, limpiar el state y devolver null
-      this.historiaFisiatrica = null;
-      return null;
+      // Si no hay historias, usar objeto por defecto (evita null en la app)
+      const defaultHistoria = getDefaultHistoriaFisiatrica();
+      this.historiaFisiatrica = defaultHistoria;
+      return defaultHistoria;
     } catch (error) {
       console.error('Error en obtenerHistoriaFisiatrica:', error);
       throw error;

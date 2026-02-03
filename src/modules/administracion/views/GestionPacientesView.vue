@@ -478,12 +478,15 @@
         <Button 
           label="Cancelar" 
           icon="pi pi-times"
+          :disabled="guardandoPaciente"
           @click="cerrarModalEditar"
           class="p-button-text"
         />
         <Button 
           label="Guardar" 
           icon="pi pi-check"
+          :loading="guardandoPaciente"
+          :disabled="guardandoPaciente"
           @click="guardarPaciente"
           class="p-button-primary"
         />
@@ -502,12 +505,15 @@
         <Button 
           label="Cancelar" 
           icon="pi pi-times"
+          :disabled="actualizandoEstadoPaciente"
           @click="modalConfirmarVisible = false"
           class="p-button-text"
         />
         <Button 
           label="Confirmar" 
           icon="pi pi-check"
+          :loading="actualizandoEstadoPaciente"
+          :disabled="actualizandoEstadoPaciente"
           @click="toggleEstadoPaciente(pacienteSeleccionado)"
           class="p-button-primary"
         />
@@ -529,6 +535,8 @@ const administracionStore = useAdministracionStore();
 const modalConfirmarVisible = ref(false);
 const accionTexto = ref('');
 const identificadorPaciente = ref('');
+const guardandoPaciente = ref(false);
+const actualizandoEstadoPaciente = ref(false);
 
 const filtroActivo = ref('todos');
 const filtros = ref([
@@ -842,6 +850,8 @@ const guardarPaciente = async () => {
       return;
     }
 
+    guardandoPaciente.value = true;
+
     // Preparar datos para enviar
     const datosPaciente = { ...formularioPaciente.value };
     
@@ -864,6 +874,8 @@ const guardarPaciente = async () => {
       return;
     }
     showError('Error al editar el paciente');
+  } finally {
+    guardandoPaciente.value = false;
   }
 };
 
@@ -876,6 +888,7 @@ const toggleEstadoPacienteConfirmar = (paciente) => {
 
 const toggleEstadoPaciente = async (paciente) => {
   try {
+    actualizandoEstadoPaciente.value = true;
     const nuevoEstado = !paciente.activo;
     await administracionStore.actualizarEstadoPaciente(paciente.hashId, nuevoEstado);
     const mensaje = nuevoEstado 
@@ -889,6 +902,8 @@ const toggleEstadoPaciente = async (paciente) => {
       : 'Error al activar el paciente';
     showError(mensaje);
     modalConfirmarVisible.value = false;
+  } finally {
+    actualizandoEstadoPaciente.value = false;
   }
 };
 

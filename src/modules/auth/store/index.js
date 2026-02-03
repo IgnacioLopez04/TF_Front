@@ -25,9 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Verificar token cada 30 segundos
     tokenCheckInterval.value = setInterval(() => {
-      const currentToken = sessionStorage.getItem('accessToken');
-
-      if (!currentToken || currentToken !== accessToken.value) {
+      if (!accessToken.value) {
         // Token perdido o cambiado
         console.warn('Token perdido o inválido, cerrando sesión...');
         logout();
@@ -47,40 +45,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!accessToken.value);
 
-  // Verificar autenticación al inicio
-  const initializeAuth = () => {
-    const token = sessionStorage.getItem('accessToken');
-    if (token) {
-      accessToken.value = token;
-      startTokenMonitoring();
-    }
-  };
-
-  // Listener para cambios en sessionStorage desde otras pestañas
-  const setupStorageListener = () => {
-    window.addEventListener('storage', (e) => {
-      if (e.key === 'accessToken') {
-        if (!e.newValue) {
-          // Token eliminado en otra pestaña
-          console.warn('Token eliminado en otra pestaña, cerrando sesión...');
-          logout();
-          stopTokenMonitoring();
-
-          if (router.currentRoute.value.name !== 'login') {
-            router.push({ name: 'login' });
-          }
-        } else if (e.newValue !== accessToken.value) {
-          // Token cambiado en otra pestaña
-          console.warn('Token cambiado en otra pestaña, actualizando...');
-          accessToken.value = e.newValue;
-        }
-      }
-    });
-  };
+  // Verificar autenticación al inicio (no restaurar token; sesión solo en memoria)
+  const initializeAuth = () => {};
 
   // Inicializar al crear el store
   initializeAuth();
-  setupStorageListener();
 
   // Redirigir al login si el estado de auth se limpia
   watch(

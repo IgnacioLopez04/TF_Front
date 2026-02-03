@@ -26,7 +26,8 @@ const setupResponseInterceptor = () => {
 setupResponseInterceptor();
 
 const getAuthHeaders = () => {
-  const token = sessionStorage.getItem('accessToken');
+  const authStore = useAuthStore();
+  const token = authStore.accessToken;
 
   if (!token) {
     return { ok: false, message: 'No se encontró el token de acceso.' };
