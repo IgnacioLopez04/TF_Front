@@ -743,6 +743,8 @@ function parsearContenidoHistoria(historiaFisiatrica, conclusion) {
   if (!conclusion) return;
 
   const secciones = {
+    'DERIVADOS POR:': 'derivadosPor',
+    'ANTECEDENTES DEL CUADRO ACTUAL:': 'antecedentesCuadro',
     'ANTECEDENTES:': 'antecedentes',
     'MEDICACIÓN ACTUAL:': 'medicacionActual',
     'ESTUDIOS REALIZADOS:': 'estudiosRealizados',

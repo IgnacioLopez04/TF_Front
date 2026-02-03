@@ -239,12 +239,15 @@
       <Button 
         label="Cancelar" 
         icon="pi pi-times"
+        :disabled="actualizandoEstadoUsuario"
         @click="modalConfirmarVisible = false"
         class="p-button-text"
       />
       <Button 
         label="Confirmar" 
         icon="pi pi-check"
+        :loading="actualizandoEstadoUsuario"
+        :disabled="actualizandoEstadoUsuario"
         @click="toggleEstadoUsuario(usuarioSeleccionado)"
         class="p-button-primary"
       />
@@ -264,6 +267,7 @@ const authStore = useAuthStore();
 const modalConfirmarVisible = ref(false);
 const accionTexto = ref('');
 const identificadorUsuario = ref('');
+const actualizandoEstadoUsuario = ref(false);
 
 const filtroActivo = ref('todos');
 const filtros = ref([
@@ -599,15 +603,16 @@ const toggleEstadoUsuarioConfirmar = (usuario) => {
 
 const toggleEstadoUsuario = async (usuario) => {
   try {
-    if(authStore.usuario.hashId === usuario.hashId && usuario.activo) {
+    if (authStore.usuario.hashId === usuario.hashId && usuario.activo) {
       showError('No es posible desactivar el usuario logeado. Cambie de usuario para realizar esta acción.');
       modalConfirmarVisible.value = false;
       return;
     }
-    
+
     const nuevoEstado = !usuario.activo;
+    actualizandoEstadoUsuario.value = true;
     await administracionStore.actualizarEstadoUsuario(usuario.hashId, nuevoEstado);
-    const mensaje = nuevoEstado 
+    const mensaje = nuevoEstado
       ? `Usuario ${usuario.nombre} ${usuario.apellido} activado correctamente`
       : `Usuario ${usuario.nombre} ${usuario.apellido} desactivado correctamente`;
     showSuccess(mensaje);
@@ -618,6 +623,8 @@ const toggleEstadoUsuario = async (usuario) => {
       : 'Error al activar el usuario';
     showError(mensaje);
     modalConfirmarVisible.value = false;
+  } finally {
+    actualizandoEstadoUsuario.value = false;
   }
 };
 

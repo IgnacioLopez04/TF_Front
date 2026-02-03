@@ -51,7 +51,12 @@ export default () => ({
   tutores: [],
   informes: [],
 
-  historiaFisiatrica: {
+  historiaFisiatrica: getDefaultHistoriaFisiatrica(),
+});
+
+/** Objeto por defecto cuando el paciente no tiene historia fisiátrica (para reutilizar en store) */
+export function getDefaultHistoriaFisiatrica() {
+  return {
     // Evaluación y Consulta
     fechaEvaluacion: 'Sin información',
     derivadosPor: 'Sin información',
@@ -125,5 +130,5 @@ export default () => ({
     diagnosticoFuncional: 'Sin información',
     conductaSeguirObjetivos: 'Sin información',
     objetivosFamilia: 'Sin información',
-  },
-});
+  };
+}

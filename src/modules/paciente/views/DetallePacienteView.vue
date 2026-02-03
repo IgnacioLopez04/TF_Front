@@ -1,6 +1,10 @@
 <template>
   <div class="page-container p-4 border-round">
-
+    <div v-if="cargandoPaciente" class="flex flex-column justify-content-center align-items-center" style="height: 60vh;">
+      <ProgressSpinner />
+      <p class="mt-3 text-gray-500">Cargando datos del paciente...</p>
+    </div>
+    <template v-else>
     <!-- Header del paciente -->
     <div class="border-round-xl shadow-sm border border-gray-100 p-6 mb-4 bg-white">
       <div class="flex md:flex-row align-items-start gap-4">
@@ -255,6 +259,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 
     <!-- Modal para Ver Informe -->
@@ -374,14 +379,16 @@
       <template #footer>
         <Button 
           label="Cancelar" 
+          :disabled="guardandoComentario"
           @click="modalComentarioVisible = false"
           class="back-button"
         />
         <Button 
           label="Guardar Comentario" 
+          :loading="guardandoComentario"
+          :disabled="!nuevoComentario.trim() || guardandoComentario"
           @click="guardarComentario"
           class="button-primary-custom"
-          :disabled="!nuevoComentario.trim()"
         />
       </template>
     </Dialog>
@@ -549,9 +556,10 @@
         />
         <Button 
           label="Crear Informe" 
+          :loading="guardandoInforme"
+          :disabled="!esInformeValido || guardandoInforme"
           @click="guardarNuevoInforme"
           class="button-primary-custom"
-          :disabled="!esInformeValido"
         />
       </template>
     </Dialog>
@@ -682,7 +690,9 @@ const fileUploadRef = ref(null);
 const informes = ref([]);
 const comentarios = ref([]);
 const comentarioLoading = ref(false);
-const guardandoMultimediaLoading = ref(false);  
+const guardandoMultimediaLoading = ref(false);
+const guardandoInforme = ref(false);
+const guardandoComentario = ref(false);
 // Formulario de nuevo multimedia
 const nuevoMultimedia = ref({
   titulo: '',
@@ -701,6 +711,7 @@ const nuevoInforme = ref({
 const imagenes = ref([]);
 const videos = ref([]);
 const cargandoMultimedia = ref(false);
+const cargandoPaciente = ref(true);
 const imagenSeleccionada = ref(null);
 const videoSeleccionado = ref(null);
 const modalImagenVisible = ref(false);
@@ -716,7 +727,8 @@ const tabs = ref([
 ]);
 
 const crearHistoriaFisiatrica = computed(() => {
-  return pacienteStore.historiaFisiatrica.fechaEvaluacion === `Sin información`;
+  const h = pacienteStore.historiaFisiatrica;
+  return !h || h.fechaEvaluacion === `Sin información`;
 });
 
 // Métodos
@@ -770,16 +782,19 @@ const guardarComentario = async () => {
       texto: nuevoComentario.value.trim()
     };
 
-    try{
+    guardandoComentario.value = true;
+    try {
       await pacienteStore.crearComentario(comentario, informeSeleccionado.value.hashId);
-      
+
       comentarios.value = await pacienteStore.obtenerComentarios(informeSeleccionado.value.hashId);
       pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
       showSuccess('Comentario agregado correctamente');
       nuevoComentario.value = '';
       modalComentarioVisible.value = false;
-    }catch(error){
+    } catch (error) {
       showError('No es posible agregar el comentario');
+    } finally {
+      guardandoComentario.value = false;
     }
   }
 };
@@ -1070,7 +1085,6 @@ const guardarNuevoInforme = async () => {
   const user = authStore.usuario;
 
   if (esInformeValido.value) {
-
     const informe = {
       idUsuario: user.id_usuario,
       titulo: nuevoInforme.value.titulo,
@@ -1080,18 +1094,21 @@ const guardarNuevoInforme = async () => {
       hashIdEHR: pacienteStore.paciente.hashIdEHR,
     };
 
+    guardandoInforme.value = true;
     try {
       await pacienteStore.crearInforme(informe);
 
       showSuccess('Informe creado correctamente');
       modalNuevoInformeVisible.value = false;
       limpiarFormularioInforme();
-      
+
       // Refrescar la lista de informes
       informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
       pacienteStore.paciente = await pacienteStore.obtenerPaciente(pacienteStore.paciente.hashId);
     } catch (error) {
       showError('No es posible crear el informe');
+    } finally {
+      guardandoInforme.value = false;
     }
   }
 };
@@ -1119,17 +1136,19 @@ const formatearFecha = (fecha) => {
 };
 
 onMounted(async () => {
-  try{
+  try {
     pacienteStore.paciente = await pacienteStore.obtenerPaciente(route.params.id);
     informes.value = await pacienteStore.obtenerInformes(pacienteStore.paciente.hashId);
     pacienteStore.historiaFisiatrica = await pacienteStore.obtenerHistoriaFisiatrica(pacienteStore.paciente.hashId);
-    
+
     // Cargar multimedia si el tab activo es Multimedia
     if (tabActivo.value === 'Multimedia') {
       cargarMultimedia();
     }
-  }catch(error){
+  } catch (error) {
     showError('No es posible obtener el paciente');
+  } finally {
+    cargandoPaciente.value = false;
   }
 });
 </script>
