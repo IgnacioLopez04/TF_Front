@@ -130,7 +130,61 @@
 
         <!-- Tab Historia Fisiátrica -->
         <div v-else-if="tabActivo === 'Historia Fisiátrica'">
-          <HistoriaFisiatrica :crearHistoriaFisiatrica="crearHistoriaFisiatrica" />
+          <div v-if="!verHistorialActivo" class="p-4">
+            <div v-if="!crearHistoriaFisiatrica" class="flex justify-content-end mb-3">
+              <Button
+                label="Ver historial"
+                icon="pi pi-history"
+                @click="abrirHistorial"
+                class="p-button-outlined p-button-primary"
+              />
+            </div>
+            <HistoriaFisiatrica :crearHistoriaFisiatrica="crearHistoriaFisiatrica" />
+          </div>
+          <div v-else class="p-4">
+            <div class="flex justify-content-between align-items-center mb-4">
+              <h3 class="text-xl font-bold text-color-primary">Historial de versiones</h3>
+              <Button
+                label="Cerrar historial"
+                icon="pi pi-times"
+                @click="cerrarHistorial"
+                class="p-button-text p-button-secondary"
+              />
+            </div>
+            <div v-if="cargandoHistorial" class="flex justify-content-center p-4">
+              <ProgressSpinner />
+            </div>
+            <div v-else-if="versionSeleccionada" class="bg-white border-round-xl shadow-sm border border-gray-100 p-4">
+              <div class="flex justify-content-between align-items-center mb-4">
+                <h4 class="text-lg font-semibold text-color-primary">Versión {{ getVersionMeta(versionSeleccionada).version_number }}</h4>
+                <Button
+                  label="Volver al historial"
+                  icon="pi pi-arrow-left"
+                  @click="versionSeleccionada = null"
+                  class="p-button-outlined p-button-primary"
+                />
+              </div>
+              <HistoriaFisiatrica
+                :crear-historia-fisiatrica="false"
+                :historia-para-mostrar="historiaDesdeVersionSeleccionada"
+              />
+            </div>
+            <div v-else-if="pacienteStore.historialHistoriaFisiatrica.length === 0" class="text-center p-6 text-gray-600">
+              No hay versiones en el historial.
+            </div>
+            <div v-else class="flex flex-column gap-2">
+              <div
+                v-for="recurso in pacienteStore.historialHistoriaFisiatrica"
+                :key="recurso.id"
+                class="bg-white border-round-xl p-3 shadow-sm border border-gray-100 flex align-items-center justify-content-between cursor-pointer hover:bg-gray-50"
+                @click="versionSeleccionada = recurso"
+              >
+                <span class="font-semibold text-color-primary">Versión {{ getVersionMeta(recurso).version_number }}</span>
+                <span class="text-gray-600">{{ formatearFechaHistorial(getVersionMeta(recurso).effective_from) }}</span>
+                <Tag v-if="getVersionMeta(recurso).is_current" value="Actual" severity="success" />
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Tab Multimedia -->
@@ -667,12 +721,16 @@ import { useRoute, useRouter } from 'vue-router';
 import { showError, showSuccess } from '@/composables/useToast';
 import { usePacienteStore } from '../store';
 import { useAuthStore } from '@/modules/auth/store';
+import { transformarHistoriaFisiatrica } from '@/utils/fhirHelper';
 import HistoriaFisiatrica from '../components/HistoriaFisiatrica.vue';
 
 const pacienteStore = usePacienteStore();
 const route = useRoute();
 const router = useRouter();
 const tabActivo = ref('Informes');
+const verHistorialActivo = ref(false);
+const versionSeleccionada = ref(null);
+const cargandoHistorial = ref(false);
 const rows = ref(5);
 const authStore = useAuthStore();
 
@@ -730,6 +788,57 @@ const crearHistoriaFisiatrica = computed(() => {
   const h = pacienteStore.historiaFisiatrica;
   return !h || h.fechaEvaluacion === `Sin información`;
 });
+
+function getVersionMeta(resource) {
+  if (!resource?.extension?.length) {
+    return {
+      version_number: resource?.id ?? '-',
+      effective_from: resource?.effective ?? null,
+      is_current: false,
+    };
+  }
+  const ext = (url) => resource.extension.find((e) => e.url?.includes(url));
+  return {
+    version_number: ext('version-number')?.valueInteger ?? resource?.id ?? '-',
+    effective_from: ext('effective-from')?.valueDateTime ?? resource?.effective ?? null,
+    is_current: ext('is-current')?.valueBoolean ?? false,
+  };
+}
+
+function formatearFechaHistorial(value) {
+  if (!value) return '-';
+  try {
+    const d = new Date(value);
+    return d.toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+  } catch {
+    return value;
+  }
+}
+
+const historiaDesdeVersionSeleccionada = computed(() => {
+  if (!versionSeleccionada.value) return null;
+  return transformarHistoriaFisiatrica(versionSeleccionada.value);
+});
+
+async function abrirHistorial() {
+  verHistorialActivo.value = true;
+  versionSeleccionada.value = null;
+  cargandoHistorial.value = true;
+  try {
+    await pacienteStore.obtenerHistorialHistoriaFisiatrica(pacienteStore.paciente.hashId);
+  } catch (e) {
+    showError('No se pudo cargar el historial');
+  } finally {
+    cargandoHistorial.value = false;
+  }
+}
+
+function cerrarHistorial() {
+  verHistorialActivo.value = false;
+  versionSeleccionada.value = null;
+  pacienteStore.historialHistoriaFisiatrica = [];
+  pacienteStore.versionHistoriaSeleccionada = null;
+}
 
 // Métodos
 const verInforme = async (informe) => {

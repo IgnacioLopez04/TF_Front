@@ -52,6 +52,9 @@ export default () => ({
   informes: [],
 
   historiaFisiatrica: getDefaultHistoriaFisiatrica(),
+
+  historialHistoriaFisiatrica: [],
+  versionHistoriaSeleccionada: null,
 });
 
 /** Objeto por defecto cuando el paciente no tiene historia fisiátrica (para reutilizar en store) */

@@ -40,17 +40,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
 import { useRouter } from 'vue-router';
 import GoogleLogin from '@/components/GoogleLogin.vue';
 import { useAuthStore } from '../store';
 import { showSuccess, showError } from '@/composables/useToast';
+import { urlFhir } from '@/utils';
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const loading = ref(false);
 const error = ref('');
+
+onMounted(() => {
+  axios.get(`${urlFhir}/metadata`).catch(() => {});
+});
 
 const handleLoginSuccess = async (response) => {
   try {
