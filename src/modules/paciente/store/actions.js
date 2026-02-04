@@ -15,6 +15,7 @@ import {
   transformarDiagnosticReport,
   transformarComentario,
   transformarHistoriaFisiatrica,
+  normalizarExamenFisico,
 } from '@/utils/fhirHelper';
 import FhirService from '@/services/fhirService';
 import { useAuthStore } from '@/modules/auth/store';
@@ -78,16 +79,36 @@ export default {
             valueBoolean: !pacienteData.activo,
           },
           ...(pacienteData.mutual != null && pacienteData.mutual !== ''
-            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/id_mutual', valueString: String(pacienteData.mutual) }]
+            ? [
+                {
+                  url: 'http://mi-servidor.com/fhir/StructureDefinition/id_mutual',
+                  valueString: String(pacienteData.mutual),
+                },
+              ]
             : []),
           ...(pacienteData.numeroAfiliado
-            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/numero_afiliado', valueString: pacienteData.numeroAfiliado }]
+            ? [
+                {
+                  url: 'http://mi-servidor.com/fhir/StructureDefinition/numero_afiliado',
+                  valueString: pacienteData.numeroAfiliado,
+                },
+              ]
             : []),
           ...(pacienteData.ocupacionActual
-            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/ocupacion_actual', valueString: pacienteData.ocupacionActual }]
+            ? [
+                {
+                  url: 'http://mi-servidor.com/fhir/StructureDefinition/ocupacion_actual',
+                  valueString: pacienteData.ocupacionActual,
+                },
+              ]
             : []),
           ...(pacienteData.ocupacionAnterior
-            ? [{ url: 'http://mi-servidor.com/fhir/StructureDefinition/ocupacion_anterior', valueString: pacienteData.ocupacionAnterior }]
+            ? [
+                {
+                  url: 'http://mi-servidor.com/fhir/StructureDefinition/ocupacion_anterior',
+                  valueString: pacienteData.ocupacionAnterior,
+                },
+              ]
             : []),
           // Extensión para tutores si existen
           ...(pacienteData.tutores && pacienteData.tutores.length > 0
@@ -494,6 +515,7 @@ export default {
   },
 
   async crearHistoriaFisiatrica(historiaFisiatricaData) {
+    console.log('historiaFisiatricaData', historiaFisiatricaData);
     try {
       // 1. Crear el recurso FHIR
       const fhirResource = FhirService.createDiagnosticReport(
@@ -544,139 +566,121 @@ export default {
           historiasFisiatricas[0],
         );
 
+        console.log('historiaFHIR', historiaFHIR);
+
+        // Normalizar examenFisico (backend envía general/cabezasentidos/etc como strings "{key=value, ...}")
+        const ef = normalizarExamenFisico(historiaFHIR.examenFisico || {});
+        const noInfo = 'No informado';
+        const v = (obj, key, fallback) =>
+          obj && obj[key] !== undefined && obj[key] !== ''
+            ? obj[key]
+            : fallback ?? noInfo;
+
+        const diag = (historiaFHIR.diagnosticoFuncional || '').trim();
+        const objFam = (historiaFHIR.objetivosFamilia || '').trim();
+        const esMismoContenido = diag && (diag === objFam || !objFam);
+
         // Mapear los datos de FHIR al objeto del state
         this.historiaFisiatrica = {
           // Evaluación y Consulta
           fechaEvaluacion:
             historiaFHIR.fechaCreacion ||
             new Date().toISOString().split('T')[0],
-          derivadosPor: historiaFHIR.derivadosPor || 'No informado',
-          antecedentesCuadro: historiaFHIR.antecedentesCuadro || 'No informado',
-          medicacionActual: historiaFHIR.medicacionActual || 'No informado',
-          estudiosRealizados: historiaFHIR.estudiosRealizados || 'No informado',
+          derivadosPor: historiaFHIR.derivadosPor || noInfo,
+          antecedentesCuadro: historiaFHIR.antecedentesCuadro || noInfo,
+          medicacionActual: historiaFHIR.medicacionActual || noInfo,
+          estudiosRealizados: historiaFHIR.estudiosRealizados || noInfo,
 
           // Antecedentes
           antecedentesHereditarios:
-            historiaFHIR.antecedentesHereditarios || 'No informado',
+            historiaFHIR.antecedentesHereditarios || noInfo,
           antecedentesPatologicos:
-            historiaFHIR.antecedentesPatologicos || 'No informado',
+            historiaFHIR.antecedentesPatologicos || noInfo,
           antecedentesQuirurgicos:
-            historiaFHIR.antecedentesQuirurgicos || 'No informado',
+            historiaFHIR.antecedentesQuirurgicos || noInfo,
           antecedentesMetabolicos:
-            historiaFHIR.antecedentesMetabolicos || 'No informado',
+            historiaFHIR.antecedentesMetabolicos || noInfo,
           antecedentesInmunologicos:
-            historiaFHIR.antecedentesInmunologicos || 'No informado',
+            historiaFHIR.antecedentesInmunologicos || noInfo,
 
           // Fisiológicos - mapear desde las extensiones FHIR
-          fisiologicosDormir: historiaFHIR.fisiologicosDormir || 'No informado',
+          fisiologicosDormir: historiaFHIR.fisiologico?.dormir || noInfo,
           fisiologicosAlimentacion:
-            historiaFHIR.fisiologicosAlimentacion || 'No informado',
-          fisiologicosCatarsis:
-            historiaFHIR.fisiologicosCatarsis || 'No informado',
-          fisiologicosDiuresis:
-            historiaFHIR.fisiologicosDiuresis || 'No informado',
+            historiaFHIR.fisiologico?.alimentacion || noInfo,
+          fisiologicosCatarsis: historiaFHIR.fisiologico?.catarsis || noInfo,
+          fisiologicosDiuresis: historiaFHIR.fisiologico?.diuresis || noInfo,
           fisiologicosPeriodoMenstrual:
-            historiaFHIR.fisiologicosPeriodoMenstrual || 'No informado',
+            historiaFHIR.fisiologico?.periodo_menstrual || noInfo,
           fisiologicosSexualidad:
-            historiaFHIR.fisiologicosSexualidad || 'No informado',
+            historiaFHIR.fisiologico?.sexualidad || noInfo,
 
           // Anamnesis sistémica
           anamnesisComunicacion:
-            historiaFHIR.anamnesisSistemica?.anamnesis_comunicacion ||
-            'No informado',
+            historiaFHIR.anamnesisSistemica?.comunicacion || noInfo,
           anamnesisMotricidad:
-            historiaFHIR.anamnesisSistemica?.anamnesis_motricidad ||
-            'No informado',
+            historiaFHIR.anamnesisSistemica?.motricidad || noInfo,
           anamnesisVidaDiaria:
-            historiaFHIR.anamnesisSistemica?.anamnesis_vida_diaria ||
-            'No informado',
+            historiaFHIR.anamnesisSistemica?.vida_diaria || noInfo,
 
-          // Examen físico - General
-          examenActitud:
-            historiaFHIR.examenFisico?.examen_actitud || 'No informado',
-          examenComunicacionCodigos:
-            historiaFHIR.examenFisico?.examen_comunicacion_codigos ||
-            'No informado',
-          examenPielFaneras:
-            historiaFHIR.examenFisico?.examen_piel_faneras || 'No informado',
+          // Examen físico - General (backend: general.actitud, pielFaneras, comunicacionCodigos)
+          examenActitud: v(ef.general, 'actitud'),
+          examenComunicacionCodigos: v(ef.general, 'comunicacionCodigos'),
+          examenPielFaneras: v(ef.general, 'pielFaneras'),
 
-          // Examen físico - Cabeza y sentidos
-          examenCabeza:
-            historiaFHIR.examenFisico?.examen_cabeza || 'No informado',
-          examenOjos: historiaFHIR.examenFisico?.examen_ojos || 'No informado',
-          examenMovimientosAnormales:
-            historiaFHIR.examenFisico?.examen_movimientos_anormales ||
-            'No informado',
-          examenEstrabismo:
-            historiaFHIR.examenFisico?.examen_estrabismo || 'No informado',
-          examenOrejas:
-            historiaFHIR.examenFisico?.examen_orejas || 'No informado',
-          examenAudicion:
-            historiaFHIR.examenFisico?.examen_audicion || 'No informado',
-          examenLabios:
-            historiaFHIR.examenFisico?.examen_labios || 'No informado',
-          examenDenticion:
-            historiaFHIR.examenFisico?.examen_denticion || 'No informado',
-          examenPaladarVelo:
-            historiaFHIR.examenFisico?.examen_paladar_velo || 'No informado',
-          examenMordida:
-            historiaFHIR.examenFisico?.examen_mordida || 'No informado',
-          examenMaxilares:
-            historiaFHIR.examenFisico?.examen_maxilares || 'No informado',
-          examenBoca: historiaFHIR.examenFisico?.examen_boca || 'No informado',
-          examenLengua:
-            historiaFHIR.examenFisico?.examen_lengua || 'No informado',
+          // Examen físico - Cabeza y sentidos (backend: cabezasentidos)
+          examenCabeza: v(ef.cabezasentidos, 'cabeza'),
+          examenOjos: v(ef.cabezasentidos, 'ojos'),
+          examenMovimientosAnormales: v(
+            ef.cabezasentidos,
+            'movimientosAnormales',
+          ),
+          examenEstrabismo: v(ef.cabezasentidos, 'estrabismo'),
+          examenOrejas: v(ef.cabezasentidos, 'orejas'),
+          examenAudicion: v(ef.cabezasentidos, 'audicion'),
+          examenLabios: v(ef.cabezasentidos, 'labios'),
+          examenDenticion: v(ef.cabezasentidos, 'denticion'),
+          examenPaladarVelo: v(ef.cabezasentidos, 'paladarVelo'),
+          examenMordida: v(ef.cabezasentidos, 'mordida'),
+          examenMaxilares: v(ef.cabezasentidos, 'maxilares'),
+          examenBoca: v(ef.cabezasentidos, 'boca'),
+          examenLengua: v(ef.cabezasentidos, 'lengua'),
 
-          // Examen físico - Tronco y extremidades
-          examenTorax:
-            historiaFHIR.examenFisico?.examen_torax || 'No informado',
-          examenAbdomen:
-            historiaFHIR.examenFisico?.examen_abdomen || 'No informado',
-          examenColumnaVertebral:
-            historiaFHIR.examenFisico?.examen_columna_vertebral ||
-            'No informado',
-          examenPelvis:
-            historiaFHIR.examenFisico?.examen_pelvis || 'No informado',
-          examenCaderas:
-            historiaFHIR.examenFisico?.examen_caderas || 'No informado',
-          examenMmii: historiaFHIR.examenFisico?.examen_mmii || 'No informado',
-          examenPies: historiaFHIR.examenFisico?.examen_pies || 'No informado',
-          examenMmss: historiaFHIR.examenFisico?.examen_mmss || 'No informado',
-          examenManos:
-            historiaFHIR.examenFisico?.examen_manos || 'No informado',
-          examenLateralidad:
-            historiaFHIR.examenFisico?.examen_lateralidad || 'No informado',
+          // Examen físico - Tronco y extremidades (backend: troncoextremidades)
+          examenTorax: v(ef.troncoextremidades, 'torax'),
+          examenAbdomen: v(ef.troncoextremidades, 'abdomen'),
+          examenColumnaVertebral: v(ef.troncoextremidades, 'columnaVertebral'),
+          examenPelvis: v(ef.troncoextremidades, 'pelvis'),
+          examenCaderas: v(ef.troncoextremidades, 'caderas'),
+          examenMmii: v(ef.troncoextremidades, 'mmii'),
+          examenPies: v(ef.troncoextremidades, 'pies'),
+          examenMmss: v(ef.troncoextremidades, 'mmss'),
+          examenManos: v(ef.troncoextremidades, 'manos'),
+          examenLateralidad: v(ef.troncoextremidades, 'lateralidad'),
 
-          // Examen físico - Sistema y actividades
-          examenApRespiratorio:
-            historiaFHIR.examenFisico?.examen_ap_respiratorio || 'No informado',
-          examenApCardiovascular:
-            historiaFHIR.examenFisico?.examen_ap_cardiovascular ||
-            'No informado',
-          examenApDigestivo:
-            historiaFHIR.examenFisico?.examen_ap_digestivo || 'No informado',
-          examenActividadRefleja:
-            historiaFHIR.examenFisico?.examen_actividad_refleja ||
-            'No informado',
-          examenActividadSensoperceptual:
-            historiaFHIR.examenFisico?.examen_actividad_sensoperceptual ||
-            'No informado',
-          examenReaccionesPosturales:
-            historiaFHIR.examenFisico?.examen_reacciones_posturales ||
-            'No informado',
-          examenDesplazamientoMarcha:
-            historiaFHIR.examenFisico?.examen_desplazamiento_marcha ||
-            'No informado',
-          examenEtapaDesarrollo:
-            historiaFHIR.examenFisico?.examen_etapa_desarrollo ||
-            'No informado',
+          // Examen físico - Sistema y actividades (backend: sistemaactividades)
+          examenApRespiratorio: v(ef.sistemaactividades, 'apRespiratorio'),
+          examenApCardiovascular: v(ef.sistemaactividades, 'apCardiovascular'),
+          examenApDigestivo: v(ef.sistemaactividades, 'apDigestivo'),
+          examenActividadRefleja: v(ef.sistemaactividades, 'actividadRefleja'),
+          examenActividadSensoperceptual: v(
+            ef.sistemaactividades,
+            'actividadSensoperceptual',
+          ),
+          examenReaccionesPosturales: v(
+            ef.sistemaactividades,
+            'reaccionesPosturales',
+          ),
+          examenDesplazamientoMarcha: v(
+            ef.sistemaactividades,
+            'desplazamientoMarcha',
+          ),
+          examenEtapaDesarrollo: v(ef.sistemaactividades, 'etapaDesarrollo'),
 
-          // Diagnóstico funcional
-          diagnosticoFuncional:
-            historiaFHIR.diagnosticoFuncional || 'No informado',
+          // Diagnóstico funcional (si backend envía mismo valor en ambos, es objetivosFamilia; diagnóstico queda "No informado")
+          diagnosticoFuncional: esMismoContenido ? noInfo : diag || noInfo,
           conductaSeguirObjetivos:
-            historiaFHIR.conductaSeguirObjetivos || 'No informado',
-          objetivosFamilia: historiaFHIR.objetivosFamilia || 'No informado',
+            historiaFHIR.conductaSeguirObjetivos || noInfo,
+          objetivosFamilia: objFam || (esMismoContenido ? diag : '') || noInfo,
         };
         return this.historiaFisiatrica;
       }

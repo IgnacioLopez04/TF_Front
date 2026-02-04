@@ -565,6 +565,50 @@ export function transformarComentario(diagnosticReport) {
 }
 
 /**
+ * Parsea una cadena en formato Java Map toString "{key=value, key2=value2}" a un objeto.
+ * @param {string} str - Cadena a parsear
+ * @returns {Object} Objeto con claves y valores
+ */
+export function parseJavaStyleMap(str) {
+  if (typeof str !== 'string' || !str.trim()) return {};
+  const trimmed = str.trim().replace(/^\{|\}$/g, '').trim();
+  if (!trimmed) return {};
+  const result = {};
+  const segments = trimmed.split(/,\s*(?=\w+=)/);
+  for (const segment of segments) {
+    const eqIndex = segment.indexOf('=');
+    if (eqIndex === -1) continue;
+    const key = segment.substring(0, eqIndex).trim();
+    const value = segment.substring(eqIndex + 1).trim();
+    if (key) result[key] = value;
+  }
+  return result;
+}
+
+/**
+ * Normaliza examenFisico cuando viene del backend con general/cabezasentidos/sistemaactividades/troncoextremidades
+ * como strings en formato "{key=value, ...}". Parsea cada string y devuelve objetos.
+ * @param {Object} examenFisico - examenFisico del backend (strings o ya objetos)
+ * @returns {Object} { general, cabezasentidos, sistemaactividades, troncoextremidades } con objetos parseados
+ */
+export function normalizarExamenFisico(examenFisico) {
+  if (!examenFisico || typeof examenFisico !== 'object') {
+    return { general: {}, cabezasentidos: {}, sistemaactividades: {}, troncoextremidades: {} };
+  }
+  const parse = (val) => {
+    if (typeof val === 'string') return parseJavaStyleMap(val);
+    if (val && typeof val === 'object' && !Array.isArray(val)) return val;
+    return {};
+  };
+  return {
+    general: parse(examenFisico.general),
+    cabezasentidos: parse(examenFisico.cabezasentidos),
+    sistemaactividades: parse(examenFisico.sistemaactividades),
+    troncoextremidades: parse(examenFisico.troncoextremidades),
+  };
+}
+
+/**
  * Transforma un DiagnosticReport FHIR de Historia Fisiatrica a un formato más legible para el frontend
  * @param {Object} diagnosticReport - El recurso DiagnosticReport de FHIR (Historia Fisiatrica)
  * @returns {Object} Objeto con la información de la historia fisiatrica en formato legible
@@ -731,6 +775,55 @@ export function transformarHistoriaFisiatrica(diagnosticReport) {
   historiaFisiatrica.profesional.nombreCompleto =
     `${historiaFisiatrica.profesional.nombre} ${historiaFisiatrica.profesional.apellido}`.trim();
 
+  // Si el backend envía formato plano (examenFisico con general/cabezasentidos como string), normalizar
+  if (
+    diagnosticReport.examenFisico &&
+    (typeof diagnosticReport.examenFisico.general === 'string' ||
+      typeof diagnosticReport.examenFisico.cabezasentidos === 'string')
+  ) {
+    historiaFisiatrica.examenFisico = normalizarExamenFisico(
+      diagnosticReport.examenFisico,
+    );
+  }
+  if (diagnosticReport.derivadosPor != null)
+    historiaFisiatrica.derivadosPor = diagnosticReport.derivadosPor;
+  if (diagnosticReport.antecedentesCuadro != null)
+    historiaFisiatrica.antecedentesCuadro = diagnosticReport.antecedentesCuadro;
+  if (diagnosticReport.medicacionActual != null)
+    historiaFisiatrica.medicacionActual = diagnosticReport.medicacionActual;
+  if (diagnosticReport.estudiosRealizados != null)
+    historiaFisiatrica.estudiosRealizados =
+      diagnosticReport.estudiosRealizados;
+  if (diagnosticReport.antecedentesHereditarios != null)
+    historiaFisiatrica.antecedentesHereditarios =
+      diagnosticReport.antecedentesHereditarios;
+  if (diagnosticReport.antecedentesPatologicos != null)
+    historiaFisiatrica.antecedentesPatologicos =
+      diagnosticReport.antecedentesPatologicos;
+  if (diagnosticReport.antecedentesQuirurgicos != null)
+    historiaFisiatrica.antecedentesQuirurgicos =
+      diagnosticReport.antecedentesQuirurgicos;
+  if (diagnosticReport.fisiologico != null)
+    historiaFisiatrica.fisiologico = diagnosticReport.fisiologico;
+  if (diagnosticReport.anamnesisSistemica != null)
+    historiaFisiatrica.anamnesisSistemica = diagnosticReport.anamnesisSistemica;
+  if (diagnosticReport.diagnosticoFuncional != null)
+    historiaFisiatrica.diagnosticoFuncional =
+      diagnosticReport.diagnosticoFuncional;
+  if (diagnosticReport.conductaSeguirObjetivos != null)
+    historiaFisiatrica.conductaSeguirObjetivos =
+      diagnosticReport.conductaSeguirObjetivos;
+  if (diagnosticReport.objetivosFamilia != null)
+    historiaFisiatrica.objetivosFamilia = diagnosticReport.objetivosFamilia;
+  if (diagnosticReport.fechaCreacion != null)
+    historiaFisiatrica.fechaCreacion = diagnosticReport.fechaCreacion;
+  if (diagnosticReport.contenido != null)
+    historiaFisiatrica.contenido = diagnosticReport.contenido;
+  if (diagnosticReport.titulo != null)
+    historiaFisiatrica.titulo = diagnosticReport.titulo;
+  if (diagnosticReport.estado != null)
+    historiaFisiatrica.estado = diagnosticReport.estado;
+
   return historiaFisiatrica;
 }
 
@@ -854,4 +947,6 @@ export default {
   transformarDiagnosticReport,
   transformarComentario,
   transformarHistoriaFisiatrica,
+  parseJavaStyleMap,
+  normalizarExamenFisico,
 };

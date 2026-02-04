@@ -37,31 +37,31 @@
               <h4 class="text-lg font-semibold mb-4 text-color-primary">Evaluación y Consulta</h4> 
               <div class="mb-4 flex gap-2">
                 <label class="block text-900 font-medium mb-2 text-color-primary">Fecha de Evaluación: </label>
-                <p class="mb-2"> {{ formatearFecha(historiaFisiatica.fechaEvaluacion) }}</p>
+                <p class="mb-2"> {{ valorParaMostrar(formatearFecha(historiaFisiatica.fechaEvaluacion)) }}</p>
               </div>
             </div>
             <div class="mb-4 md:col-span-2">
               <label class="block text-900 font-medium mb-2 text-color-primary">Derivados por</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.derivadosPor }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.derivadosPor) }}</p>
               </div>
             </div>
             <div class="mb-4 md:col-span-2">
               <label class="block text-900 font-medium mb-2 text-color-primary">Antecedentes del cuadro actual</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.antecedentesCuadro }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.antecedentesCuadro) }}</p>
               </div>
             </div>
             <div class="mb-4 md:col-span-2">
               <label class="block text-900 font-medium mb-2 text-color-primary">Medicación actual</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.medicacionActual }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.medicacionActual) }}</p>
               </div>
             </div>
             <div class="mb-4 md:col-span-2">
               <label class="block text-900 font-medium mb-2 text-color-primary">Estudios realizados</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.estudiosRealizados }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.estudiosRealizados) }}</p>
               </div>
             </div>
           </div>
@@ -75,35 +75,35 @@
             <div class="mb-4">
               <label class="block text-900 font-medium mb-2 text-color-primary">Hereditarios</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.antecedentesHereditarios }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.antecedentesHereditarios) }}</p>
               </div>
             </div>
             <!-- Patológicos -->
             <div class="mb-4">
               <label class="block text-900 font-medium mb-2 text-color-primary">Patológico</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.antecedentesPatologicos }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.antecedentesPatologicos) }}</p>
               </div>
             </div>
             <!-- Quirúrgicos -->
             <div class="mb-4">
               <label class="block text-900 font-medium mb-2 text-color-primary">Quirúrgicos</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.antecedentesQuirurgicos }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.antecedentesQuirurgicos) }}</p>
               </div>
             </div>
             <!-- Metabólicos -->
             <div class="mb-4">
               <label class="block text-900 font-medium mb-2 text-color-primary">Metabólicos</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.antecedentesMetabolicos }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.antecedentesMetabolicos) }}</p>
               </div>
             </div>
             <!-- Inmunológicos -->
             <div class="mb-4">
               <label class="block text-900 font-medium mb-2 text-color-primary">Inmunológicos</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 120px;">
-                <p>{{ historiaFisiatica.antecedentesInmunologicos }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.antecedentesInmunologicos) }}</p>
               </div>
             </div>
             <!-- Fisiológicos - Layout de dos columnas -->
@@ -116,37 +116,37 @@
                 <div class="col-span-2">
                   <label class="block text-900 font-medium mb-2 text-sm">Dormir</label>
                   <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                    <p>{{ historiaFisiatica.fisiologicosDormir }}</p>
+                    <p>{{ valorParaMostrar(historiaFisiatica.fisiologicosDormir) }}</p>
                   </div>
                 </div> 
                 <div class="col-span-2">
                   <label class="block text-900 font-medium mb-2 text-sm">Catarsis</label>
                   <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                    <p>{{ historiaFisiatica.fisiologicosCatarsis }}</p>
+                    <p>{{ valorParaMostrar(historiaFisiatica.fisiologicosCatarsis) }}</p>
                   </div>
                 </div>
                 <div class="col-span-2">
                   <label class="block text-900 font-medium mb-2 text-sm">Periodo menstrual</label>
                   <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                    <p>{{ historiaFisiatica.fisiologicosPeriodoMenstrual }}</p>
+                    <p>{{ valorParaMostrar(historiaFisiatica.fisiologicosPeriodoMenstrual) }}</p>
                   </div>
                 </div>
                 <div class="col-span-2">
                   <label class="block text-900 font-medium mb-2 text-sm">Alimentación</label>
                   <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                    <p>{{ historiaFisiatica.fisiologicosAlimentacion }}</p>
+                    <p>{{ valorParaMostrar(historiaFisiatica.fisiologicosAlimentacion) }}</p>
                   </div>
                 </div>
                 <div class="col-span-2">
                   <label class="block text-900 font-medium mb-2 text-sm">Diuresis</label>
                   <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                    <p>{{ historiaFisiatica.fisiologicosDiuresis }}</p>
+                    <p>{{ valorParaMostrar(historiaFisiatica.fisiologicosDiuresis) }}</p>
                   </div>
                 </div>
                 <div class="col-span-2">
                   <label class="block text-900 font-medium mb-2 text-sm">Sexualidad</label>
                   <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                    <p>{{ historiaFisiatica.fisiologicosSexualidad }}</p>
+                    <p>{{ valorParaMostrar(historiaFisiatica.fisiologicosSexualidad) }}</p>
                   </div>
                 </div>
               </div>
@@ -160,19 +160,19 @@
             <div class="">
               <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades de comunicación</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                <p>{{ historiaFisiatica.anamnesisComunicacion }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.anamnesisComunicacion) }}</p>
               </div>
             </div>
             <div class="">
               <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades en motricidad</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                <p>{{ historiaFisiatica.anamnesisMotricidad }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.anamnesisMotricidad) }}</p>
               </div>
             </div>
             <div class="">
               <label class="block text-900 font-medium mb-2 text-color-primary">Capacidades de la vida diaria</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                <p>{{ historiaFisiatica.anamnesisVidaDiaria }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.anamnesisVidaDiaria) }}</p>
               </div>
             </div>
           </div>
@@ -203,19 +203,19 @@
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Actitud</label>
                     <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                      <p>{{ historiaFisiatica.examenActitud }}</p>
+                      <p>{{ valorParaMostrar(historiaFisiatica.examenActitud) }}</p>
                     </div>
                   </div>
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Comunicación y códigos</label>
                     <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                      <p>{{ historiaFisiatica.examenComunicacionCodigos }}</p>
+                      <p>{{ valorParaMostrar(historiaFisiatica.examenComunicacionCodigos) }}</p>
                     </div>
                   </div>
                   <div>
                     <label class="block text-900 font-medium mb-2 text-color-primary">Piel y faneras</label>
                     <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                      <p>{{ historiaFisiatica.examenPielFaneras }}</p>
+                      <p>{{ valorParaMostrar(historiaFisiatica.examenPielFaneras) }}</p>
                     </div>
                   </div>
                 </div>
@@ -228,19 +228,19 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Cabeza</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenCabeza }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenCabeza) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Movimientos anormales</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenMovimientosAnormales }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenMovimientosAnormales) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Orejas</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenOrejas }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenOrejas) }}</p>
                       </div>
                     </div>
                   </div>                            
@@ -248,37 +248,37 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Ojos</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenOjos }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenOjos) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Estrabismo</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenEstrabismo }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenEstrabismo) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Audición</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenAudicion }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenAudicion) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Labios</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenLabios }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenLabios) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Dentición</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenDenticion }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenDenticion) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Paladar y velo</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenPaladarVelo }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenPaladarVelo) }}</p>
                       </div>
                     </div>
                   </div>
@@ -287,25 +287,25 @@
                     <div class="ml-4 mb-3">
                       <label class="block text-900 font-medium mb-2 text-sm">Boca</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenBoca }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenBoca) }}</p>
                       </div>
                     </div>
                     <div class="ml-4 mb-3">
                       <label class="block text-900 font-medium mb-2 text-sm">Lengua</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenLengua }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenLengua) }}</p>
                       </div>
                     </div>
                     <div class="ml-4 mb-3">
                       <label class="block text-900 font-medium mb-2 text-sm">Mordida</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenMordida }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenMordida) }}</p>
                       </div>
                     </div>
                     <div class="ml-4 mb-3">
                       <label class="block text-900 font-medium mb-2 text-sm">Maxilares</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenMaxilares }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenMaxilares) }}</p>
                       </div>
                     </div>
                   </div>
@@ -319,61 +319,61 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Tórax</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenTorax }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenTorax) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Columna vertebral</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenColumnaVertebral }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenColumnaVertebral) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Caderas</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenCaderas }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenCaderas) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Pies</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenPies }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenPies) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Manos</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenManos }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenManos) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Abdomen</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenAbdomen }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenAbdomen) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Pelvis</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenPelvis }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenPelvis) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">M.M.I.I.</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenMMII }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenMMII) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">M.M.S.S.</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenMMSS }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenMMSS) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Lateralidad</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenLateralidad }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenLateralidad) }}</p>
                       </div>
                     </div>
                   </div>
@@ -387,49 +387,49 @@
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Respiratorio</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenApRespiratorio }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenApRespiratorio) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Digestivo</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenApDigestivo }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenApDigestivo) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Actividad sensoperceptual</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenActividadSensoperceptual }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenActividadSensoperceptual) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Desplazamiento-marcha</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenDesplazamientoMarcha }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenDesplazamientoMarcha) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Ap. Cardiovascular</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenApCardiovascular }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenApCardiovascular) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Actividad refleja</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenActividadRefleja }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenActividadRefleja) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Reacciones posturales</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenReaccionesPosturales }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenReaccionesPosturales) }}</p>
                       </div>
                     </div>
                     <div>
                       <label class="block text-900 font-medium mb-2 text-color-primary">Etapa del desarrollo</label>
                       <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                        <p>{{ historiaFisiatica.examenEtapaDesarrollo }}</p>
+                        <p>{{ valorParaMostrar(historiaFisiatica.examenEtapaDesarrollo) }}</p>
                       </div>
                     </div>
                   </div>
@@ -445,19 +445,19 @@
             <div>
               <label class="block text-900 font-medium mb-2 text-color-primary">Diagnóstico Funcional</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                <p>{{ historiaFisiatica.diagnosticoFuncional }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.diagnosticoFuncional) }}</p>
               </div>
             </div>
             <div>
               <label class="block text-900 font-medium mb-2 text-color-primary">Conducta a seguir, objetivos</label>
               <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
-                <p>{{ historiaFisiatica.conductaSeguirObjetivos }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.conductaSeguirObjetivos) }}</p>
               </div>
             </div>
             <div>
               <label class="block text-900 font-medium mb-2 text-color-primary">Objetivos de la familia</label>
               <div class="border-round-xl px-3 shadow-md" style="max-height: 80px;">
-                <p>{{ historiaFisiatica.objetivosFamilia }}</p>
+                <p>{{ valorParaMostrar(historiaFisiatica.objetivosFamilia) }}</p>
               </div>
             </div>
           </div>
@@ -519,6 +519,9 @@ const historiaFisiatica = computed(() => {
     fechaEvaluacion: raw.fechaEvaluacion ?? raw.fechaCreacion ?? 'Sin información'
   };
 });
+
+/** Muestra "No informado" cuando el valor es null, vacío o "Sin información". */
+const valorParaMostrar = (val) => (val && val !== 'Sin información' ? val : 'No informado');
 
 // Formatear fecha de evaluación a formato legible DD/MM/YYYY
 const formatearFecha = (fecha) => {
