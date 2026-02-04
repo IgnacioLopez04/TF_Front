@@ -131,7 +131,13 @@
         <!-- Tab Historia Fisiátrica -->
         <div v-else-if="tabActivo === 'Historia Fisiátrica'">
           <div v-if="!verHistorialActivo" class="p-4">
-            <div v-if="!crearHistoriaFisiatrica" class="flex justify-content-end mb-3">
+            <div v-if="!crearHistoriaFisiatrica" class="flex justify-content-end gap-2 mb-3">
+              <Button
+                label="Editar historia"
+                icon="pi pi-pencil"
+                @click="editarHistoria"
+                class="p-button-outlined p-button-primary"
+              />
               <Button
                 label="Ver historial"
                 icon="pi pi-history"
@@ -819,6 +825,10 @@ const historiaDesdeVersionSeleccionada = computed(() => {
   if (!versionSeleccionada.value) return null;
   return transformarHistoriaFisiatrica(versionSeleccionada.value);
 });
+
+function editarHistoria() {
+  router.push(`/pacientes/${pacienteStore.paciente.hashId}/nueva-historia?editar=1`);
+}
 
 async function abrirHistorial() {
   verHistorialActivo.value = true;

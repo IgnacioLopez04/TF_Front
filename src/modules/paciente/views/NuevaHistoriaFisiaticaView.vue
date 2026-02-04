@@ -4,7 +4,7 @@
     <div class="bg-white border-round-xl shadow-sm border border-gray-100 p-5 mb-4">
       <div class="flex justify-content-between align-items-center ">
         <div>
-          <h1 class="text-2xl font-bold text-color-primary mb-2">Nueva Historia Fisiátrica</h1>
+          <h1 class="text-2xl font-bold text-color-primary mb-2">{{ esEdicion ? 'Editar historia fisiátrica' : 'Nueva Historia Fisiátrica' }}</h1>
           <p class="text-gray-600 text-lg">Paciente: {{ `${pacienteStore.paciente.nombre} ${pacienteStore.paciente.apellido}` }} (DNI: {{ pacienteStore.paciente.dni }})</p>
         </div>
       </div>
@@ -813,7 +813,7 @@
         
         <Button 
           v-else
-          label="Finalizar" 
+          :label="esEdicion ? 'Guardar cambios' : 'Finalizar'" 
           icon="pi pi-check"
           :loading="guardandoHistoria"
           :disabled="guardandoHistoria"
@@ -827,7 +827,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { showSuccess, showError } from '@/composables/useToast';
 import { usePacienteStore } from '../store';
 
@@ -840,6 +840,7 @@ const props = defineProps({
 });
 // Router
 const router = useRouter();
+const route = useRoute();
 
 // Estado del formulario
 const pacienteStore = usePacienteStore();
@@ -847,10 +848,22 @@ const pasoActivo = ref(0);
 const subTabExamenFisicoActivo = ref(0);
 const guardandoHistoria = ref(false);
 
-// Inicializar la historia fisiatrica cuando se monta el componente
-onMounted(() => {
-  pacienteStore.inicializarHistoriaFisiatrica();
-  pacienteStore.historiaFisiatrica.fechaEvaluacion = new Date();
+const esEdicion = computed(() => route.query.editar === '1' || route.query.editar === 'true');
+
+// Inicializar o cargar la historia según modo (crear vs editar)
+onMounted(async () => {
+  if (esEdicion.value) {
+    if (pacienteStore.paciente.hashId !== route.params.id) {
+      await pacienteStore.obtenerPaciente(route.params.id);
+    }
+    await pacienteStore.obtenerHistoriaFisiatrica(pacienteStore.paciente.hashId);
+    if (typeof pacienteStore.historiaFisiatrica.fechaEvaluacion === 'string') {
+      pacienteStore.historiaFisiatrica.fechaEvaluacion = new Date(pacienteStore.historiaFisiatrica.fechaEvaluacion);
+    }
+  } else {
+    pacienteStore.inicializarHistoriaFisiatrica();
+    pacienteStore.historiaFisiatrica.fechaEvaluacion = new Date();
+  }
 });
 
 // Pasos de la historia
@@ -940,7 +953,7 @@ const finalizarHistoria = async () => {
   guardandoHistoria.value = true;
   try {
     await pacienteStore.crearHistoriaFisiatrica(pacienteStore.historiaFisiatrica);
-    showSuccess('Historia fisiátrica creada exitosamente');
+    showSuccess(esEdicion.value ? 'Historia fisiátrica actualizada exitosamente' : 'Historia fisiátrica creada exitosamente');
     router.push(`/pacientes/${pacienteStore.paciente.hashId}`);
   } catch (error) {
     showError('No se pudo guardar la historia fisiátrica');
