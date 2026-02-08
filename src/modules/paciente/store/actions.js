@@ -62,6 +62,14 @@ export default {
             url: 'http://mi-servidor.com/fhir/StructureDefinition/calle',
             valueString: pacienteData.calle,
           },
+          ...(pacienteData.numero != null && pacienteData.numero !== ''
+            ? [
+                {
+                  url: 'http://mi-servidor.com/fhir/StructureDefinition/numero',
+                  valueString: String(pacienteData.numero),
+                },
+              ]
+            : []),
           {
             url: 'http://mi-servidor.com/fhir/StructureDefinition/id_prestacion',
             valueString: pacienteData.prestacion,

@@ -780,10 +780,13 @@ export default {
           valueString: pacienteData.calle,
         });
       }
-      if (pacienteData.prestacion) {
+      if (
+        pacienteData.idPrestacion != null &&
+        pacienteData.idPrestacion !== ''
+      ) {
         fhirPatient.extension.push({
           url: 'http://mi-servidor.com/fhir/StructureDefinition/id_prestacion',
-          valueString: pacienteData.prestacion.toString(),
+          valueString: String(pacienteData.idPrestacion),
         });
       }
       if (pacienteData.pisoDepto) {
@@ -892,11 +895,15 @@ export default {
         ],
       };
 
-      // Agregar otras extensiones existentes si las hay
-      if (paciente.prestacion) {
+      // Agregar otras extensiones existentes si las hay (usar id cuando exista)
+      const idPrestacionVal =
+        paciente.idPrestacion != null && paciente.idPrestacion !== ''
+          ? paciente.idPrestacion
+          : paciente.prestacion;
+      if (idPrestacionVal != null && idPrestacionVal !== '') {
         fhirPatient.extension.push({
           url: 'http://mi-servidor.com/fhir/StructureDefinition/id_prestacion',
-          valueString: paciente.prestacion.toString(),
+          valueString: String(idPrestacionVal),
         });
       }
 
