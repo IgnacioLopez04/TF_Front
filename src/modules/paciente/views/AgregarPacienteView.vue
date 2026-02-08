@@ -51,6 +51,8 @@
               v-model="pacienteStore.paciente.dni"
               placeholder="Ingrese el DNI"
               class="w-full"
+              maxlength="8"
+              @keypress="(e) => soloNumeros(e)"
               :class="{ 'p-invalid': !isValid.dni && errors.dni }"
             />
             <small v-if="errors.dni" class="p-error">{{ errors.dni }}</small>
@@ -320,6 +322,8 @@
                 v-model="tutor.dni"
                 placeholder="Ej: 1234567890"
                 class="w-full"
+                maxlength="8"
+                @keypress="(e) => soloNumeros(e)"
                 :class="{ 'p-invalid': !isValid[`tutor${index}DNI`] && errors[`tutor${index}DNI`] }"
                 @blur="validateTutorField(index, 'dni', 'DNI')"
               />
@@ -518,6 +522,14 @@ const agregarTutor = () => {
 const eliminarTutor = (index) => {
   if (pacienteStore.tutores) {
     pacienteStore.tutores = pacienteStore.tutores.filter((_, i) => i !== index);
+  }
+};
+
+const soloNumeros = (event) => {
+  const isPrintable = event.key && event.key.length === 1;
+  const isAllowed = /^\d+$/.test(event.key);
+  if (!isPrintable || !isAllowed) {
+    event.preventDefault();
   }
 };
 

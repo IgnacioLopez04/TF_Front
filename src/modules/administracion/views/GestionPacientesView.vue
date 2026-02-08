@@ -424,7 +424,11 @@
                   v-model="tutor.dni"
                   placeholder="DNI del tutor"
                   class="w-full"
+                  maxlength="8"
+                  @keypress="(e) => soloNumeros(e)"
+                  :class="{ 'p-invalid': erroresValidacion[`tutor${index}DNI`] }"
                 />
+                <small v-if="erroresValidacion[`tutor${index}DNI`]" class="p-error">{{ erroresValidacion[`tutor${index}DNI`] }}</small>
               </div>
             </div>
             <div class="flex gap-3 form-row">
@@ -662,7 +666,7 @@ const pacientesPaginados = computed(() => {
   return pacientesFiltrados.value.slice(inicio, fin);
 });
 
-const { validatePatientForm, clearErrors } = useValidations();
+const { validatePatientForm, clearErrors, errors } = useValidations();
 
 watch(esMenorDeEdad, (nuevoValor) => {
   if (nuevoValor && formularioPaciente.value.tutores && formularioPaciente.value.tutores.length === 0) {
@@ -862,8 +866,11 @@ const cerrarModalEditar = () => {
 const guardarPaciente = async () => {
   try {
     clearErrors();
-    
+
     if (!validatePatientForm(formularioPaciente.value)) {
+      Object.keys(errors.value).forEach((k) => {
+        erroresValidacion.value[k] = errors.value[k] || '';
+      });
       showError('Por favor, corrija los errores en el formulario');
       return;
     }

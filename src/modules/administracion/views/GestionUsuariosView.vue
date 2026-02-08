@@ -164,6 +164,7 @@
               :class="{ 'p-invalid': erroresValidacion.dni }"
               maxlength="8"
               @keypress="(e)=> soloNumeros(e)"
+              @blur="onBlurDni"
             />
             <small v-if="erroresValidacion.dni" class="p-error">{{ erroresValidacion.dni }}</small>
           </div>
@@ -260,6 +261,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useAdministracionStore } from '../store';
 import { showError, showSuccess } from '@/composables/useToast';
 import { useAuthStore } from '@/modules/auth/store';
+import { validateDni } from '@/utils/validators';
 
 const administracionStore = useAdministracionStore();
 const authStore = useAuthStore();
@@ -435,19 +437,14 @@ const validarNombre = (valor, campo) => {
   return true;
 };
 
-const validarDNI = (valor) => {
-  if (valor && valor.trim() !== '') {
-    if (!/^\d+$/.test(valor.trim())) {
-      erroresValidacion.value.dni = 'El DNI solo puede contener números';
-      return false;
-    }
-    if (valor.trim().length > 8) {
-      erroresValidacion.value.dni = 'El DNI no puede tener más de 8 dígitos';
-      return false;
-    }
+const onBlurDni = () => {
+  const dni = formularioUsuario.value.dni?.trim();
+  if (dni) {
+    const r = validateDni(dni, { required: false, minLength: 7, maxLength: 8 });
+    erroresValidacion.value.dni = r.valid ? '' : (r.message ?? '');
+  } else {
+    erroresValidacion.value.dni = '';
   }
-  erroresValidacion.value.dni = '';
-  return true;
 };
 
 const validarFechaNacimiento = (fecha) => {
@@ -544,9 +541,13 @@ const guardarUsuario = async () => {
     
     // Validar DNI (opcional pero si se ingresa debe ser válido)
     if (formularioUsuario.value.dni && formularioUsuario.value.dni.trim() !== '') {
-      if (!validarDNI(formularioUsuario.value.dni)) {
+      const resultDni = validateDni(formularioUsuario.value.dni, { required: false, minLength: 7, maxLength: 8 });
+      if (!resultDni.valid) {
+        erroresValidacion.value.dni = resultDni.message;
         esValido = false;
       }
+    } else {
+      erroresValidacion.value.dni = '';
     }
     
     // Validar fecha de nacimiento
