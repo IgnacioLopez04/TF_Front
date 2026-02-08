@@ -79,7 +79,6 @@ export function useCheckAuth(accessToken, logout) {
     try {
       if (!accessToken.value) {
         logout();
-        showError('Inicie sesión para continuar');
         return { isAuthenticated: false };
       }
       return { isAuthenticated: true };
