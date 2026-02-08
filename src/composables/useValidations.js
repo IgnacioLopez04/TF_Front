@@ -36,10 +36,48 @@ export const useValidations = () => {
     return keys.map((k) => fieldLabels[k] || k).join(', ');
   };
 
+  // Convierte la clave del campo en etiqueta legible para mensajes (solo uso interno)
+  const getFieldLabel = (fieldName) => {
+    const known = {
+      nombre: 'Nombre',
+      apellido: 'Apellido',
+      ocupacionActual: 'Ocupación actual',
+      ocupacionAnterior: 'Ocupación anterior',
+      calle: 'Calle',
+      barrio: 'Barrio',
+      numero: 'Número',
+      prestacion: 'Prestación',
+      provincia: 'Provincia',
+      localidad: 'Localidad',
+      mutual: 'Obra social o mutual',
+      numeroAfiliado: 'Número de afiliado',
+    };
+    if (known[fieldName]) return known[fieldName];
+    const tutorMatch = fieldName.match(
+      /^tutor\d+(Name|DNI|Occupation|BirthDate|BirthPlace)$/,
+    );
+    if (tutorMatch) {
+      const labels = {
+        Name: 'Nombre del tutor',
+        DNI: 'DNI del tutor',
+        Occupation: 'Ocupación del tutor',
+        BirthDate: 'Fecha de nacimiento del tutor',
+        BirthPlace: 'Lugar de nacimiento del tutor',
+      };
+      return labels[tutorMatch[1]] || fieldName;
+    }
+    // Fallback: camelCase a palabras (ej. ocupacionActual -> Ocupación actual no aplicable aquí; solo para keys no mapeados)
+    const withSpaces = fieldName.replace(/([A-Z0-9])/g, ' $1').trim();
+    return (
+      withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1).toLowerCase()
+    );
+  };
+
   // Validar nombre y apellido (solo letras y espacios)
   const validateName = (value, fieldName) => {
+    const label = getFieldLabel(fieldName);
     if (!value || value.trim() === '') {
-      errors.value[fieldName] = `El ${fieldName} es obligatorio`;
+      errors.value[fieldName] = `El ${label} es obligatorio`;
       isValid.value[fieldName] = false;
       return false;
     }
@@ -49,7 +87,7 @@ export const useValidations = () => {
     if (!nameRegex.test(value.trim())) {
       errors.value[
         fieldName
-      ] = `El ${fieldName} solo puede contener letras y espacios`;
+      ] = `El ${label} solo puede contener letras y espacios`;
       isValid.value[fieldName] = false;
       return false;
     }
@@ -77,8 +115,9 @@ export const useValidations = () => {
 
   // Validar ocupación
   const validateOccupation = (value, fieldName) => {
+    const label = getFieldLabel(fieldName);
     if (!value || value.trim() === '') {
-      errors.value[fieldName] = `La ${fieldName} es obligatoria`;
+      errors.value[fieldName] = `La ${label} es obligatoria`;
       isValid.value[fieldName] = false;
       return false;
     }
