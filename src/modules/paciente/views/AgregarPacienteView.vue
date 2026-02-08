@@ -267,6 +267,7 @@
               v-model="pacienteStore.paciente.numeroAfiliado"
               placeholder="Ej: 1234567890"
               class="w-full"
+              maxlength="25"
               :class="{ 'p-invalid': !isValid.numeroAfiliado && errors.numeroAfiliado }"
             />
             <small v-if="errors.numeroAfiliado" class="p-error">{{ errors.numeroAfiliado }}</small>
@@ -483,17 +484,34 @@ const esMenorDeEdad = computed(() => {
 });
 
 
-const { 
-  errors, 
-  isValid, 
-  validatePatientForm, 
+const {
+  errors,
+  isValid,
+  validatePatientForm,
   clearErrors,
+  getErrorSummary,
   validateTutorName,
   validateTutorDNI,
   validateTutorBirthDate,
   validateTutorOccupation,
   validateTutorBirthPlace
 } = useValidations();
+
+const labelsCamposPaciente = {
+  nombre: 'Nombre',
+  apellido: 'Apellido',
+  dni: 'DNI',
+  prestacion: 'Prestación',
+  ocupacionActual: 'Ocupación actual',
+  ocupacionAnterior: 'Ocupación anterior',
+  calle: 'Calle',
+  numero: 'Número',
+  barrio: 'Barrio',
+  provincia: 'Provincia',
+  localidad: 'Localidad',
+  mutual: 'Obra social / Mutual',
+  numeroAfiliado: 'Número de afiliado'
+};
 
 onMounted(async () => {
   try {
@@ -578,7 +596,8 @@ const guardarPaciente = async () => {
 
   clearErrors();
   if (!validatePatientForm(pacienteStore.paciente)) {
-    showError('Por favor, corrija los errores en el formulario antes de continuar');
+    const campos = getErrorSummary(labelsCamposPaciente);
+    showError(campos ? `Corrija los siguientes campos: ${campos}` : 'Por favor, corrija los errores en el formulario antes de continuar');
     return;
   }
 

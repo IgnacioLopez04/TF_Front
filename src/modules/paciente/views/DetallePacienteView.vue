@@ -1254,7 +1254,9 @@ const esInformeValido = computed(() => {
 });
 
 const formatearFecha = (fecha) => {
+  if (fecha == null || fecha === undefined || fecha === '') return 'N/A';
   const date = new Date(fecha);
+  if (isNaN(date.getTime())) return 'N/A';
   return date.toLocaleDateString('es-ES', {
     day: '2-digit',
     month: '2-digit',

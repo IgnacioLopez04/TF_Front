@@ -556,7 +556,9 @@ const guardarUsuario = async () => {
     }
     
     if (!esValido) {
-      showError('Por favor, corrija los errores en el formulario');
+      const labelsUsuarios = { nombre: 'Nombre', apellido: 'Apellido', dni: 'DNI', fechaNacimiento: 'Fecha de nacimiento' };
+      const campos = Object.keys(erroresValidacion.value).filter((k) => erroresValidacion.value[k]).map((k) => labelsUsuarios[k] || k).join(', ');
+      showError(campos ? `Corrija los siguientes campos: ${campos}` : 'Por favor, corrija los errores en el formulario');
       return;
     }
 

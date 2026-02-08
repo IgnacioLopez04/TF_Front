@@ -456,7 +456,7 @@
             </div>
             <div>
               <label class="block text-900 font-medium mb-2 text-color-primary">Objetivos de la familia</label>
-              <div class="border-round-xl px-3 shadow-md" style="max-height: 80px;">
+              <div class="border-round-xl p-3 shadow-md" style="max-height: 80px;">
                 <p>{{ valorParaMostrar(historiaFisiatica.objetivosFamilia) }}</p>
               </div>
             </div>
