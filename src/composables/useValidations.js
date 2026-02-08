@@ -165,10 +165,17 @@ export const useValidations = () => {
     return true;
   };
 
-  // Validar número de afiliado (solo números)
+  // Validar número de afiliado (solo números, máx. 25 caracteres)
   const validateAffiliateNumber = (value) => {
     if (!value || value.trim() === '') {
       errors.value.numeroAfiliado = 'El número de afiliado es obligatorio';
+      isValid.value.numeroAfiliado = false;
+      return false;
+    }
+
+    if (value.trim().length > 25) {
+      errors.value.numeroAfiliado =
+        'El número de afiliado no puede superar los 25 caracteres';
       isValid.value.numeroAfiliado = false;
       return false;
     }

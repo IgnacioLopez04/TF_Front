@@ -373,6 +373,7 @@
                 v-model="formularioPaciente.numeroAfiliado" 
                 placeholder="Número de afiliado"
                 class="w-full"
+                maxlength="25"
                 :class="{ 'p-invalid': erroresValidacion.numeroAfiliado }"
               />
               <small v-if="erroresValidacion.numeroAfiliado" class="p-error">{{ erroresValidacion.numeroAfiliado }}</small>

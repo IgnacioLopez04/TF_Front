@@ -267,6 +267,7 @@
               v-model="pacienteStore.paciente.numeroAfiliado"
               placeholder="Ej: 1234567890"
               class="w-full"
+              maxlength="25"
               :class="{ 'p-invalid': !isValid.numeroAfiliado && errors.numeroAfiliado }"
             />
             <small v-if="errors.numeroAfiliado" class="p-error">{{ errors.numeroAfiliado }}</small>
