@@ -55,6 +55,10 @@ const loading = ref(false);
 const error = ref('');
 
 onMounted(() => {
+  if (authStore.checkAuth().isAuthenticated) {
+    router.replace('/inicio');
+    return;
+  }
   axios.get(`${urlFhir}/metadata`).catch(() => {});
 });
 

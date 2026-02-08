@@ -38,16 +38,6 @@
       <ProgressSpinner />
     </div>
 
-    <!-- Overlay de carga al editar paciente -->
-    <div
-      v-if="cargandoEditarPaciente"
-      class="flex flex-column align-items-center justify-content-center gap-3 position-fixed top-0 left-0 w-full h-full bg-black-alpha-50 z-5"
-      style="pointer-events: auto;"
-    >
-      <ProgressSpinner style="width: 50px; height: 50px" />
-      <p class="text-900 font-medium m-0">Cargando datos del paciente...</p>
-    </div>
-
     <!-- Lista de pacientes -->
     <div v-else class="flex flex-column gap-3 px-3">
       <Card 
@@ -145,7 +135,15 @@
       class="p-fluid dialog-responsive"
       :style="{ width: '90vw', maxWidth: '800px' }"
     >
-      <div class="flex flex-column gap-4 form-container">
+      <div
+        v-if="cargandoEditarPaciente"
+        class="flex flex-column align-items-center justify-content-center gap-3"
+        style="min-height: 200px;"
+      >
+        <ProgressSpinner style="width: 50px; height: 50px" />
+        <p class="text-900 font-medium m-0">Cargando datos del paciente...</p>
+      </div>
+      <div v-else class="flex flex-column gap-4 form-container">
         <!-- Identificación del Paciente -->
         <div class="surface-card p-4 border-round-lg shadow-1">
           <h3 class="text-xl font-semibold text-purple-600 mb-4">Identificación del Paciente</h3>
@@ -767,19 +765,21 @@ const nuevoPaciente = () => {
 };
 
 const editarPaciente = async (paciente) => {
+  pacienteSeleccionado.value = { hashId: paciente.hashId };
+  modalEditarVisible.value = true;
   cargandoEditarPaciente.value = true;
   pacienteCargandoHashId.value = paciente.hashId;
   try {
     // Cargar datos completos del paciente
     const pacienteCompleto = await administracionStore.obtenerPaciente(paciente.hashId);
-    
+
     pacienteSeleccionado.value = pacienteCompleto;
-    
+
     // Cargar ciudades si hay provincia
     if (pacienteCompleto.provincia) {
       await administracionStore.obtenerCiudades(pacienteCompleto.provincia);
     }
-    
+
     formularioPaciente.value = {
       nombre: pacienteCompleto.nombre || '',
       apellido: pacienteCompleto.apellido || '',
@@ -801,7 +801,7 @@ const editarPaciente = async (paciente) => {
       tutores: pacienteCompleto.tutores ? [...pacienteCompleto.tutores] : [],
       activo: pacienteCompleto.activo !== undefined ? pacienteCompleto.activo : true,
     };
-    
+
     // Limpiar errores
     erroresValidacion.value = {
       nombre: '',
@@ -815,10 +815,9 @@ const editarPaciente = async (paciente) => {
       mutual: '',
       numeroAfiliado: '',
     };
-    
-    modalEditarVisible.value = true;
   } catch (error) {
     showError('Error al cargar los datos del paciente');
+    modalEditarVisible.value = false;
   } finally {
     cargandoEditarPaciente.value = false;
     pacienteCargandoHashId.value = null;

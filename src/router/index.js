@@ -10,7 +10,7 @@ import administracionRoutes from '@/modules/administracion/routes';
 const routes = [
   {
     path: '/',
-    redirect: '/inicio',
+    redirect: '/login',
   },
   {
     ...authRoutes,
