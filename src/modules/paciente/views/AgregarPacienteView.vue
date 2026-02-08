@@ -88,6 +88,7 @@
               placeholder="Seleccione fecha"
               dateFormat="dd/mm/yy"
               :showIcon="true"
+              :maxDate="fechaMaxima"
               class="w-full"
             />
           </div>
@@ -342,10 +343,11 @@
                 placeholder="Seleccione fecha"
                 dateFormat="dd/mm/yy"
                 :showIcon="true"
+                :maxDate="fechaMaxima"
                 class="w-full"
                 :class="{ 'p-invalid': !isValid[`tutor${index}BirthDate`] && errors[`tutor${index}BirthDate`] }"
                 @blur="validateTutorField(index, 'fechaNacimiento', 'BirthDate')"
-            />
+              />
               <small v-if="errors[`tutor${index}BirthDate`]" class="p-error">{{ errors[`tutor${index}BirthDate`] }}</small>
             </div>
 
@@ -455,6 +457,12 @@ const isLoading = ref({
   ciudades: false,
   prestaciones: false,
   mutuales: false
+});
+
+const fechaMaxima = computed(() => {
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() - 1);
+  return hoy;
 });
 
 const esMenorDeEdad = computed(() => {

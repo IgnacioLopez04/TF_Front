@@ -440,6 +440,7 @@
                   placeholder="Seleccione fecha"
                   dateFormat="dd/mm/yy"
                   :showIcon="true"
+                  :maxDate="fechaMaxima"
                   class="w-full"
                 />
               </div>

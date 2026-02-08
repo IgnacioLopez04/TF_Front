@@ -546,6 +546,7 @@
             v-model="nuevoMultimedia.fecha" 
             :showIcon="true"
             dateFormat="dd/mm/yy"
+            :maxDate="fechaMaxima"
             class="w-full"
           />
         </div>
@@ -592,6 +593,7 @@
               v-model="nuevoInforme.fecha" 
               :showIcon="true"
               dateFormat="dd/mm/yy"
+              :maxDate="fechaMaxima"
               class="w-full"
             />
           </div>
@@ -789,6 +791,12 @@ const tabs = ref([
   { label: 'Historia Fisiátrica', icon: 'pi pi-history' },
   { label: 'Multimedia', icon: 'pi pi-images' }
 ]);
+
+const fechaMaxima = computed(() => {
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() - 1);
+  return hoy;
+});
 
 const crearHistoriaFisiatrica = computed(() => {
   const h = pacienteStore.historiaFisiatrica;
