@@ -29,6 +29,13 @@ export const useValidations = () => {
     return Object.keys(errors.value).length > 0;
   };
 
+  // Resumen de nombres de campos con error para el toast (fieldLabels: { nombre: 'Nombre', dni: 'DNI', ... })
+  const getErrorSummary = (fieldLabels = {}) => {
+    const keys = Object.keys(errors.value);
+    if (keys.length === 0) return '';
+    return keys.map((k) => fieldLabels[k] || k).join(', ');
+  };
+
   // Validar nombre y apellido (solo letras y espacios)
   const validateName = (value, fieldName) => {
     if (!value || value.trim() === '') {
@@ -311,6 +318,7 @@ export const useValidations = () => {
     clearErrors,
     clearError,
     getError,
+    getErrorSummary,
     hasErrors,
     validatePatientForm,
     validateName,

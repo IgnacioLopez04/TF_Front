@@ -41,7 +41,7 @@
           <!-- Fecha de Evaluación -->
           <div class="flex justify-content-between align-items-center md:flex-row flex-column">
             <h2 class="text-xl font-semibold mb-4 text-color-primary">Información de la Evaluación</h2>
-            <div class="flex align-items-center gap-2 md:flex-row flex-column">
+            <div class="flex flex-column gap-1 md:flex-row flex-column">
               <label class="block font-medium ">
                 Fecha de Evaluación <span class="text-red-500">*</span>
               </label>
@@ -51,7 +51,10 @@
                 :showIcon="true"
                 dateFormat="dd/mm/yy"
                 :maxDate="fechaMaxima"
+                :class="{ 'p-invalid': erroresHistoria.fechaEvaluacion }"
+                class="w-full"
               />
+              <small v-if="erroresHistoria.fechaEvaluacion" class="p-error">{{ erroresHistoria.fechaEvaluacion }}</small>
             </div>
           </div>
           <Divider />
@@ -70,7 +73,10 @@
                 :rows="4" 
                 placeholder="Describa el motivo principal de la consulta..."
                 class="w-full"
+                :class="{ 'p-invalid': erroresHistoria.derivadosPor }"
+                @input="erroresHistoria.derivadosPor = ''"
               />
+              <small v-if="erroresHistoria.derivadosPor" class="p-error">{{ erroresHistoria.derivadosPor }}</small>
             </div>
           </div>
           <!-- Antecedentes del cuadro actual -->
@@ -848,6 +854,7 @@ const pacienteStore = usePacienteStore();
 const pasoActivo = ref(0);
 const subTabExamenFisicoActivo = ref(0);
 const guardandoHistoria = ref(false);
+const erroresHistoria = ref({ fechaEvaluacion: '', derivadosPor: '' });
 
 const esEdicion = computed(() => route.query.editar === '1' || route.query.editar === 'true');
 
@@ -893,8 +900,8 @@ const subTabsExamenFisico = ref([
 // Computed properties
 const esFormularioValido = computed(() => {
   if (pasoActivo.value === 0) {
-    return pacienteStore.historiaFisiatrica.fechaEvaluacion && 
-           pacienteStore.historiaFisiatrica.derivadosPor.trim().length > 0;
+    const derivados = (pacienteStore.historiaFisiatrica.derivadosPor || '').trim();
+    return pacienteStore.historiaFisiatrica.fechaEvaluacion && derivados.length > 0;
   }
   return true;
 });
@@ -927,13 +934,33 @@ const seleccionarPaso = (index) => {
   }
 };
 
+const validarPaso0 = () => {
+  erroresHistoria.value = { fechaEvaluacion: '', derivadosPor: '' };
+  let hayErrores = false;
+  if (!pacienteStore.historiaFisiatrica.fechaEvaluacion) {
+    erroresHistoria.value.fechaEvaluacion = 'La fecha de evaluación es obligatoria';
+    hayErrores = true;
+  }
+  const derivados = (pacienteStore.historiaFisiatrica.derivadosPor || '').trim();
+  if (derivados.length === 0) {
+    erroresHistoria.value.derivadosPor = 'Derivados por es obligatorio';
+    hayErrores = true;
+  }
+  return hayErrores;
+};
+
 const pasoAnterior = () => {
   if (pasoActivo.value > 0) {
     pasoActivo.value--;
+    erroresHistoria.value = { fechaEvaluacion: '', derivadosPor: '' };
   }
 };
 
 const pasoSiguiente = () => {
+  if (pasoActivo.value === 0 && validarPaso0()) {
+    showError('Complete los campos obligatorios: Fecha de Evaluación, Derivados por');
+    return;
+  }
   if (esFormularioValido.value && pasoActivo.value < pasos.value.length - 1) {
     pasoActivo.value++;
   } else if (!esFormularioValido.value) {
@@ -948,11 +975,14 @@ const cancelar = () => {
 };
 
 const onChangeFechaEvaluacion = () => {
-  // La fecha ya se actualiza automáticamente en el v-model
-  // El computed fechaEvaluacionFormateada se recalculará automáticamente
+  erroresHistoria.value.fechaEvaluacion = '';
 };
 
 const finalizarHistoria = async () => {
+  if (pasoActivo.value === 0 && validarPaso0()) {
+    showError('Complete los campos obligatorios: Fecha de Evaluación, Derivados por');
+    return;
+  }
   if (!esFormularioValido.value) {
     showError('Por favor complete todos los campos obligatorios');
     return;

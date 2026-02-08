@@ -483,17 +483,34 @@ const esMenorDeEdad = computed(() => {
 });
 
 
-const { 
-  errors, 
-  isValid, 
-  validatePatientForm, 
+const {
+  errors,
+  isValid,
+  validatePatientForm,
   clearErrors,
+  getErrorSummary,
   validateTutorName,
   validateTutorDNI,
   validateTutorBirthDate,
   validateTutorOccupation,
   validateTutorBirthPlace
 } = useValidations();
+
+const labelsCamposPaciente = {
+  nombre: 'Nombre',
+  apellido: 'Apellido',
+  dni: 'DNI',
+  prestacion: 'Prestación',
+  ocupacionActual: 'Ocupación actual',
+  ocupacionAnterior: 'Ocupación anterior',
+  calle: 'Calle',
+  numero: 'Número',
+  barrio: 'Barrio',
+  provincia: 'Provincia',
+  localidad: 'Localidad',
+  mutual: 'Obra social / Mutual',
+  numeroAfiliado: 'Número de afiliado'
+};
 
 onMounted(async () => {
   try {
@@ -578,7 +595,8 @@ const guardarPaciente = async () => {
 
   clearErrors();
   if (!validatePatientForm(pacienteStore.paciente)) {
-    showError('Por favor, corrija los errores en el formulario antes de continuar');
+    const campos = getErrorSummary(labelsCamposPaciente);
+    showError(campos ? `Corrija los siguientes campos: ${campos}` : 'Por favor, corrija los errores en el formulario antes de continuar');
     return;
   }
 
