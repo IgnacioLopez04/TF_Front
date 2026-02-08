@@ -38,6 +38,16 @@
       <ProgressSpinner />
     </div>
 
+    <!-- Overlay de carga al editar paciente -->
+    <div
+      v-if="cargandoEditarPaciente"
+      class="flex flex-column align-items-center justify-content-center gap-3 position-fixed top-0 left-0 w-full h-full bg-black-alpha-50 z-5"
+      style="pointer-events: auto;"
+    >
+      <ProgressSpinner style="width: 50px; height: 50px" />
+      <p class="text-900 font-medium m-0">Cargando datos del paciente...</p>
+    </div>
+
     <!-- Lista de pacientes -->
     <div v-else class="flex flex-column gap-3 px-3">
       <Card 
@@ -85,6 +95,7 @@
               <Button 
                 icon="pi pi-pencil"
                 class="p-button-text p-button-rounded action-btn edit-btn"
+                :loading="cargandoEditarPaciente && pacienteCargandoHashId === paciente.hashId"
                 @click="editarPaciente(paciente)"
                 title="Editar paciente"
               />
@@ -552,6 +563,8 @@ const paginaActual = ref(1);
 const elementosPorPagina = ref(5);
 
 const modalEditarVisible = ref(false);
+const cargandoEditarPaciente = ref(false);
+const pacienteCargandoHashId = ref(null);
 const pacienteSeleccionado = ref(null);
 const formularioPaciente = ref({
   nombre: '',
@@ -749,6 +762,8 @@ const nuevoPaciente = () => {
 };
 
 const editarPaciente = async (paciente) => {
+  cargandoEditarPaciente.value = true;
+  pacienteCargandoHashId.value = paciente.hashId;
   try {
     // Cargar datos completos del paciente
     const pacienteCompleto = await administracionStore.obtenerPaciente(paciente.hashId);
@@ -799,6 +814,9 @@ const editarPaciente = async (paciente) => {
     modalEditarVisible.value = true;
   } catch (error) {
     showError('Error al cargar los datos del paciente');
+  } finally {
+    cargandoEditarPaciente.value = false;
+    pacienteCargandoHashId.value = null;
   }
 };
 
