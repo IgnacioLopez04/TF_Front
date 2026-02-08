@@ -515,7 +515,6 @@ export default {
   },
 
   async crearHistoriaFisiatrica(historiaFisiatricaData) {
-    console.log('historiaFisiatricaData', historiaFisiatricaData);
     try {
       // 1. Crear el recurso FHIR
       const fhirResource = FhirService.createDiagnosticReport(
@@ -565,8 +564,6 @@ export default {
         const historiaFHIR = transformarHistoriaFisiatrica(
           historiasFisiatricas[0],
         );
-
-        console.log('historiaFHIR', historiaFHIR);
 
         // Normalizar examenFisico (backend envía general/cabezasentidos/etc como strings "{key=value, ...}")
         const ef = normalizarExamenFisico(historiaFHIR.examenFisico || {});

@@ -1,4 +1,5 @@
 import { ref } from 'vue';
+import { validateDni } from '@/utils/validators';
 
 export const useValidations = () => {
   const errors = ref({});
@@ -51,21 +52,18 @@ export const useValidations = () => {
     return true;
   };
 
-  // Validar DNI (solo números)
+  // Validar DNI (solo números, 7-8 dígitos)
   const validateDNI = (value) => {
-    if (!value || value.trim() === '') {
-      errors.value.dni = 'El DNI es obligatorio';
+    const result = validateDni(value, {
+      required: true,
+      minLength: 7,
+      maxLength: 8,
+    });
+    if (!result.valid) {
+      errors.value.dni = result.message;
       isValid.value.dni = false;
       return false;
     }
-
-    const dniRegex = /^\d+$/;
-    if (!dniRegex.test(value.trim())) {
-      errors.value.dni = 'El DNI solo puede contener números';
-      isValid.value.dni = false;
-      return false;
-    }
-
     clearError('dni');
     return true;
   };
@@ -141,32 +139,22 @@ export const useValidations = () => {
     return true;
   };
 
-  // Validar DNI del tutor (mínimo 7 dígitos, solo números)
+  // Validar DNI del tutor (7-8 dígitos, solo números)
   const validateTutorDNI = (value, tutorIndex) => {
     const fieldName = `tutor${tutorIndex}DNI`;
-
-    if (!value || value.toString().trim() === '') {
-      errors.value[fieldName] = 'El DNI del tutor es obligatorio';
+    const result = validateDni(value, {
+      required: true,
+      minLength: 7,
+      maxLength: 8,
+    });
+    if (!result.valid) {
+      const message =
+        result.message?.replace(/^El DNI /, 'El DNI del tutor ') ??
+        result.message;
+      errors.value[fieldName] = message;
       isValid.value[fieldName] = false;
       return false;
     }
-
-    const dniString = value.toString().trim();
-    const dniRegex = /^\d+$/;
-
-    if (!dniRegex.test(dniString)) {
-      errors.value[fieldName] = 'El DNI del tutor solo puede contener números';
-      isValid.value[fieldName] = false;
-      return false;
-    }
-
-    if (dniString.length < 7) {
-      errors.value[fieldName] =
-        'El DNI del tutor debe tener al menos 7 dígitos';
-      isValid.value[fieldName] = false;
-      return false;
-    }
-
     clearError(fieldName);
     return true;
   };

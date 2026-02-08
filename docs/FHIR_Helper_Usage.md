@@ -57,8 +57,7 @@ export const obtenerProvincias = async () => {
   try {
     const response = await useAxios.get(`${urlFhirLocation}?_type=province`);
     const resources = extractFhirResources(response.data);
-    
-    console.log('Provincias procesadas:', resources);
+
     return resources;
   } catch (error) {
     console.error('Error obteniendo provincias:', error);
@@ -81,7 +80,7 @@ import { findResourceById } from '@/utils/fhirHelper';
 
 const provincia = findResourceById(response.data, '1');
 if (provincia) {
-  console.log('Provincia encontrada:', provincia.name);
+  // usar provincia.name
 }
 ```
 
@@ -130,9 +129,7 @@ const firstType = extractFhirResources(response.data, {
 import { getResponseStats } from '@/utils/fhirHelper';
 
 const stats = getResponseStats(response.data);
-console.log('Total de recursos:', stats.total);
-console.log('Tipos encontrados:', stats.types);
-console.log('Es un Bundle:', stats.hasBundle);
+// stats.total, stats.types, stats.hasBundle
 ```
 
 ### **Conteo de Recursos**
@@ -140,7 +137,6 @@ console.log('Es un Bundle:', stats.hasBundle);
 import { getResourceCount } from '@/utils/fhirHelper';
 
 const total = getResourceCount(response.data);
-console.log(`Se encontraron ${total} recursos`);
 ```
 
 ### **Verificar si Hay Recursos**
@@ -148,9 +144,9 @@ console.log(`Se encontraron ${total} recursos`);
 import { hasResources } from '@/utils/fhirHelper';
 
 if (hasResources(response.data)) {
-  console.log('La respuesta contiene recursos');
+  // la respuesta contiene recursos
 } else {
-  console.log('No se encontraron recursos');
+  // no se encontraron recursos
 }
 ```
 
@@ -219,8 +215,7 @@ const resourcesWithMeta = extractFhirResources(response.data, {
 
 resourcesWithMeta.forEach(resource => {
   if (resource._bundleMetadata) {
-    console.log('Posición en Bundle:', resource._bundleMetadata.index);
-    console.log('Metadatos de búsqueda:', resource._bundleMetadata.search);
+    // resource._bundleMetadata.index, resource._bundleMetadata.search
   }
 });
 ```

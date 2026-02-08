@@ -50,6 +50,7 @@
                 @onChange="onChangeFechaEvaluacion"
                 :showIcon="true"
                 dateFormat="dd/mm/yy"
+                :maxDate="fechaMaxima"
               />
             </div>
           </div>
@@ -849,6 +850,12 @@ const subTabExamenFisicoActivo = ref(0);
 const guardandoHistoria = ref(false);
 
 const esEdicion = computed(() => route.query.editar === '1' || route.query.editar === 'true');
+
+const fechaMaxima = computed(() => {
+  const hoy = new Date();
+  hoy.setDate(hoy.getDate() - 1);
+  return hoy;
+});
 
 // Inicializar o cargar la historia según modo (crear vs editar)
 onMounted(async () => {

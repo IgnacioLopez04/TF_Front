@@ -26,3 +26,6 @@ export const urlFhirReport = `${urlFhir}/DiagnosticReport`;
 export const urlFhirDocumentReference = `${urlFhir}/DocumentReference`;
 export const urlFhirAnnex = `${urlFhir}/Annex`;
 export const urlFhirPractitioner = `${urlFhir}/Practitioner`;
+
+// Validadores compartidos
+export { validateDni } from './validators';
