@@ -223,6 +223,8 @@
         <Button 
           label="Guardar" 
           icon="pi pi-check"
+          :loading="guardandoUsuario"
+          :disabled="guardandoUsuario"
           @click="guardarUsuario"
           class="p-button-primary"
         />
@@ -270,6 +272,7 @@ const modalConfirmarVisible = ref(false);
 const accionTexto = ref('');
 const identificadorUsuario = ref('');
 const actualizandoEstadoUsuario = ref(false);
+const guardandoUsuario = ref(false);
 
 const filtroActivo = ref('todos');
 const filtros = ref([
@@ -525,9 +528,8 @@ const cerrarModalEditar = () => {
 };
 
 const guardarUsuario = async () => {
-  try {
-    // Validaciones completas
-    let esValido = true;
+  // Validaciones completas
+  let esValido = true;
     
     // Validar nombre
     if (!validarNombre(formularioUsuario.value.nombre, 'nombre')) {
@@ -574,27 +576,31 @@ const guardarUsuario = async () => {
       datosUsuario.fechaNacimiento = `${year}-${month}-${day}`;
     }
 
-    if (modoCrear.value) {
-      // Crear nuevo usuario
-      await administracionStore.crearUsuario(datosUsuario);
-      showSuccess(`Usuario ${formularioUsuario.value.nombre} ${formularioUsuario.value.apellido} creado correctamente`);
-    } else {
-      // Editar usuario existente
-      await administracionStore.editarUsuario(usuarioSeleccionado.value.hashId, datosUsuario);
-      showSuccess(`Usuario ${formularioUsuario.value.nombre} ${formularioUsuario.value.apellido} actualizado correctamente`);
+    guardandoUsuario.value = true;
+    try {
+      if (modoCrear.value) {
+        // Crear nuevo usuario
+        await administracionStore.crearUsuario(datosUsuario);
+        showSuccess(`Usuario ${formularioUsuario.value.nombre} ${formularioUsuario.value.apellido} creado correctamente`);
+      } else {
+        // Editar usuario existente
+        await administracionStore.editarUsuario(usuarioSeleccionado.value.hashId, datosUsuario);
+        showSuccess(`Usuario ${formularioUsuario.value.nombre} ${formularioUsuario.value.apellido} actualizado correctamente`);
+      }
+
+      cerrarModalEditar();
+    } catch (error) {
+      if (error.response?.status === 400) {
+        showError('Usuario ya existe. Por favor, active el usuario existente o controle los datos ingresados.');
+        return;
+      }
+      const mensaje = modoCrear.value
+        ? 'Error al crear el usuario'
+        : 'Error al editar el usuario';
+      showError(mensaje);
+    } finally {
+      guardandoUsuario.value = false;
     }
-    
-    cerrarModalEditar();
-  } catch (error) {
-    if(error.response.status === 400) {
-      showError('Usuario ya existe. Por favor, active el usuario existente o controle los datos ingresados.');
-      return;
-    }
-    const mensaje = modoCrear.value 
-      ? 'Error al crear el usuario'
-      : 'Error al editar el usuario';
-    showError(mensaje);
-  }
 };
 
 const toggleEstadoUsuarioConfirmar = (usuario) => {
