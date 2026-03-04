@@ -13,10 +13,39 @@ export const login = async (credential) => {
   }
 };
 
-export function useLogin(usuario, accessToken, startTokenMonitoring) {
+export const refreshSession = async () => {
+  try {
+    const response = await useAxios.postUnauthenticated(`${urlAuth}/refresh`, {});
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const backendLogout = async () => {
+  try {
+    await useAxios.postUnauthenticated(`${urlAuth}/logout`, {});
+  } catch (_error) {
+  }
+};
+
+const decodeJwtExpiration = (token) => {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const json = JSON.parse(atob(base64));
+    if (!json.exp) return null;
+    return json.exp * 1000;
+  } catch (e) {
+    console.warn('No se pudo decodificar la expiración del JWT', e);
+    return null;
+  }
+};
+
+export function useLogin(usuario, accessToken, tokenExpiresAt, startTokenMonitoring) {
   return (userData, token) => {
     try {
-      // Actualizar el estado del usuario
       usuario.value = {
         id_usuario: userData.id_usuario,
         nombre: userData.nombre || '',
@@ -28,10 +57,9 @@ export function useLogin(usuario, accessToken, startTokenMonitoring) {
         id_tipo_usuario: userData.id_tipo_usuario || null,
       };
 
-      // Actualizar el token
       accessToken.value = token;
+      tokenExpiresAt.value = token ? decodeJwtExpiration(token) : null;
 
-      // Iniciar monitoreo del token
       if (startTokenMonitoring) {
         startTokenMonitoring();
       }
@@ -43,13 +71,11 @@ export function useLogin(usuario, accessToken, startTokenMonitoring) {
   };
 }
 
-export function useLogout(usuario, accessToken, stopTokenMonitoring) {
-  return () => {
+export function useLogout(usuario, accessToken, tokenExpiresAt, stopTokenMonitoring) {
+  return async () => {
     try {
-      // Remover token de sessionStorage
       sessionStorage.removeItem('accessToken');
 
-      // Resetear el estado del usuario
       usuario.value = {
         id_usuario: null,
         nombre: '',
@@ -61,13 +87,14 @@ export function useLogout(usuario, accessToken, stopTokenMonitoring) {
         id_tipo_usuario: null,
       };
 
-      // Resetear el token
       accessToken.value = null;
+      tokenExpiresAt.value = null;
 
-      // Detener monitoreo del token
       if (stopTokenMonitoring) {
         stopTokenMonitoring();
       }
+
+      await backendLogout();
     } catch (error) {
       showError('Error al cerrar sesión');
     }

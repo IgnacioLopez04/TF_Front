@@ -13,9 +13,11 @@ export function useAuthState() {
   });
 
   const accessToken = ref(null);
+  const tokenExpiresAt = ref(null);
 
   return {
     usuario,
     accessToken,
+    tokenExpiresAt,
   };
 }

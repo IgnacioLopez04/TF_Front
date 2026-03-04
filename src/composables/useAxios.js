@@ -8,13 +8,23 @@ const setupResponseInterceptor = () => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401 || error.response?.status === 403) {
-        // Token expirado o inválido
-        const authStore = useAuthStore();
-        authStore.logout();
+        const url = error.config?.url || '';
 
-        // Redirigir al login si no estamos ya ahí
-        if (router.currentRoute.value.name !== 'login') {
-          router.push({ name: 'login' });
+        // Evitar recursividad en endpoints de autenticación
+        const isAuthEndpoint =
+          url.includes('/auth/login') ||
+          url.includes('/auth/refresh') ||
+          url.includes('/auth/logout');
+
+        if (!isAuthEndpoint) {
+          // Token expirado o inválido en rutas de negocio
+          const authStore = useAuthStore();
+          authStore.logout();
+
+          // Redirigir al login si no estamos ya ahí
+          if (router.currentRoute.value.name !== 'login') {
+            router.push({ name: 'login' });
+          }
         }
       }
       return Promise.reject(error);
@@ -61,6 +71,7 @@ export class useAxios {
       headers: {
         'Content-Type': 'application/json',
       },
+      withCredentials: true,
     });
     return response;
   }
