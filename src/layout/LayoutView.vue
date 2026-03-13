@@ -1,17 +1,23 @@
 <template>
   <div class="min-h-screen flex flex-column">
     <!-- Navbar -->
-    <nav class="navbar p-3 flex justify-content-between align-items-center w-full border-bottom-1 border-200 shadow-1">
+    <nav
+      class="navbar p-3 flex justify-content-between align-items-center w-full border-bottom-1 border-200 shadow-1"
+    >
       <div class="flex align-items-center gap-4">
         <div class="flex align-items-center gap-2">
-          <div class="logo-avatar flex align-items-center justify-content-center">TF</div>
-          <span class="text-xl font-bold text-700">TF Causana</span>
+          <div
+            class="logo-avatar flex align-items-center justify-content-center"
+          >
+            FC
+          </div>
+          <span class="text-xl font-bold text-700">Fundación Causana</span>
         </div>
         <div class="flex align-items-center gap-3">
-          <router-link 
-            v-for="item in menuItems" 
+          <router-link
+            v-for="item in menuItems"
             :key="item.to"
-            :to="item.to" 
+            :to="item.to"
             class="nav-link text-600 hover:text-700 no-underline"
           >
             {{ item.name }}
@@ -19,16 +25,20 @@
         </div>
       </div>
       <div class="flex align-items-center gap-3">
-        <Avatar 
-          v-if="authStore.usuario.picture" 
-          :image="authStore.usuario.picture" 
+        <Avatar
+          v-if="authStore.usuario.picture"
+          :image="authStore.usuario.picture"
           shape="circle"
           size="large"
-          v-tooltip.bottom="`${authStore.usuario.nombre} ${authStore.usuario.apellido}`"
+          v-tooltip.bottom="
+            `${authStore.usuario.nombre} ${authStore.usuario.apellido}`
+          "
         />
-        <Avatar 
+        <Avatar
           v-else
-          :label="getInitials(authStore.usuario.nombre, authStore.usuario.apellido)"
+          :label="
+            getInitials(authStore.usuario.nombre, authStore.usuario.apellido)
+          "
           shape="circle"
           size="large"
         />
@@ -42,11 +52,14 @@
     <main class="flex-1 p-4">
       <router-view />
     </main>
-    
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-white p-4 text-center">
       <div>
-        <p class="m-0 text-sm opacity-80">&copy; 2025 Sistema de Historias Clínicas. Todos los derechos reservados.</p>
+        <p class="m-0 text-sm opacity-80">
+          &copy; 2025 Sistema de Historias Clínicas. Todos los derechos
+          reservados.
+        </p>
       </div>
     </footer>
   </div>
@@ -65,19 +78,19 @@ const allMenuItems = [
   {
     to: '/pacientes',
     name: 'Pacientes',
-    hasAccess: () => true
+    hasAccess: () => true,
   },
   {
     to: '/administracion',
     name: 'Administración',
     hasAccess: () => {
       return authStore.usuario.id_tipo_usuario === 2;
-    }
-  }
+    },
+  },
 ];
 
 const menuItems = computed(() => {
-  return allMenuItems.filter(item => item.hasAccess());
+  return allMenuItems.filter((item) => item.hasAccess());
 });
 
 const logout = () => {
