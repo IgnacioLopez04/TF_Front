@@ -525,14 +525,41 @@ const valorParaMostrar = (val) => (val && val !== 'Sin información' ? val : 'No
 
 // Formatear fecha de evaluación a formato legible DD/MM/YYYY
 const formatearFecha = (fecha) => {
-  if (!fecha || fecha === 'Sin información') return 'Sin información';
-  
-  const fechaObj = new Date(fecha);
-  const dia = fechaObj.getDate().toString().padStart(2, '0');
-  const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
-  const año = fechaObj.getFullYear();
-  
-  return `${dia}/${mes}/${año}`;
+  if (
+    !fecha ||
+    fecha === 'Sin información' ||
+    fecha === 'Fecha no disponible'
+  ) {
+    return 'Sin información';
+  }
+
+  if (fecha instanceof Date) {
+    if (isNaN(fecha.getTime())) return 'Sin información';
+    const dia = fecha.getDate().toString().padStart(2, '0');
+    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+    const año = fecha.getFullYear();
+    return `${dia}/${mes}/${año}`;
+  }
+
+  if (typeof fecha === 'string') {
+    const soloFecha = fecha.split(' ')[0];
+
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(soloFecha)) {
+      return soloFecha;
+    }
+
+    const fechaObj = new Date(fecha);
+    if (isNaN(fechaObj.getTime())) {
+      return 'Sin información';
+    }
+
+    const dia = fechaObj.getDate().toString().padStart(2, '0');
+    const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
+    const año = fechaObj.getFullYear();
+    return `${dia}/${mes}/${año}`;
+  }
+
+  return 'Sin información';
 };
 
 const crearNuevaHistoria = () => {
