@@ -588,9 +588,12 @@ export default {
         // Mapear los datos de FHIR al objeto del state
         this.historiaFisiatrica = {
           // Evaluación y Consulta
+          // Usar directamente la fecha proveniente de FHIR (effective-from o effectiveDateTime)
+          // sin textos como "Fecha no disponible"; si no viene, dejar null
           fechaEvaluacion:
-            historiaFHIR.fechaCreacion ||
-            new Date().toISOString().split('T')[0],
+            historiaFHIR.fechaCreacion && historiaFHIR.fechaCreacion !== 'Fecha no disponible'
+              ? historiaFHIR.fechaCreacion
+              : null,
           derivadosPor: historiaFHIR.derivadosPor || noInfo,
           antecedentesCuadro: historiaFHIR.antecedentesCuadro || noInfo,
           medicacionActual: historiaFHIR.medicacionActual || noInfo,

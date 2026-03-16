@@ -621,7 +621,8 @@ export function transformarHistoriaFisiatrica(diagnosticReport) {
     tipo: 'fisiatrica',
     titulo: diagnosticReport.code?.text || 'Historia Clínica Fisiátrica',
     contenido: diagnosticReport.conclusion || 'Sin contenido',
-    fechaCreacion: diagnosticReport.effectiveDateTime || 'Fecha no disponible',
+    // Fecha de creación/evaluación: preferir extensión "effective-from" y luego effectiveDateTime
+    fechaCreacion: diagnosticReport.effectiveDateTime || null,
     estado: diagnosticReport.status || 'unknown',
 
     // Referencia al paciente
@@ -665,6 +666,12 @@ export function transformarHistoriaFisiatrica(diagnosticReport) {
           break;
         case 'http://mi-servidor.com/fhir/StructureDefinition/historia-tipo':
           historiaFisiatrica.tipo = value;
+          break;
+        // Fecha efectiva desde la que rige esta versión de la historia
+        case 'http://mi-servidor/fhir/StructureDefinition/effective-from':
+          // valueDateTime llega como value en la extensión; priorizarla sobre effectiveDateTime
+          historiaFisiatrica.fechaCreacion =
+            extension.valueDateTime || value || historiaFisiatrica.fechaCreacion;
           break;
         case 'http://example.org/fhir/StructureDefinition/user-name':
           historiaFisiatrica.profesional.nombre = value;
