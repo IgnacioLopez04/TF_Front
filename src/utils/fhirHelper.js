@@ -668,7 +668,7 @@ export function transformarHistoriaFisiatrica(diagnosticReport) {
           historiaFisiatrica.tipo = value;
           break;
         // Fecha efectiva desde la que rige esta versión de la historia
-        case 'http://mi-servidor/fhir/StructureDefinition/effective-from':
+        case 'http://mi-servidor.com/fhir/StructureDefinition/effective-from':
           // valueDateTime llega como value en la extensión; priorizarla sobre effectiveDateTime
           historiaFisiatrica.fechaCreacion =
             extension.valueDateTime || value || historiaFisiatrica.fechaCreacion;
