@@ -58,8 +58,8 @@
       </Card>
     </div>
 
-    <!-- Mensaje cuando no hay pacientes -->
-    <div v-if="pacientesFiltrados.length === 0" class="text-center p-6">
+    <!-- Mensaje cuando no hay pacientes (solo después de cargar) -->
+    <div v-if="!isLoadingPacientes && pacientesFiltrados.length === 0" class="text-center p-6">
       <i class="pi pi-users" style="font-size: 3rem; color: #9ca3af; margin-bottom: 1rem;"></i>
       <p>No se encontraron pacientes</p>
     </div>
