@@ -829,6 +829,29 @@
         />
       </div>
     </div>
+    <!-- Modal de confirmación de cancelación -->
+    <Dialog
+      v-model:visible="modalConfirmarCancelarVisible"
+      header="Confirmar cancelación"
+      :modal="true"
+      class="p-fluid dialog-responsive"
+    >
+      <p>¿Está seguro que desea cancelar? Se perderán todos los datos ingresados.</p>
+      <template #footer>
+        <Button 
+          label="No, continuar editando" 
+          icon="pi pi-times"
+          @click="modalConfirmarCancelarVisible = false"
+          class="back-button border-round"
+        />
+        <Button 
+          label="Sí, cancelar" 
+          icon="pi pi-check"
+          @click="confirmarCancelacion"
+          class="button-primary-custom"
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -855,6 +878,7 @@ const pasoActivo = ref(0);
 const subTabExamenFisicoActivo = ref(0);
 const guardandoHistoria = ref(false);
 const erroresHistoria = ref({ fechaEvaluacion: '', derivadosPor: '' });
+const modalConfirmarCancelarVisible = ref(false);
 
 const esEdicion = computed(() => route.query.editar === '1' || route.query.editar === 'true');
 
@@ -1009,9 +1033,12 @@ const pasoSiguiente = () => {
 };
 
 const cancelar = () => {
-  if (confirm('¿Está seguro de que desea cancelar? Se perderán todos los datos ingresados.')) {
-    volver();
-  }
+  modalConfirmarCancelarVisible.value = true;
+};
+
+const confirmarCancelacion = () => {
+  modalConfirmarCancelarVisible.value = false;
+  volver();
 };
 
 const onChangeFechaEvaluacion = () => {
@@ -1053,36 +1080,6 @@ const volver = () => {
 }
 
 .text-color-primary {
-  color: #7c3aed;
-}
-
-.bg-color-primary {
-  background-color: #7c3aed;
-}
-
-.back-button {
-  background-color: white !important;
-  border-color: #8b5cf6 !important;
-  color: #8b5cf6 !important;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.back-button:hover {
-  background-color: #7c3aed !important;
-  border-color: #7c3aed !important;
-  color: #ffffff !important;
-}
-
-.button-primary-custom {
-  background-color: #7c3aed;
-  border-color: #7c3aed;
-  color: white;
-}
-
-.button-primary-custom:hover {
-  background-color: white;
-  border-color: #7c3aed;
   color: #7c3aed;
 }
 

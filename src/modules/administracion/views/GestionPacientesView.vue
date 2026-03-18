@@ -495,7 +495,7 @@
           icon="pi pi-times"
           :disabled="guardandoPaciente"
           @click="cerrarModalEditar"
-          class="p-button-text"
+          class="back-button border-round"
         />
         <Button 
           label="Guardar" 
@@ -503,7 +503,7 @@
           :loading="guardandoPaciente"
           :disabled="guardandoPaciente"
           @click="guardarPaciente"
-          class="p-button-primary"
+          class="button-primary-custom border-round"
         />
       </template>
     </Dialog>
@@ -522,7 +522,7 @@
           icon="pi pi-times"
           :disabled="actualizandoEstadoPaciente"
           @click="modalConfirmarVisible = false"
-          class="p-button-text"
+          class="back-button border-round"
         />
         <Button 
           label="Confirmar" 
@@ -530,7 +530,7 @@
           :loading="actualizandoEstadoPaciente"
           :disabled="actualizandoEstadoPaciente"
           @click="toggleEstadoPaciente(pacienteSeleccionado)"
-          class="p-button-primary"
+          class="button-primary-custom border-round"
         />
       </template>
     </Dialog>

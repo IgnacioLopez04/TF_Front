@@ -218,7 +218,7 @@
           label="Cancelar" 
           icon="pi pi-times"
           @click="cerrarModalEditar"
-          class="p-button-text"
+          class="back-button border-round"
         />
         <Button 
           label="Guardar" 
@@ -226,7 +226,7 @@
           :loading="guardandoUsuario"
           :disabled="guardandoUsuario"
           @click="guardarUsuario"
-          class="p-button-primary"
+          class="button-primary-custom border-round"
         />
       </template>
     </Dialog>
@@ -244,15 +244,15 @@
         icon="pi pi-times"
         :disabled="actualizandoEstadoUsuario"
         @click="modalConfirmarVisible = false"
-        class="p-button-text"
-      />
+        class="back-button border-round"
+       />
       <Button 
         label="Confirmar" 
         icon="pi pi-check"
         :loading="actualizandoEstadoUsuario"
         :disabled="actualizandoEstadoUsuario"
         @click="toggleEstadoUsuario(usuarioSeleccionado)"
-        class="p-button-primary"
+        class="button-primary-custom border-round"
       />
     </template>
   </Dialog>
