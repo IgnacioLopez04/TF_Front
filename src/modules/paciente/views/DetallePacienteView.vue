@@ -1297,21 +1297,6 @@ onMounted(async () => {
   min-height: 100vh;
 }
 
-/* Botón de volver con el mismo color de borde que Agregar Paciente */
-.back-button {
-  background-color: white !important;
-  border-color: #8b5cf6 !important;
-  color: #8b5cf6 !important;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.back-button:hover {
-  background-color: #7c3aed !important;
-  border-color: #7c3aed !important;
-  color: #ffffff !important;
-}
-
 /* Estilos personalizados para mejorar la apariencia */
 :deep(.p-tabs) {
   border: none;

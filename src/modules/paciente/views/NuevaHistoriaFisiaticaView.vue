@@ -829,6 +829,29 @@
         />
       </div>
     </div>
+    <!-- Modal de confirmación de cancelación -->
+    <Dialog
+      v-model:visible="modalConfirmarCancelarVisible"
+      header="Confirmar cancelación"
+      :modal="true"
+      class="p-fluid dialog-responsive"
+    >
+      <p>¿Está seguro que desea cancelar? Se perderán todos los datos ingresados.</p>
+      <template #footer>
+        <Button 
+          label="No, continuar editando" 
+          icon="pi pi-times"
+          @click="modalConfirmarCancelarVisible = false"
+          class="back-button border-round"
+        />
+        <Button 
+          label="Sí, cancelar" 
+          icon="pi pi-check"
+          @click="confirmarCancelacion"
+          class="button-primary-custom"
+        />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -855,6 +878,7 @@ const pasoActivo = ref(0);
 const subTabExamenFisicoActivo = ref(0);
 const guardandoHistoria = ref(false);
 const erroresHistoria = ref({ fechaEvaluacion: '', derivadosPor: '' });
+const modalConfirmarCancelarVisible = ref(false);
 
 const esEdicion = computed(() => route.query.editar === '1' || route.query.editar === 'true');
 
@@ -864,6 +888,52 @@ const fechaMaxima = computed(() => {
   return hoy;
 });
 
+// Función auxiliar para parsear la fecha de evaluación desde distintos formatos
+function parsearFechaEvaluacion(fecha) {
+  if (!fecha) return null;
+
+  // Si ya es Date, validar que sea correcta
+  if (fecha instanceof Date) {
+    return isNaN(fecha.getTime()) ? null : fecha;
+  }
+
+  // Si viene como string, por ejemplo '18/03/2026, 10:11'
+  if (typeof fecha === 'string') {
+    const [fechaStr, horaStrRaw] = fecha.split(',');
+    const soloFecha = (fechaStr || '').trim();
+    const soloHora = (horaStrRaw || '').trim();
+
+    const matchFecha = soloFecha.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!matchFecha) {
+      // Último intento: dejar que el Date nativo intente parsear
+      const dNativa = new Date(fecha);
+      return isNaN(dNativa.getTime()) ? null : dNativa;
+    }
+
+    const dia = Number(matchFecha[1]);
+    const mes = Number(matchFecha[2]) - 1; // 0-11
+    const anio = Number(matchFecha[3]);
+
+    let horas = 0;
+    let minutos = 0;
+
+    if (soloHora) {
+      const matchHora = soloHora.match(/^(\d{1,2}):(\d{2})$/);
+      if (matchHora) {
+        horas = Number(matchHora[1]);
+        minutos = Number(matchHora[2]);
+      }
+    }
+
+    const d = new Date(anio, mes, dia, horas, minutos);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Cualquier otro tipo: intento nativo
+  const dFallback = new Date(fecha);
+  return isNaN(dFallback.getTime()) ? null : dFallback;
+}
+
 // Inicializar o cargar la historia según modo (crear vs editar)
 onMounted(async () => {
   if (esEdicion.value) {
@@ -871,9 +941,8 @@ onMounted(async () => {
       await pacienteStore.obtenerPaciente(route.params.id);
     }
     await pacienteStore.obtenerHistoriaFisiatrica(pacienteStore.paciente.hashId);
-    if (typeof pacienteStore.historiaFisiatrica.fechaEvaluacion === 'string') {
-      pacienteStore.historiaFisiatrica.fechaEvaluacion = new Date(pacienteStore.historiaFisiatrica.fechaEvaluacion);
-    }
+    const parsed = parsearFechaEvaluacion(pacienteStore.historiaFisiatrica.fechaEvaluacion);
+    pacienteStore.historiaFisiatrica.fechaEvaluacion = parsed || new Date();
   } else {
     pacienteStore.inicializarHistoriaFisiatrica();
     pacienteStore.historiaFisiatrica.fechaEvaluacion = new Date();
@@ -908,16 +977,11 @@ const esFormularioValido = computed(() => {
 
 // Formatear fecha de evaluación a formato legible DD/MM/YYYY
 const fechaEvaluacionFormateada = computed(() => {
-  if (
-    !pacienteStore.historiaFisiatrica.fechaEvaluacion ||
-    pacienteStore.historiaFisiatrica.fechaEvaluacion === 'Sin información'
-  )
-    return 'Sin información';
+  const parsed = parsearFechaEvaluacion(pacienteStore.historiaFisiatrica.fechaEvaluacion);
+  if (!parsed) return 'Sin información';
 
   // Ajustar a UTC-3 (Argentina, por ejemplo)
-  const fechaOriginal = new Date(pacienteStore.historiaFisiatrica.fechaEvaluacion);
-  // Obtener la hora UTC y restar 3 horas para UTC-3
-  const fechaUTC3 = new Date(fechaOriginal.getTime() - 3 * 60 * 60 * 1000);
+  const fechaUTC3 = new Date(parsed.getTime() - 3 * 60 * 60 * 1000);
 
   const dia = fechaUTC3.getDate().toString().padStart(2, '0');
   const mes = (fechaUTC3.getMonth() + 1).toString().padStart(2, '0');
@@ -969,9 +1033,12 @@ const pasoSiguiente = () => {
 };
 
 const cancelar = () => {
-  if (confirm('¿Está seguro de que desea cancelar? Se perderán todos los datos ingresados.')) {
-    volver();
-  }
+  modalConfirmarCancelarVisible.value = true;
+};
+
+const confirmarCancelacion = () => {
+  modalConfirmarCancelarVisible.value = false;
+  volver();
 };
 
 const onChangeFechaEvaluacion = () => {
@@ -1013,36 +1080,6 @@ const volver = () => {
 }
 
 .text-color-primary {
-  color: #7c3aed;
-}
-
-.bg-color-primary {
-  background-color: #7c3aed;
-}
-
-.back-button {
-  background-color: white !important;
-  border-color: #8b5cf6 !important;
-  color: #8b5cf6 !important;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.back-button:hover {
-  background-color: #7c3aed !important;
-  border-color: #7c3aed !important;
-  color: #ffffff !important;
-}
-
-.button-primary-custom {
-  background-color: #7c3aed;
-  border-color: #7c3aed;
-  color: white;
-}
-
-.button-primary-custom:hover {
-  background-color: white;
-  border-color: #7c3aed;
   color: #7c3aed;
 }
 
