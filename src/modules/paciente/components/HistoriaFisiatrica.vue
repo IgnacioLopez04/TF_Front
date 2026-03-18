@@ -523,7 +523,7 @@ const historiaFisiatica = computed(() => {
 /** Muestra "No informado" cuando el valor es null, vacío o "Sin información". */
 const valorParaMostrar = (val) => (val && val !== 'Sin información' ? val : 'No informado');
 
-// Formatear fecha de evaluación a formato legible DD/MM/YYYY
+// Formatear fecha de evaluación reutilizando la lógica del historial (fecha + hora legible)
 const formatearFecha = (fecha) => {
   if (
     !fecha ||
@@ -533,33 +533,61 @@ const formatearFecha = (fecha) => {
     return 'Sin información';
   }
 
-  if (fecha instanceof Date) {
-    if (isNaN(fecha.getTime())) return 'Sin información';
-    const dia = fecha.getDate().toString().padStart(2, '0');
-    const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-    const año = fecha.getFullYear();
-    return `${dia}/${mes}/${año}`;
-  }
-
-  if (typeof fecha === 'string') {
-    const soloFecha = fecha.split(' ')[0];
-
-    if (/^\d{2}\/\d{2}\/\d{4}$/.test(soloFecha)) {
-      return soloFecha;
+  try {
+    // Soportar tanto objetos Date como strings (por ejemplo '18/03/2026, 10:11')
+    if (fecha instanceof Date) {
+      if (isNaN(fecha.getTime())) return 'Sin información';
+      return fecha.toLocaleString('es-ES', {
+        dateStyle: 'short',
+        timeStyle: 'short'
+      });
     }
 
-    const fechaObj = new Date(fecha);
-    if (isNaN(fechaObj.getTime())) {
+    // Si es string, intentamos parsear el formato DD/MM/YYYY, HH:mm manualmente
+    if (typeof fecha === 'string') {
+      const [fechaStr, horaStrRaw] = fecha.split(',');
+      const soloFecha = (fechaStr || '').trim();
+      const soloHora = (horaStrRaw || '').trim();
+
+      const matchFecha = soloFecha.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (matchFecha) {
+        const dia = Number(matchFecha[1]);
+        const mes = Number(matchFecha[2]) - 1; // 0-11
+        const anio = Number(matchFecha[3]);
+
+        let horas = 0;
+        let minutos = 0;
+
+        if (soloHora) {
+          const matchHora = soloHora.match(/^(\d{1,2}):(\d{2})$/);
+          if (matchHora) {
+            horas = Number(matchHora[1]);
+            minutos = Number(matchHora[2]);
+          }
+        }
+
+        const d = new Date(anio, mes, dia, horas, minutos);
+        if (isNaN(d.getTime())) return 'Sin información';
+
+        return d.toLocaleString('es-ES', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        });
+      }
+
+    // Si no es string ni Date, intentamos último recurso con Date nativo
+    const d = new Date(fecha);
+    if (isNaN(d.getTime())) {
       return 'Sin información';
     }
-
-    const dia = fechaObj.getDate().toString().padStart(2, '0');
-    const mes = (fechaObj.getMonth() + 1).toString().padStart(2, '0');
-    const año = fechaObj.getFullYear();
-    return `${dia}/${mes}/${año}`;
+    return d.toLocaleString('es-ES', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    });
+    }
+  } catch {
+    return 'Sin información';
   }
-
-  return 'Sin información';
 };
 
 const crearNuevaHistoria = () => {
